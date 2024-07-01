@@ -1,0 +1,96 @@
+﻿@page "/"
+@using MAUI_OpenAI
+@using MAUI_OpenAI.Models
+@using Microsoft.Extensions.Logging
+@inject IOpenAIService OpenAIService
+@inject ILogger<Home> Logger
+
+<div class="flex flex-col h-full bg-backdrop text-brightWhite">
+    <div class="flex-grow p-4 overflow-y-auto bg-darkblue">
+        @foreach (var chat in chats)
+        {
+            <div class="my-2 p-2 rounded-lg max-w-md @GetMessageCssClass(chat.Role)">
+                <p>@chat.Message</p>
+            </div>
+        }
+    </div>
+
+    <div class="bg-darkblue p-4 shadow-md">
+        <div class="flex">
+            <button @onclick="ClearMessages" class="bg-red-500 text-brightWhite p-2 rounded-l-md hover:bg-brightRed focus:outline-none focus:ring focus:ring-red">
+                Clear
+            </button>
+            <input @bind="userMessage" placeholder="Type your message here"
+                @onkeydown="HandleKeyDown"
+                class="flex-grow p-2 border border-gray rounded-none focus:outline-none focus:ring focus:border-blue bg-input text-brightWhite"
+                disabled="@isSending" />
+            <button @onclick="SendMessage" class="bg-blue text-brightWhite p-2 rounded-r-md hover:bg-brightBlue focus:outline-none focus:ring focus:ring-blue"
+                    disabled="@isSending">
+                Send
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string userMessage;
+    private bool isSending = false;
+    private List<ChatMessageModel> chats = new List<ChatMessageModel>();
+    private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(userMessage))
+            return;
+
+        Logger.LogInformation("Send button clicked with message: {Message}", userMessage);
+
+        var tempUserMessage = userMessage;
+        userMessage = string.Empty; // Clear the input field after sending the message
+        isSending = true;
+        StateHasChanged();
+
+        var userChatMessage = new ChatMessageModel(tempUserMessage, "user");
+        chats.Add(userChatMessage); // Add user message to chats
+        conversation.Add(userChatMessage); // Keep the full conversation context
+
+        await OpenAIService.GetChatCompletionStreamingAsync(conversation, tempUserMessage, UpdateResponse);
+
+        isSending = false;
+        StateHasChanged();
+    }
+
+    private void UpdateResponse(string update)
+    {
+        if (chats.LastOrDefault()?.Role == "assistant")
+        {
+            chats.Last().Message += update;
+        }
+        else
+        {
+            var newMessage = new ChatMessageModel(update, "assistant");
+            chats.Add(newMessage);
+            conversation.Add(newMessage);
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ClearMessages()
+    {
+        chats.Clear();
+        StateHasChanged();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && !isSending)
+        {
+            await SendMessage();
+        }
+    }
+
+    private string GetMessageCssClass(string role)
+    {
+        return role == "user" ? "bg-blue text-brightWhite self-end ml-auto" : "bg-green text-brightWhite self-start mr-auto";
+    }
+}

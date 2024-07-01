@@ -1,0 +1,36 @@
+<header class="flex items-center h-16 px-4">
+    <div class="flex justify-start w-1/2">
+        <button @onclick="@ShowSidebar"
+            class="h-8 w-8 flex justify-center items-center p-2 border rounded-md hover:bg-gray transition-colors duration-300"
+        >
+            <i class="fa-solid fa-bars text-white"></i>
+        </button>
+    </div>
+    <div class="flex flex-shrink-0">
+        <h1 class="font-bold text-xl">
+            MAUI OpenAI
+        </h1>
+    </div>
+    <div class="flex justify-end w-1/2">
+        <a href="/" class="group">
+            <i class="fa-solid fa-robot text-white" />
+        </a>
+    </div>
+</header>
+
+<Sidebar
+    IsSidebarVisible="@IsSidebarVisible"
+    IsSidebarVisibleChanged="HandleSidebarVisibility"
+/>
+
+@code {
+    private bool IsSidebarVisible { get; set; } = false;
+    private void ShowSidebar()
+    {
+        IsSidebarVisible = true;
+    }
+    private void HandleSidebarVisibility(bool isVisible)
+    {
+        IsSidebarVisible = isVisible;
+    }
+}

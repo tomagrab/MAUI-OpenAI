@@ -1,0 +1,277 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:slnt,wght@-10..0,100..900&display=swap");
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+}
+
+/* Scrollbar size */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  transition: 1.0s;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(127, 127, 127, 0.6);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  transition: 1.0s;
+}
+
+::-webkit-scrollbar-thumb:vertical:hover,
+::-webkit-scrollbar-thumb:horizontal:hover {
+  background-color: rgb(110, 110, 110);
+  transition: 0.3s;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+
+
+::-webkit-scrollbar-thumb:vertical:active,
+::-webkit-scrollbar-thumb:horizontal:active {
+  background: rgba(95, 91, 91, 1);
+
+}
+
+::-webkit-scrollbar-corner {
+  background: none;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(127, 127, 127, 0.6) transparent;
+}
+
+body {
+  @apply bg-background text-foreground;
+}
+
+.active {
+  @apply bg-green/90;
+}
+
+.align-right {
+  @apply flex justify-end;
+}
+
+.btn,
+.btn-home {
+  @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-white;
+}
+
+.btn-home {
+  @apply font-bold text-white drop-shadow-lg;
+}
+
+.btn-primary {
+  @apply bg-green hover:bg-green/90;
+}
+
+.btn-secondary {
+  @apply bg-blue hover:bg-blue/80;
+}
+
+.btn-destructive {
+  @apply bg-red hover:bg-red/90;
+}
+
+.btn-outline {
+  @apply border border-input bg-background;
+}
+
+.btn-link {
+  @apply text-blue hover:text-blue/90 underline-offset-4 hover:underline;
+}
+
+.btn-sm {
+  @apply h-9 rounded-md px-3;
+}
+
+.btn-base {
+  @apply h-10 px-4 py-2;
+}
+
+.btn-lg {
+  @apply h-11 rounded-md px-8;
+}
+
+.btn-icon {
+  @apply h-10 w-10;
+}
+
+.card {
+  @apply rounded-lg border shadow-sm;
+}
+
+.card-content {
+  @apply p-6 pt-0;
+}
+
+.card-description {
+  @apply text-sm;
+}
+
+.card-footer {
+  @apply flex items-center p-6 pt-0;
+}
+
+.card-header {
+  @apply flex flex-col space-y-1.5 p-6;
+}
+
+.card-title {
+  @apply text-2xl font-semibold leading-none tracking-tight;
+}
+
+.checkbox {
+  @apply h-4 w-4 shrink-0 rounded-sm border ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.error-text {
+  @apply text-red;
+}
+
+.form {
+  @apply flex flex-col gap-2 shadow max-w-sm p-4 rounded-md;
+}
+
+.form-control-col {
+  @apply flex flex-col gap-2;
+}
+
+.form-control-row {
+  @apply flex items-center justify-between;
+}
+
+h1 {
+  @apply text-2xl md:text-3xl lg:text-4xl font-bold;
+}
+
+h2 {
+  @apply text-xl md:text-2xl lg:text-3xl font-semibold;
+}
+
+hr {
+  @apply border-b border-blue my-4;
+}
+
+.modal-container {
+  @apply min-w-full min-h-full flex items-center justify-center;
+}
+
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-50;
+}
+
+.modal {
+  @apply bg-white rounded-lg shadow-lg max-w-lg mx-auto p-4 z-10;
+}
+
+.modal-header {
+  @apply flex items-center justify-between;
+}
+
+.modal-title {
+  @apply text-xl font-semibold text-darkblue;
+}
+
+.modal-body {
+  @apply py-4 text-darkblue;
+}
+
+.modal-footer {
+  @apply flex justify-end gap-4 p-4;
+}
+
+.modal-close-button {
+  @apply text-lg cursor-pointer;
+}
+
+.info-content-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-0;
+}
+
+.info-icon:hover ~ .info-content-overlay {
+  @apply opacity-50 block z-0;
+}
+
+.info-icon:hover ~ .info-content {
+  @apply block items-center justify-center bg-darkblue p-2 font-normal rounded-md z-10;
+}
+
+.info-icon:hover {
+  @apply z-10;
+}
+
+.input {
+  @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-white;
+}
+
+.invalid {
+  @apply border-red focus:ring-red;
+}
+
+p {
+  @apply text-base md:text-lg lg:text-xl;
+}
+
+.textarea {
+  @apply flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.quickgrid > tbody > tr {
+  @apply rounded-md transition-colors duration-300 overflow-hidden;
+}
+
+.quickgrid > tbody > tr:not(.modal-overlay):hover {
+  @apply bg-darkblue text-white;
+}
+
+.quickgrid > tbody > tr:hover > td > a {
+  @apply text-blue;
+}
+
+.quickgrid > tbody > tr:hover > td > button {
+  @apply text-red;
+}
+
+.quickgrid > tbody > tr > td {
+  @apply p-2;
+}
+
+.quickgrid > tbody > tr > td:first-child {
+  @apply rounded-tl-md rounded-bl-md;
+}
+
+.quickgrid > tbody > tr > td:last-child {
+  @apply rounded-tr-md rounded-br-md;
+}

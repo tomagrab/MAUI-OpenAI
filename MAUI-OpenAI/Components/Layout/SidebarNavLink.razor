@@ -1,0 +1,18 @@
+@inject NavigationManager NavigationManager
+
+<NavLink href="@Href" Match="NavLinkMatch.All" class="flex items-center justify-start gap-2 p-2 rounded">
+    @if (!string.IsNullOrWhiteSpace(Icon))
+    {
+        <i class="@Icon text-white"></i>
+    }
+    <span class="text-white">@Title</span>
+</NavLink>
+
+@code {
+    [Parameter]
+    public required string Title { get; set; }
+    [Parameter]
+    public required string Icon { get; set; }
+    [Parameter]
+    public required string Href { get; set; }
+}
