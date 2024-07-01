@@ -17,7 +17,7 @@
 
     <div class="bg-darkblue p-4 shadow-md">
         <div class="flex">
-            <button @onclick="ClearMessages" class="bg-red-500 text-brightWhite p-2 rounded-l-md hover:bg-brightRed focus:outline-none focus:ring focus:ring-red">
+            <button @onclick="ClearMessages" class="bg-red text-brightWhite p-2 rounded-l-md hover:bg-brightRed focus:outline-none focus:ring focus:ring-red">
                 Clear
             </button>
             <input @bind="userMessage" placeholder="Type your message here"
@@ -25,7 +25,7 @@
                 class="flex-grow p-2 border border-gray rounded-none focus:outline-none focus:ring focus:border-blue bg-input text-brightWhite"
                 disabled="@isSending" />
             <button @onclick="SendMessage" class="bg-blue text-brightWhite p-2 rounded-r-md hover:bg-brightBlue focus:outline-none focus:ring focus:ring-blue"
-                    disabled="@isSending">
+                    disabled="@isSending || string.IsNullOrWhiteSpace(userMessage)">
                 Send
             </button>
         </div>
@@ -33,7 +33,7 @@
 </div>
 
 @code {
-    private string userMessage;
+    private string userMessage = "";
     private bool isSending = false;
     private List<ChatMessageModel> chats = new List<ChatMessageModel>();
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
@@ -43,12 +43,12 @@
         if (string.IsNullOrWhiteSpace(userMessage))
             return;
 
-        Logger.LogInformation("Send button clicked with message: {Message}", userMessage);
-
         var tempUserMessage = userMessage;
-        userMessage = string.Empty; // Clear the input field after sending the message
+        userMessage = string.Empty; // Clear the input field immediately
         isSending = true;
         StateHasChanged();
+
+        Logger.LogInformation("Send button clicked with message: {Message}", tempUserMessage);
 
         var userChatMessage = new ChatMessageModel(tempUserMessage, "user");
         chats.Add(userChatMessage); // Add user message to chats
@@ -70,7 +70,7 @@
         {
             var newMessage = new ChatMessageModel(update, "assistant");
             chats.Add(newMessage);
-            conversation.Add(newMessage);
+            conversation.Add(newMessage); // Add to full conversation context
         }
         InvokeAsync(StateHasChanged);
     }
