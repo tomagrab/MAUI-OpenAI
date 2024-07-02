@@ -1,10 +1,12 @@
 ﻿@page "/"
 @using Microsoft.Extensions.Logging
+@using MAUI_OpenAI.Models
+@using MAUI_OpenAI.Services
 @inject IOpenAIService OpenAIService
 @inject ILogger<Home> Logger
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite">
-    <div class="flex-grow p-4 overflow-y-auto bg-darkblue">
+    <div class="flex-grow p-4">
         @foreach (var chat in chats)
         {
             <div class="my-2 p-2 rounded-lg max-w-md @GetMessageCssClass(chat.Role)">
@@ -13,20 +15,20 @@
         }
     </div>
 
-    <div class="bg-darkblue p-4 shadow-md">
-        <div class="flex">
-            <button @onclick="ClearMessages" class="bg-red text-brightWhite p-2 rounded-l-md hover:bg-brightRed focus:outline-none focus:ring focus:ring-red">
-                Clear
+    <div class="p-4 shadow-md">
+        <form class="flex w-full" @onsubmit="HandleSubmit">
+            <button type="button" @onclick="ClearMessages" class="bg-red text-brightWhite p-2 rounded-l-md hover:bg-brightRed focus:outline-none focus:ring focus:ring-red">
+                <i class="fas fa-trash"></i>
             </button>
-            <input @bind="userMessage" placeholder="Type your message here"
+            <input @bind="userMessage" @bind:event="oninput" placeholder="Type your message here"
                 @onkeydown="HandleKeyDown"
                 class="flex-grow p-2 border border-gray rounded-none focus:outline-none focus:ring focus:border-blue bg-input text-brightWhite @(isSending ? "disabled-input" : "")"
                 disabled="@isSending" />
-            <button @onclick="SendMessage" class="bg-blue text-brightWhite p-2 rounded-r-md hover:bg-brightBlue focus:outline-none focus:ring focus:ring-blue @(isSending || string.IsNullOrWhiteSpace(userMessage) ? "disabled-button" : "")"
-                    disabled="@isSending || string.IsNullOrWhiteSpace(userMessage)">
-                Send
+            <button type="submit" class="bg-blue  text-brightWhite p-2 rounded-r-md hover:bg-brightBlue focus:outline-none focus:ring focus:ring-blue @(isSending || string.IsNullOrWhiteSpace(userMessage) ? "disabled-button" : "")"
+                    disabled="@(isSending || string.IsNullOrWhiteSpace(userMessage))">
+                <i class="fas fa-paper-plane"></i>
             </button>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -87,8 +89,13 @@
         }
     }
 
+    private async Task HandleSubmit()
+    {
+        await SendMessage();
+    }
+
     private string GetMessageCssClass(string role)
     {
-        return role == "user" ? "bg-blue text-brightWhite self-end ml-auto" : "bg-green text-brightWhite self-start mr-auto";
+        return role == "user" ? "bg-blue text-brightWhite self-end ml-auto text-right" : "bg-green text-brightWhite self-start mr-auto text-left";
     }
 }
