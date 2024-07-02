@@ -25,6 +25,7 @@ namespace MAUI_OpenAI
 
             builder.Services.AddSingleton(chatClient);
             builder.Services.AddSingleton<IOpenAIService, OpenAIService>();
+            builder.Services.AddSingleton<IKeyboardService, KeyboardService>();
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
