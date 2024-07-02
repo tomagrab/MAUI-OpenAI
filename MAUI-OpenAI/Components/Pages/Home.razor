@@ -15,7 +15,7 @@
         }
     </div>
 
-    <div class="p-4 shadow-md">
+    <div class="@GetFormContainerCssClass()">
         <form class="flex w-full" @onsubmit="HandleSubmit">
             <button type="button" @onclick="ClearMessages" class="bg-red text-brightWhite p-2 rounded-l-md hover:bg-brightRed focus:outline-none focus:ring focus:ring-red">
                 <i class="fas fa-trash"></i>
