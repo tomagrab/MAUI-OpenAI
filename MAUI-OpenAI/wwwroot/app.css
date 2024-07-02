@@ -710,6 +710,10 @@ video {
   max-width: 32rem;
 }
 
+.max-w-xl {
+  max-width: 36rem;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -877,6 +881,11 @@ video {
 .px-16 {
   padding-left: 4rem;
   padding-right: 4rem;
+}
+
+.px-10 {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
 }
 
 .pr-14 {
@@ -1586,5 +1595,9 @@ p {
 @media (min-width: 768px) {
   .md\:max-w-md {
     max-width: 28rem;
+  }
+
+  .md\:max-w-lg {
+    max-width: 32rem;
   }
 }

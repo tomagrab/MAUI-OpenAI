@@ -8,7 +8,7 @@
     <div class="flex-grow p-4 overflow-auto">
         @foreach (var chat in chats)
         {
-            <div class="my-2 p-2 rounded-lg max-w-lg md:max-w-md sm:max-w-sm @GetMessageCssClass(chat.Role)">
+            <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md @GetMessageCssClass(chat.Role)">
                 <p>@chat.Message</p>
             </div>
         }
@@ -19,7 +19,7 @@
             <textarea @bind="userMessage" @bind:event="oninput" placeholder="Type your message here"
                 @onfocus="HandleInputFocus" @onblur="HandleInputBlur"
                 @onkeydown="HandleKeyDown"
-                class="flex-grow p-4 px-16 rounded border border-gray focus:outline-none focus:ring focus:border-blue bg-input text-brightWhite h-20 resize-none pr-14"
+                class="flex-grow p-4 px-10 rounded border border-gray focus:outline-none focus:ring focus:border-blue bg-input text-brightWhite h-20 resize-none pr-14"
                 disabled="@isSending"></textarea>
             <button type="button" @onclick="ClearMessages" class="absolute left-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightRed focus:outline-none focus:ring focus:ring-red">
                 <i class="fas fa-trash"></i>
