@@ -1,6 +1,6 @@
 using MAUI_OpenAI.Models;
 
-namespace MAUI_OpenAI
+namespace MAUI_OpenAI.Services
 {
     public interface IOpenAIService
     {

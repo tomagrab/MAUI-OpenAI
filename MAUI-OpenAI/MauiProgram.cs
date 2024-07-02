@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenAI.Chat;
+using MAUI_OpenAI.Services;
 
 namespace MAUI_OpenAI
 {

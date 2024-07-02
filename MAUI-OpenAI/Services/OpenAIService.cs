@@ -3,7 +3,7 @@ using OpenAI.Chat;
 using MAUI_OpenAI.Models;
 using System.ClientModel;
 
-namespace MAUI_OpenAI
+namespace MAUI_OpenAI.Services
 {
     public class OpenAIService : IOpenAIService
     {

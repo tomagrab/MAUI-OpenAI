@@ -621,10 +621,6 @@ video {
   display: flex;
 }
 
-.table {
-  display: table;
-}
-
 .h-16 {
   height: 4rem;
 }
@@ -655,10 +651,6 @@ video {
 
 .w-8 {
   width: 2rem;
-}
-
-.max-w-xs {
-  max-width: 20rem;
 }
 
 .max-w-md {
@@ -764,11 +756,6 @@ video {
   border-color: rgb(110 118 129 / var(--tw-border-opacity));
 }
 
-.border-red {
-  --tw-border-opacity: 1;
-  border-color: rgb(255 123 114 / var(--tw-border-opacity));
-}
-
 .bg-backdrop {
   --tw-bg-opacity: 1;
   background-color: rgb(1 4 9 / var(--tw-bg-opacity));
@@ -789,13 +776,13 @@ video {
   background-color: rgb(22 27 34 / var(--tw-bg-opacity));
 }
 
-.bg-input {
-  background-color: hsl(var(--input));
-}
-
 .bg-green {
   --tw-bg-opacity: 1;
   background-color: rgb(63 185 80 / var(--tw-bg-opacity));
+}
+
+.bg-input {
+  background-color: hsl(var(--input));
 }
 
 .bg-red {
@@ -827,11 +814,6 @@ video {
 
 .font-bold {
   font-weight: 700;
-}
-
-.text-black {
-  --tw-text-opacity: 1;
-  color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
 .text-brightWhite {
@@ -1113,6 +1095,30 @@ body {
 .checkbox:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.disabled-input {
+  cursor: not-allowed;
+  --tw-bg-opacity: 1;
+  background-color: rgb(110 118 129 / var(--tw-bg-opacity));
+}
+
+.disabled-input:hover {
+  cursor: not-allowed;
+  --tw-bg-opacity: 1;
+  background-color: rgb(110 118 129 / var(--tw-bg-opacity));
+}
+
+.disabled-button {
+  cursor: not-allowed;
+  --tw-bg-opacity: 1;
+  background-color: rgb(110 118 129 / var(--tw-bg-opacity));
+}
+
+.disabled-button:hover {
+  cursor: not-allowed;
+  --tw-bg-opacity: 1;
+  background-color: rgb(110 118 129 / var(--tw-bg-opacity));
 }
 
 .error-text {
@@ -1433,14 +1439,14 @@ p {
   background-color: rgb(121 192 255 / var(--tw-bg-opacity));
 }
 
-.hover\:bg-gray:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(110 118 129 / var(--tw-bg-opacity));
-}
-
 .hover\:bg-brightRed:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(255 161 152 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-gray:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(110 118 129 / var(--tw-bg-opacity));
 }
 
 .focus\:border-blue:focus {

@@ -1,6 +1,4 @@
 ﻿@page "/"
-@using MAUI_OpenAI
-@using MAUI_OpenAI.Models
 @using Microsoft.Extensions.Logging
 @inject IOpenAIService OpenAIService
 @inject ILogger<Home> Logger
@@ -22,9 +20,9 @@
             </button>
             <input @bind="userMessage" placeholder="Type your message here"
                 @onkeydown="HandleKeyDown"
-                class="flex-grow p-2 border border-gray rounded-none focus:outline-none focus:ring focus:border-blue bg-input text-brightWhite"
+                class="flex-grow p-2 border border-gray rounded-none focus:outline-none focus:ring focus:border-blue bg-input text-brightWhite @(isSending ? "disabled-input" : "")"
                 disabled="@isSending" />
-            <button @onclick="SendMessage" class="bg-blue text-brightWhite p-2 rounded-r-md hover:bg-brightBlue focus:outline-none focus:ring focus:ring-blue"
+            <button @onclick="SendMessage" class="bg-blue text-brightWhite p-2 rounded-r-md hover:bg-brightBlue focus:outline-none focus:ring focus:ring-blue @(isSending || string.IsNullOrWhiteSpace(userMessage) ? "disabled-button" : "")"
                     disabled="@isSending || string.IsNullOrWhiteSpace(userMessage)">
                 Send
             </button>
@@ -70,7 +68,7 @@
         {
             var newMessage = new ChatMessageModel(update, "assistant");
             chats.Add(newMessage);
-            conversation.Add(newMessage); // Add to full conversation context
+            conversation.Add(newMessage);
         }
         InvokeAsync(StateHasChanged);
     }
