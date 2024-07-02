@@ -2,7 +2,6 @@
 @using MAUI_OpenAI.Models
 @using MAUI_OpenAI.Services
 @inject IOpenAIService OpenAIService
-@inject IKeyboardService KeyboardService
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <div class="flex-grow p-4 overflow-auto">
@@ -38,18 +37,6 @@
     private List<ChatMessageModel> chats = new List<ChatMessageModel>();
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
     private bool isInputFocused = false;
-    private bool isKeyboardVisible = false;
-
-    protected override void OnInitialized()
-    {
-        KeyboardService.KeyboardStateChanged += OnKeyboardStateChanged;
-    }
-
-    private void OnKeyboardStateChanged(object sender, bool isVisible)
-    {
-        isKeyboardVisible = isVisible;
-        InvokeAsync(StateHasChanged);
-    }
 
     private async Task SendMessage()
     {
@@ -125,6 +112,6 @@
     private string GetFormContainerCssClass()
     {
         var baseClass = "p-4 shadow-md";
-       return isKeyboardVisible ? $"{baseClass} mb-64" : baseClass;
+        return isInputFocused ? $"{baseClass} mb-64 md:mb-0" : baseClass;
     }
 }
