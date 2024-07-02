@@ -21,10 +21,11 @@
                 <i class="fas fa-trash"></i>
             </button>
             <input @bind="userMessage" @bind:event="oninput" placeholder="Type your message here"
+                @onfocus="HandleInputFocus" @onblur="HandleInputBlur"
                 @onkeydown="HandleKeyDown"
                 class="flex-grow p-2 border border-gray rounded-none focus:outline-none focus:ring focus:border-blue bg-input text-brightWhite @(isSending ? "disabled-input" : "")"
                 disabled="@isSending" />
-            <button type="submit" class="bg-blue  text-brightWhite p-2 rounded-r-md hover:bg-brightBlue focus:outline-none focus:ring focus:ring-blue @(isSending || string.IsNullOrWhiteSpace(userMessage) ? "disabled-button" : "")"
+            <button type="submit" class="bg-blue text-brightWhite p-2 rounded-r-md hover:bg-brightBlue focus:outline-none focus:ring focus:ring-blue @(isSending || string.IsNullOrWhiteSpace(userMessage) ? "disabled-button" : "")"
                     disabled="@(isSending || string.IsNullOrWhiteSpace(userMessage))">
                 <i class="fas fa-paper-plane"></i>
             </button>
@@ -37,6 +38,7 @@
     private bool isSending = false;
     private List<ChatMessageModel> chats = new List<ChatMessageModel>();
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
+    private bool isInputFocused = false;
 
     private async Task SendMessage()
     {
@@ -94,8 +96,25 @@
         await SendMessage();
     }
 
+    private void HandleInputFocus()
+    {
+        isInputFocused = true;
+        StateHasChanged();
+    }
+
+    private void HandleInputBlur()
+    {
+        isInputFocused = false;
+        StateHasChanged();
+    }
+
     private string GetMessageCssClass(string role)
     {
         return role == "user" ? "bg-blue text-brightWhite self-end ml-auto text-right" : "bg-green text-brightWhite self-start mr-auto text-left";
+    }
+
+    private string GetFormContainerCssClass()
+    {
+        return isInputFocused ? "p-4 shadow-md mt-24" : "p-4 shadow-md";
     }
 }
