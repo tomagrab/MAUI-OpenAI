@@ -624,6 +624,10 @@ video {
   right: 0.5rem;
 }
 
+.right-10 {
+  right: 2.5rem;
+}
+
 .z-40 {
   z-index: 40;
 }
@@ -681,6 +685,10 @@ video {
   height: 5rem;
 }
 
+.h-auto {
+  height: auto;
+}
+
 .w-0 {
   width: 0px;
 }
@@ -712,6 +720,10 @@ video {
 
 .max-w-xl {
   max-width: 36rem;
+}
+
+.max-w-full {
+  max-width: 100%;
 }
 
 .flex-1 {

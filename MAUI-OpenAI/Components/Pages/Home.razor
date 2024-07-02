@@ -9,24 +9,41 @@
         @foreach (var chat in chats)
         {
             <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md @GetMessageCssClass(chat.Role)">
-                <p>@chat.Message</p>
+                @if (chat.IsImage)
+                {
+                    <img src="data:image/png;base64,@chat.Message" alt="Generated Image" class="max-w-full h-auto" />
+                }
+                else
+                {
+                    <p>@chat.Message</p>
+                }
             </div>
         }
     </div>
 
     <div class="@GetFormContainerCssClass() relative">
         <form class="flex w-full relative" @onsubmit="HandleSubmit">
-            <textarea @bind="userMessage" @bind:event="oninput" placeholder="Type your message here"
+            <textarea @bind="userMessage" @bind:event="oninput" placeholder="Type your message or prompt here"
                 @onfocus="HandleInputFocus" @onblur="HandleInputBlur"
                 @onkeydown="HandleKeyDown"
-                class="flex-grow p-4 px-10 rounded border border-gray focus:outline-none focus:ring focus:border-blue bg-input text-brightWhite h-20 resize-none pr-14"
+                class="flex-grow p-4 px-10 rounded border border-gray focus:outline-none bg-input text-brightWhite h-20 resize-none pr-14"
                 disabled="@isSending"></textarea>
-            <button type="button" @onclick="ClearMessages" class="absolute left-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightRed focus:outline-none focus:ring focus:ring-red">
+            <button type="button" @onclick="ClearMessages" class="absolute left-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightRed focus:outline-none">
                 <i class="fas fa-trash"></i>
             </button>
-            <button type="submit" class="absolute right-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none focus:ring focus:ring-blue @(isSending || string.IsNullOrWhiteSpace(userMessage) ? "disabled-button" : "") disabled:opacity-50"
+            <button type="button" @onclick="ToggleImageGeneration" class="absolute right-10 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none">
+                @if (isGeneratingImage)
+                {
+                    <i class="fas fa-image"></i>
+                }
+                else
+                {
+                    <i class="fas fa-paper-plane"></i>
+                }
+            </button>
+            <button type="submit" class="absolute right-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none @(isSending || string.IsNullOrWhiteSpace(userMessage) ? "disabled-button" : "") disabled:opacity-50"
                     disabled="@(isSending || string.IsNullOrWhiteSpace(userMessage))">
-                <i class="fas fa-paper-plane"></i>
+                <i class="fas fa-check"></i>
             </button>
         </form>
     </div>
@@ -35,6 +52,7 @@
 @code {
     private string userMessage = "";
     private bool isSending = false;
+    private bool isGeneratingImage = false;
     private List<ChatMessageModel> chats = new List<ChatMessageModel>();
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
     private bool isInputFocused = false;
@@ -59,9 +77,17 @@
         chats.Add(userChatMessage); // Add user message to chats
         conversation.Add(userChatMessage); // Keep the full conversation context
 
-        await OpenAIService.GetChatCompletionStreamingAsync(conversation, tempUserMessage, UpdateResponse);
+        if (isGeneratingImage)
+        {
+            await OpenAIService.GenerateImageAsync(tempUserMessage, UpdateImageResponse, UpdateErrorResponse);
+        }
+        else
+        {
+            await OpenAIService.GetChatCompletionStreamingAsync(conversation, tempUserMessage, UpdateResponse);
+        }
 
         isSending = false;
+        isGeneratingImage = false;
         StateHasChanged();
     }
 
@@ -77,6 +103,23 @@
             chats.Add(newMessage);
             conversation.Add(newMessage);
         }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateImageResponse(byte[] imageBytes)
+    {
+        var base64Image = Convert.ToBase64String(imageBytes);
+        var imageMessage = new ChatMessageModel(base64Image, "assistant", true);
+        chats.Add(imageMessage);
+        conversation.Add(imageMessage);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateErrorResponse(string error)
+    {
+        var errorMessage = new ChatMessageModel(error, "assistant");
+        chats.Add(errorMessage);
+        conversation.Add(errorMessage);
         InvokeAsync(StateHasChanged);
     }
 
@@ -108,6 +151,12 @@
     private void HandleInputBlur()
     {
         isInputFocused = false;
+        StateHasChanged();
+    }
+
+    private void ToggleImageGeneration()
+    {
+        isGeneratingImage = !isGeneratingImage;
         StateHasChanged();
     }
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenAI.Chat;
 using MAUI_OpenAI.Services;
+using OpenAI.Images;
 
 namespace MAUI_OpenAI
 {
@@ -23,7 +24,13 @@ namespace MAUI_OpenAI
                 OPENAI_API_KEY
             );
 
+            ImageClient imageClient = new (
+                model: "dall-e-3",
+                OPENAI_API_KEY
+            );
+
             builder.Services.AddSingleton(chatClient);
+            builder.Services.AddSingleton(imageClient);
             builder.Services.AddSingleton<IOpenAIService, OpenAIService>();
             builder.Services.AddSingleton<IPlatformService, PlatformService>();
             builder.Services.AddMauiBlazorWebView();
