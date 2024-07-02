@@ -24,8 +24,11 @@ namespace MAUI_OpenAI.Services
                 // Append the new message to the conversation
                 conversation.Add(new ChatMessageModel(message, "user"));
 
+                // Filter out image messages
+                var textConversation = conversation.Where(c => !c.IsImage).ToList();
+
                 // Ensure the conversation stays within the token limit
-                var trimmedConversation = TrimConversationToTokenLimit(conversation);
+                var trimmedConversation = TrimConversationToTokenLimit(textConversation);
 
                 var messages = trimmedConversation.Select(c => new UserChatMessage(c.Message)).ToArray();
 

@@ -13,8 +13,8 @@
                 {
                     @if (chat.IsLoading)
                     {
-                        <div class="w-24 h-24 bg-gray-300 rounded-lg flex items-center justify-center">
-                            <i class="fa fa-spinner-scale fa-xl custom-spin"></i>
+                        <div class="w-[1792px] h-[1024px] bg-gray-300 rounded-lg flex items-center justify-center">
+                            <i class="fa fa-spinner custom-spin text-4xl text-gray-600"></i>
                         </div>
                     }
                     else
@@ -88,9 +88,8 @@
 
         if (isGeneratingImage)
         {
-            var loadingMessage = new ChatMessageModel("", "assistant", true) { IsLoading = true };
+            var loadingMessage = new ChatMessageModel("", "assistant", true, true);
             chats.Add(loadingMessage);
-            conversation.Add(loadingMessage);
             StateHasChanged();
 
             await OpenAIService.GenerateImageAsync(tempUserMessage, (imageBytes) =>
@@ -100,7 +99,7 @@
         }
         else
         {
-            await OpenAIService.GetChatCompletionStreamingAsync(conversation, tempUserMessage, UpdateResponse);
+            await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), tempUserMessage, UpdateResponse);
         }
 
         isSending = false;
@@ -128,6 +127,7 @@
         var base64Image = Convert.ToBase64String(imageBytes);
         loadingMessage.Message = base64Image;
         loadingMessage.IsLoading = false;
+        conversation.Add(loadingMessage);
         InvokeAsync(StateHasChanged);
     }
 
@@ -142,6 +142,7 @@
     private void ClearMessages()
     {
         chats.Clear();
+        conversation.Clear();
         StateHasChanged();
     }
 
