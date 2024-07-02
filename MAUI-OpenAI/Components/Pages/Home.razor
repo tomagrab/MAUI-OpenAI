@@ -1,7 +1,9 @@
 ﻿@page "/"
+@using Microsoft.Extensions.Logging
 @using MAUI_OpenAI.Models
 @using MAUI_OpenAI.Services
 @inject IOpenAIService OpenAIService
+@inject ILogger<Home> Logger
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite">
     <div class="flex-grow p-4">
@@ -47,6 +49,8 @@
         userMessage = string.Empty; // Clear the input field immediately
         isSending = true;
         StateHasChanged();
+
+        Logger.LogInformation("Send button clicked with message: {Message}", tempUserMessage);
 
         var userChatMessage = new ChatMessageModel(tempUserMessage, "user");
         chats.Add(userChatMessage); // Add user message to chats
@@ -111,6 +115,7 @@
 
     private string GetFormContainerCssClass()
     {
-        return isInputFocused ? "p-4 shadow-md mb-64" : "p-4 shadow-md";
+        var baseClass = "p-4 shadow-md";
+        return isInputFocused ? $"{baseClass} mb-64 md:mb-0" : baseClass;
     }
 }

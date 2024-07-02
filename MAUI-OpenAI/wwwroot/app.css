@@ -1494,3 +1494,9 @@ p {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(255 123 114 / var(--tw-ring-opacity));
 }
+
+@media (min-width: 768px) {
+  .md\:mb-0 {
+    margin-bottom: 0px;
+  }
+}
