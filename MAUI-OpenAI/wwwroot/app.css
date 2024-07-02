@@ -609,6 +609,10 @@ video {
   margin-bottom: 0.5rem;
 }
 
+.mb-24 {
+  margin-bottom: 6rem;
+}
+
 .ml-auto {
   margin-left: auto;
 }
@@ -617,8 +621,16 @@ video {
   margin-right: auto;
 }
 
-.mt-24 {
-  margin-top: 6rem;
+.mb-96 {
+  margin-bottom: 24rem;
+}
+
+.mb-72 {
+  margin-bottom: 18rem;
+}
+
+.mb-64 {
+  margin-bottom: 16rem;
 }
 
 .flex {
@@ -715,10 +727,6 @@ video {
 
 .overflow-hidden {
   overflow: hidden;
-}
-
-.overflow-y-auto {
-  overflow-y: auto;
 }
 
 .rounded {
@@ -1489,4 +1497,24 @@ p {
 .focus\:ring-red:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(255 123 114 / var(--tw-ring-opacity));
+}
+
+@media (min-width: 640px) {
+  .sm\:mb-24 {
+    margin-bottom: 6rem;
+  }
+
+  .sm\:mb-28 {
+    margin-bottom: 7rem;
+  }
+
+  .sm\:mb-96 {
+    margin-bottom: 24rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:mb-0 {
+    margin-bottom: 0px;
+  }
 }
