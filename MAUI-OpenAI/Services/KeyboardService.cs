@@ -1,6 +1,3 @@
-using Microsoft.Maui.Controls;
-using System;
-
 namespace MAUI_OpenAI.Services
 {
     public class KeyboardService : IKeyboardService
@@ -16,9 +13,9 @@ namespace MAUI_OpenAI.Services
         {
             // This needs to be implemented for each platform
 #if ANDROID
-            PlatformKeyboardService.KeyboardStateChanged += OnKeyboardStateChanged;
+            MAUI_OpenAI.Platforms.Android.Services.PlatformKeyboardService.KeyboardStateChanged += OnKeyboardStateChanged;
 #elif IOS
-            PlatformKeyboardService.KeyboardStateChanged += OnKeyboardStateChanged;
+            MAUI_OpenAI.Platforms.iOS.Services.PlatformKeyboardService.KeyboardStateChanged += OnKeyboardStateChanged;
 #endif
         }
 
