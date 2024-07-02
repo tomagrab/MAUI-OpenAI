@@ -1,0 +1,96 @@
+﻿@page "/"
+@using MAUI_OpenAI.Models
+@using MAUI_OpenAI.Services
+@inject IOpenAIService OpenAIService
+@inject IPlatformService PlatformService
+
+<div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
+    <ChatMessages Chats="chats" />
+    <ChatInput
+        UserMessage="@userMessage"
+        IsSending="@isSending"
+        IsGeneratingImage="@isGeneratingImage"
+        OnSendMessage="HandleSendMessage"
+        OnToggleImageGeneration="HandleToggleImageGeneration"
+    />
+</div>
+
+@code {
+    private string userMessage = "";
+    private bool isSending = false;
+    private bool isGeneratingImage = false;
+    private List<ChatMessageModel> chats = new List<ChatMessageModel>();
+    private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
+
+    private async Task HandleSendMessage(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        userMessage = message;
+        userMessage = string.Empty; // Clear the input field immediately
+        isSending = true;
+        StateHasChanged();
+
+        var userChatMessage = new ChatMessageModel(message, "user");
+        chats.Add(userChatMessage); // Add user message to chats
+        conversation.Add(userChatMessage); // Keep the full conversation context
+
+        if (isGeneratingImage)
+        {
+            var loadingMessage = new ChatMessageModel("", "assistant", true, true);
+            chats.Add(loadingMessage);
+            StateHasChanged();
+
+            await OpenAIService.GenerateImageAsync(message, (imageBytes) =>
+            {
+                UpdateImageResponse(imageBytes, loadingMessage);
+            }, UpdateErrorResponse);
+        }
+        else
+        {
+            await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), message, UpdateResponse);
+        }
+
+        isSending = false;
+        isGeneratingImage = false;
+        StateHasChanged();
+    }
+
+    private void HandleToggleImageGeneration(bool isGenerating)
+    {
+        isGeneratingImage = isGenerating;
+    }
+
+    private void UpdateResponse(string update)
+    {
+        if (chats.LastOrDefault()?.Role == "assistant")
+        {
+            chats.Last().Message += update;
+        }
+        else
+        {
+            var newMessage = new ChatMessageModel(update, "assistant");
+            chats.Add(newMessage);
+            conversation.Add(newMessage);
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateImageResponse(byte[] imageBytes, ChatMessageModel loadingMessage)
+    {
+        var base64Image = Convert.ToBase64String(imageBytes);
+        loadingMessage.Message = base64Image;
+        loadingMessage.IsLoading = false;
+        conversation.Add(loadingMessage);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateErrorResponse(string error)
+    {
+        var errorMessage = new ChatMessageModel(error, "assistant");
+        chats.Add(errorMessage);
+        conversation.Add(errorMessage);
+        InvokeAsync(StateHasChanged);
+    }
+}

@@ -1,0 +1,88 @@
+<div class="@GetFormContainerCssClass() relative">
+    <form class="flex w-full relative" @onsubmit="HandleSubmit">
+        <textarea @bind="UserMessage" @bind:event="oninput" placeholder="Type your message or prompt here"
+            @onfocus="HandleInputFocus" @onblur="HandleInputBlur"
+            @onkeydown="HandleKeyDown"
+            class="flex-grow p-4 px-10 rounded border border-gray focus:outline-none bg-input text-brightWhite h-20 resize-none"
+            disabled="@IsSending"></textarea>
+        <button type="button" @onclick="ClearMessages" class="absolute left-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightRed focus:outline-none">
+            <i class="fas fa-trash"></i>
+        </button>
+        <button type="button" @onclick="ToggleImageGeneration" class="absolute right-10 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none">
+            @if (IsGeneratingImage)
+            {
+                <i class="fas fa-image"></i>
+            }
+            else
+            {
+                <i class="fas fa-paper-plane"></i>
+            }
+        </button>
+        <button type="submit" class="absolute right-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none @(IsSending || string.IsNullOrWhiteSpace(UserMessage) ? "disabled-button" : "") disabled:opacity-50"
+                disabled="@(IsSending || string.IsNullOrWhiteSpace(UserMessage))">
+            <i class="fas fa-check"></i>
+        </button>
+    </form>
+</div>
+
+@code {
+    [Parameter]
+    public string UserMessage { get; set; }
+    [Parameter]
+    public bool IsSending { get; set; }
+    [Parameter]
+    public bool IsGeneratingImage { get; set; }
+    [Parameter]
+    public EventCallback<string> OnSendMessage { get; set; }
+    [Parameter]
+    public EventCallback<bool> OnToggleImageGeneration { get; set; }
+    private bool isInputFocused = false;
+
+    private async Task HandleSubmit()
+    {
+        if (OnSendMessage.HasDelegate)
+        {
+            await OnSendMessage.InvokeAsync(UserMessage);
+        }
+    }
+
+    private void ClearMessages()
+    {
+        UserMessage = string.Empty;
+    }
+
+    private async Task ToggleImageGeneration()
+    {
+        IsGeneratingImage = !IsGeneratingImage;
+        if (OnToggleImageGeneration.HasDelegate)
+        {
+            await OnToggleImageGeneration.InvokeAsync(IsGeneratingImage);
+        }
+    }
+
+    private void HandleInputFocus()
+    {
+        isInputFocused = true;
+        StateHasChanged();
+    }
+
+    private void HandleInputBlur()
+    {
+        isInputFocused = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && !IsSending)
+        {
+            await HandleSubmit();
+        }
+    }
+
+    private string GetFormContainerCssClass()
+    {
+        var baseClass = "p-4 shadow-md";
+        return baseClass;
+    }
+}
