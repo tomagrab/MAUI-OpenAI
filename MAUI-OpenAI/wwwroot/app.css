@@ -580,6 +580,14 @@ video {
   position: fixed;
 }
 
+.relative {
+  position: relative;
+}
+
+.sticky {
+  position: sticky;
+}
+
 .inset-0 {
   inset: 0px;
 }
@@ -665,8 +673,17 @@ video {
   width: 100%;
 }
 
+.w-fit {
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
 .max-w-md {
   max-width: 28rem;
+}
+
+.max-w-lg {
+  max-width: 32rem;
 }
 
 .flex-1 {
@@ -1493,6 +1510,12 @@ p {
 .focus\:ring-red:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(255 123 114 / var(--tw-ring-opacity));
+}
+
+@media (min-width: 640px) {
+  .sm\:max-w-md {
+    max-width: 28rem;
+  }
 }
 
 @media (min-width: 768px) {

@@ -5,17 +5,17 @@
 @inject IOpenAIService OpenAIService
 @inject ILogger<Home> Logger
 
-<div class="flex flex-col h-full bg-backdrop text-brightWhite">
-    <div class="flex-grow p-4">
+<div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
+    <div class="flex-grow p-4 overflow-auto">
         @foreach (var chat in chats)
         {
-            <div class="my-2 p-2 rounded-lg max-w-md @GetMessageCssClass(chat.Role)">
+            <div class="my-2 p-2 rounded-lg w-fit max-w-lg sm:max-w-md @GetMessageCssClass(chat.Role)">
                 <p>@chat.Message</p>
             </div>
         }
     </div>
 
-    <div class="@GetFormContainerCssClass()">
+    <div class="sticky bottom-0 w-full p-4 shadow-md bg-backdrop">
         <form class="flex w-full" @onsubmit="HandleSubmit">
             <button type="button" @onclick="ClearMessages" class="bg-red text-brightWhite p-2 rounded-l-md hover:bg-brightRed focus:outline-none focus:ring focus:ring-red">
                 <i class="fas fa-trash"></i>
