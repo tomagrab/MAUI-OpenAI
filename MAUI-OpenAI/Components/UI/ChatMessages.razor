@@ -12,7 +12,7 @@
                 }
                 else
                 {
-                    <img src="data:image/png;base64,@chat.Message" alt="Generated Image" class="max-w-full h-auto rounded-lg" />
+                    <img src="data:image/png;base64,@chat.Message" alt="Generated Image" class="max-w-full h-auto rounded-lg cursor-pointer" @onclick='() => HandleImageClick("data:image/png;base64," + chat.Message)' />
                 }
             }
             else
@@ -27,8 +27,19 @@
     [Parameter]
     public List<ChatMessageModel> Chats { get; set; } = new List<ChatMessageModel>();
 
+    [Parameter]
+    public EventCallback<string> OnImageClick { get; set; }
+
     private string GetMessageCssClass(string role)
     {
         return role == "user" ? "bg-blue text-brightWhite self-end ml-auto text-right" : "bg-green text-brightWhite self-start mr-auto text-left";
+    }
+
+    private async Task HandleImageClick(string imageSrc)
+    {
+        if (OnImageClick.HasDelegate)
+        {
+            await OnImageClick.InvokeAsync(imageSrc);
+        }
     }
 }

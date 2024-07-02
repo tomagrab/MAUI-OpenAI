@@ -1,11 +1,9 @@
 ﻿@page "/"
-@using MAUI_OpenAI.Models
-@using MAUI_OpenAI.Services
 @inject IOpenAIService OpenAIService
 @inject IPlatformService PlatformService
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
-    <ChatMessages Chats="chats" />
+    <ChatMessages Chats="chats" OnImageClick="OpenModal" />
     <ChatInput
         UserMessage="@userMessage"
         IsSending="@isSending"
@@ -13,6 +11,10 @@
         OnSendMessage="HandleSendMessage"
         OnToggleImageGeneration="HandleToggleImageGeneration"
     />
+    @if (showModal)
+    {
+        <Modal ImageSrc="@selectedImage" OnClose="HandleModalClose" />
+    }
 </div>
 
 @code {
@@ -21,6 +23,8 @@
     private bool isGeneratingImage = false;
     private List<ChatMessageModel> chats = new List<ChatMessageModel>();
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
+    private bool showModal = false;
+    private string selectedImage = "";
 
     private async Task HandleSendMessage(string message)
     {
@@ -60,6 +64,17 @@
     private void HandleToggleImageGeneration(bool isGenerating)
     {
         isGeneratingImage = isGenerating;
+    }
+
+    private void OpenModal(string imageSrc)
+    {
+        selectedImage = imageSrc;
+        showModal = true;
+    }
+
+    private void HandleModalClose()
+    {
+        showModal = false;
     }
 
     private void UpdateResponse(string update)
