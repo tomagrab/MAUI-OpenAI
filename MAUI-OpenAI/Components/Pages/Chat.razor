@@ -2,6 +2,7 @@
 @inject IOpenAIService OpenAIService
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
+    <RoleSelector OnRoleSelected="HandleRoleSelected" />
     <ChatMessages
         Chats="chats" ErrorMessage="@errorMessage" OnImageClick="OpenModal" OnError="HandleError"
     />
@@ -34,6 +35,7 @@
     private bool showModal = false;
     private string selectedImage = "";
     private string errorMessage = "";
+    private string currentRole = "";
 
     private async Task HandleSendMessage(string message)
     {
@@ -48,7 +50,7 @@
         StateHasChanged();
 
         var userChatMessage = new ChatMessageModel(tempUserMessage, "user");
-        chats.Add(userChatMessage)
+        chats.Add(userChatMessage);
         conversation.Add(userChatMessage);
 
         try
@@ -100,6 +102,23 @@
             isSending = false;
             StateHasChanged();
         }
+    }
+
+    private async Task HandleRoleSelected(string newRolePrompt)
+    {
+        if (!string.IsNullOrEmpty(currentRole))
+        {
+            var forgetMessage = new ChatMessageModel("Forget the previous role.", "user");
+            chats.Add(forgetMessage);
+            conversation.Add(forgetMessage);
+        }
+
+        var roleMessage = new ChatMessageModel(newRolePrompt, "system");
+        chats.Add(roleMessage);
+        conversation.Add(roleMessage);
+
+        currentRole = newRolePrompt;
+        StateHasChanged();
     }
 
     private void HandleToggleImageGeneration(bool isGenerating)
@@ -211,7 +230,7 @@
         try
         {
             var errorMessageModel = new ChatMessageModel(error, "error");
-            errorMessage = error; 
+            errorMessage = error;
             chats.Add(errorMessageModel);
             conversation.Add(errorMessageModel);
             InvokeAsync(StateHasChanged);
