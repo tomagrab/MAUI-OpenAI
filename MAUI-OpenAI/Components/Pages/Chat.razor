@@ -33,7 +33,7 @@
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
     private bool showModal = false;
     private string selectedImage = "";
-    private string errorMessage = ""; // Initialize as an empty string
+    private string errorMessage = "";
 
     private async Task HandleSendMessage(string message)
     {
@@ -43,13 +43,13 @@
         }
 
         var tempUserMessage = message;
-        userMessage = string.Empty; // Clear the input field
+        userMessage = string.Empty;
         isSending = true;
         StateHasChanged();
 
         var userChatMessage = new ChatMessageModel(tempUserMessage, "user");
-        chats.Add(userChatMessage); // Add user message to chats
-        conversation.Add(userChatMessage); // Keep the full conversation context
+        chats.Add(userChatMessage)
+        conversation.Add(userChatMessage);
 
         try
         {
@@ -120,7 +120,7 @@
         {
             chats.Clear();
             conversation.Clear();
-            errorMessage = ""; // Clear error message
+            errorMessage = "";
             StateHasChanged();
         }
         catch (Exception ex)
@@ -210,8 +210,8 @@
     {
         try
         {
-            var errorMessageModel = new ChatMessageModel(error, "error"); // Set error message role to "error"
-            errorMessage = error; // Set error message
+            var errorMessageModel = new ChatMessageModel(error, "error");
+            errorMessage = error; 
             chats.Add(errorMessageModel);
             conversation.Add(errorMessageModel);
             InvokeAsync(StateHasChanged);
