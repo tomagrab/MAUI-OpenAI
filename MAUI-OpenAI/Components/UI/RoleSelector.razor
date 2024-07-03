@@ -23,9 +23,8 @@
 }
 
 <div class="mb-4">
-    <label for="roleSelector" class="block text-brightWhite mb-2">Select Role / Tone / Character:</label>
     <select id="roleSelector" @onchange="HandleRoleChange" class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite">
-        <option value="">Select a role</option>
+        <option value="">Role</option>
         @foreach (var role in rolePrompts.Keys)
         {
             <option value="@role">@role</option>
