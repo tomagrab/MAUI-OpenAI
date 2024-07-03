@@ -1,14 +1,8 @@
+@inject IPlatformService PlatformService
+
 <div class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 backdrop-blur-md" @onclick="CloseModal">
     <div class="relative bg-darkblue bg-opacity-80 backdrop-blur-lg rounded-lg overflow-hidden shadow-lg w-full max-w-2xl" @onclick:stopPropagation="true">
         <div class="flex justify-between p-2">
-            <div class="flex space-x-2">
-                <button class="text-white hover:text-gray-900" @onclick="SaveImage">
-                    <i class="fas fa-save"></i> Save Image
-                </button>
-                <button class="text-white hover:text-gray-900" @onclick="CopyImage">
-                    <i class="fas fa-copy"></i> Copy Image
-                </button>
-            </div>
             <button class="text-white hover:text-gray-900" @onclick="CloseModal">
                 <i class="fas fa-times"></i>
             </button>
@@ -36,6 +30,12 @@
     public EventCallback<string> OnError { get; set; }
 
     private string ErrorMessage { get; set; } = string.Empty;
+    private string Platform { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        Platform = PlatformService.GetPlatform();
+    }
 
     private async Task CloseModal()
     {
@@ -60,54 +60,5 @@
             OnError.InvokeAsync(message);
         }
         StateHasChanged();
-    }
-
-    private async Task SaveImage()
-    {
-        try
-        {
-            if (!string.IsNullOrEmpty(ImageSrc))
-            {
-                var base64Data = ImageSrc.Substring(ImageSrc.IndexOf(',') + 1);
-                var imageBytes = Convert.FromBase64String(base64Data);
-
-                var filePath = Path.Combine(FileSystem.AppDataDirectory, $"image_{DateTime.Now:yyyyMMdd_HHmmss}.png");
-                await File.WriteAllBytesAsync(filePath, imageBytes);
-
-                HandleError("Image saved successfully.");
-            }
-            else
-            {
-                HandleError("No image to save.");
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error saving image: {ex.Message}");
-        }
-    }
-
-    private async Task CopyImage()
-    {
-        try
-        {
-            if (!string.IsNullOrEmpty(ImageSrc))
-            {
-                var base64Data = ImageSrc.Substring(ImageSrc.IndexOf(',') + 1);
-                var imageBytes = Convert.FromBase64String(base64Data);
-
-                await Clipboard.SetImageAsync(imageBytes);
-
-                HandleError("Image copied to clipboard.");
-            }
-            else
-            {
-                HandleError("No image to copy.");
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error copying image: {ex.Message}");
-        }
     }
 }
