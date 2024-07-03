@@ -3,22 +3,22 @@
         <textarea @bind="UserMessage" @bind:event="oninput" placeholder="Type your message or prompt here"
             @onfocus="HandleInputFocus" @onblur="HandleInputBlur"
             @onkeydown="HandleKeyDown"
-            class="flex-grow p-4 px-10 rounded border border-gray focus:outline-none bg-input text-brightWhite h-20 resize-none"
+            class="flex-grow p-4 px-10 rounded border border-gray focus:outline-none bg-input text-brightWhite h-28 resize-none"
             disabled="@IsSending"></textarea>
         <button type="button" @onclick="ClearMessages" class="absolute left-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightRed focus:outline-none">
             <i class="fas fa-trash"></i>
         </button>
-        <button type="button" @onclick="ToggleImageGeneration" class="absolute right-10 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none">
+        <button type="button" @onclick="ToggleImageGeneration" class="absolute right-2 top-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none">
             @if (IsGeneratingImage)
             {
                 <i class="fas fa-image"></i>
             }
             else
             {
-                <i class="fas fa-paper-plane"></i>
+                <i class="fas fa-envelope"></i>
             }
         </button>
-        <button type="submit" class="absolute right-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none @(IsSending || string.IsNullOrWhiteSpace(UserMessage) ? "disabled-button" : "") disabled:opacity-50"
+        <button type="submit" class="absolute right-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 disabled="@(IsSending || string.IsNullOrWhiteSpace(UserMessage))">
             <i class="fas fa-check"></i>
         </button>
