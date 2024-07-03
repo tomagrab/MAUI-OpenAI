@@ -36,6 +36,8 @@
     public EventCallback OnClose { get; set; }
     [Parameter]
     public EventCallback<string> OnError { get; set; }
+    [Parameter]
+    public EventCallback<string> OnSuccess { get; set; }
 
     private string ErrorMessage { get; set; } = string.Empty;
     private string Platform { get; set; } = string.Empty;
@@ -85,8 +87,10 @@
 
                 if (result.IsSuccessful)
                 {
-                    Console.WriteLine($"Image saved successfully to {result.FilePath}");
-                    // Optionally show a toast notification or some other non-intrusive feedback
+                    if (OnSuccess.HasDelegate)
+                    {
+                        await OnSuccess.InvokeAsync("Image saved successfully.");
+                    }
                 }
                 else
                 {

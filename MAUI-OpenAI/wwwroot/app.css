@@ -852,6 +852,11 @@ video {
   background-color: rgb(255 123 114 / var(--tw-bg-opacity));
 }
 
+.bg-brightGreen {
+  --tw-bg-opacity: 1;
+  background-color: rgb(86 211 100 / var(--tw-bg-opacity));
+}
+
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }

@@ -20,6 +20,7 @@
             ImageSrc="@selectedImage"
             OnClose="HandleModalClose"
             OnError="HandleError"
+            OnSuccess="HandleSuccess"
         />
     }
 </div>
@@ -131,6 +132,14 @@
     private void HandleError(string message)
     {
         errorMessage = message;
+        StateHasChanged();
+    }
+
+    private void HandleSuccess(string message)
+    {
+        var successMessage = new ChatMessageModel(message, "success");
+        chats.Add(successMessage);
+        conversation.Add(successMessage);
         StateHasChanged();
     }
 
