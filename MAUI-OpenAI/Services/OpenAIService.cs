@@ -2,7 +2,6 @@ using OpenAI.Chat;
 using MAUI_OpenAI.Models;
 using System.ClientModel;
 using OpenAI.Images;
-using Microsoft.Extensions.Logging;
 
 namespace MAUI_OpenAI.Services
 {
@@ -10,21 +9,20 @@ namespace MAUI_OpenAI.Services
     {
         private readonly ChatClient _chatClient;
         private readonly ImageClient _imageClient;
-        private readonly ILogger<OpenAIService> _logger;
-        private const int MaxTokens = 4096; // Set the token limit according to your model
+        private readonly ITokenizerService _tokenizerService;
+        private const int MaxTokens = 80000;
 
-        public OpenAIService(ChatClient chatClient, ImageClient imageClient, ILogger<OpenAIService> logger)
+        public OpenAIService(ChatClient chatClient, ImageClient imageClient, ITokenizerService tokenizerService)
         {
             _chatClient = chatClient;
             _imageClient = imageClient;
-            _logger = logger;
+            _tokenizerService = tokenizerService;
         }
 
         public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, string message, Action<string> onUpdate)
         {
             try
             {
-                _logger.LogInformation("GetChatCompletionStreamingAsync called with message: {message}", message);
                 // Append the new message to the conversation
                 conversation.Add(new ChatMessageModel(message, "user"));
 
@@ -32,7 +30,16 @@ namespace MAUI_OpenAI.Services
                 var textConversation = conversation.Where(c => !c.IsImage).ToList();
 
                 // Ensure the conversation stays within the token limit
-                var trimmedConversation = TrimConversationToTokenLimit(textConversation);
+                List<ChatMessageModel> trimmedConversation;
+                try
+                {
+                    trimmedConversation = _tokenizerService.TrimConversationToTokenLimit(textConversation, MaxTokens);
+                }
+                catch (Exception tex)
+                {
+                    onUpdate($"An error occurred while trimming the conversation: {tex.Message}");
+                    return;
+                }
 
                 var messages = trimmedConversation.Select(c => new UserChatMessage(c.Message)).ToArray();
 
@@ -46,35 +53,24 @@ namespace MAUI_OpenAI.Services
                     }
                 }
             }
+            catch (ClientResultException cre)
+            {
+                onUpdate($"An error occurred while processing the request: {cre.Message}");
+            }
+            catch (TimeoutException te)
+            {
+                onUpdate("Request timed out: " + te.Message);
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while processing the request");
-                onUpdate("An error occurred while processing the request: " + ex.Message);
+                onUpdate($"An unexpected error occurred while processing the request: {ex.Message}");
             }
-        }
-
-        private List<ChatMessageModel> TrimConversationToTokenLimit(List<ChatMessageModel> conversation)
-        {
-            // This is a placeholder implementation. You will need to implement token counting
-            // and trimming logic according to the tokenization method used by your model.
-            // Here's a simplified version that keeps the last N messages.
-
-            // Estimate the tokens and keep the last messages under the token limit
-            var estimatedTokens = conversation.Sum(c => c.Message.Split(' ').Length);
-            while (estimatedTokens > MaxTokens && conversation.Count > 0)
-            {
-                conversation.RemoveAt(0);
-                estimatedTokens = conversation.Sum(c => c.Message.Split(' ').Length);
-            }
-
-            return conversation;
         }
 
         public async Task GenerateImageAsync(string prompt, Action<byte[]> onImageGenerated, Action<string> onError)
         {
             try
             {
-                _logger.LogInformation("GenerateImageAsync called with prompt: {prompt}", prompt);
                 var options = new ImageGenerationOptions
                 {
                     Quality = GeneratedImageQuality.High,
@@ -86,10 +82,17 @@ namespace MAUI_OpenAI.Services
                 GeneratedImage image = await _imageClient.GenerateImageAsync(prompt, options);
                 onImageGenerated?.Invoke(image.ImageBytes.ToArray());
             }
+            catch (ClientResultException cre)
+            {
+                onError?.Invoke($"An error occurred while generating the image: {cre.Message}");
+            }
+            catch (TimeoutException te)
+            {
+                onError?.Invoke("Image generation request timed out: " + te.Message);
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while generating the image");
-                onError?.Invoke("An error occurred while generating the image: " + ex.Message);
+                onError?.Invoke($"An unexpected error occurred while generating the image: {ex.Message}");
             }
         }
     }

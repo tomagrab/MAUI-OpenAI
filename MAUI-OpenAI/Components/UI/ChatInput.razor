@@ -1,5 +1,4 @@
 @using Microsoft.Extensions.Logging
-@inject ILogger<ChatInput> Logger
 @inject IPlatformService PlatformService
 
 <div class="@GetFormContainerCssClass() relative">
@@ -57,27 +56,23 @@
     protected override void OnInitialized()
     {
         platform = PlatformService.GetPlatform();
-        Logger.LogInformation("Platform initialized as: {platform}", platform);
     }
 
     private async Task HandleSubmit()
     {
-        Logger.LogInformation("HandleSubmit called with message: {UserMessage}");
         if (OnSendMessage.HasDelegate)
         {
             await OnSendMessage.InvokeAsync(UserMessage);
-            Logger.LogInformation("OnSendMessage delegate invoked");
             UserMessage = string.Empty;
         }
         else
         {
-            Logger.LogWarning("OnSendMessage delegate not set");
+
         }
     }
 
     private void ClearMessages()
     {
-        Logger.LogInformation("ClearMessages called");
         if (OnClearMessages.HasDelegate)
         {
             OnClearMessages.InvokeAsync();
@@ -86,16 +81,13 @@
 
     private async Task ToggleImageGeneration()
     {
-        Logger.LogInformation("ToggleImageGeneration called, current state: {IsGeneratingImage}");
         IsGeneratingImage = !IsGeneratingImage;
         if (OnToggleImageGeneration.HasDelegate)
         {
             await OnToggleImageGeneration.InvokeAsync(IsGeneratingImage);
-            Logger.LogInformation("OnToggleImageGeneration delegate invoked");
         }
         else
         {
-            Logger.LogWarning("OnToggleImageGeneration delegate not set");
         }
     }
 
@@ -103,21 +95,18 @@
     {
         if (args.Key == "Enter" && !args.ShiftKey && !IsSending)
         {
-            Logger.LogInformation("HandleKeyDown called with Enter key");
             await HandleSubmit();
         }
     }
 
     private void HandleInputFocus()
     {
-        Logger.LogInformation("HandleInputFocus called");
         isFocused = true;
         StateHasChanged();
     }
 
     private void HandleInputBlur()
     {
-        Logger.LogInformation("HandleInputBlur called");
         isFocused = false;
         StateHasChanged();
     }

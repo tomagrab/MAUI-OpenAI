@@ -4,7 +4,15 @@ namespace MAUI_OpenAI.Services
     {
         public string GetPlatform()
         {
-            return DeviceInfo.Platform.ToString();
+            try
+            {
+                return DeviceInfo.Platform.ToString();
+            }
+            catch (Exception ex)
+            {
+                // Handle unexpected errors gracefully and provide a default value
+                return $"Unknown Platform (Error: {ex.Message})";
+            }
         }
     }
 }
