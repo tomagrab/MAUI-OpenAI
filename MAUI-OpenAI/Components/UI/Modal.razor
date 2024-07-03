@@ -24,6 +24,8 @@
 
     [Parameter]
     public EventCallback OnClose { get; set; }
+    [Parameter]
+    public EventCallback<string> OnError { get; set; }
 
     private string ErrorMessage { get; set; } = string.Empty;
 
@@ -45,6 +47,10 @@
     private void HandleError(string message)
     {
         ErrorMessage = message;
+        if (OnError.HasDelegate)
+        {
+            OnError.InvokeAsync(message);
+        }
         StateHasChanged();
     }
 }
