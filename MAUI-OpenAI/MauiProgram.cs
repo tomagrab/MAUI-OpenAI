@@ -2,6 +2,8 @@
 using OpenAI.Chat;
 using MAUI_OpenAI.Services;
 using OpenAI.Images;
+using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Storage;
 
 namespace MAUI_OpenAI
 {
@@ -12,6 +14,7 @@ namespace MAUI_OpenAI
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -31,6 +34,7 @@ namespace MAUI_OpenAI
 
             builder.Services.AddSingleton(chatClient);
             builder.Services.AddSingleton(imageClient);
+            builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
             builder.Services.AddSingleton<ITokenizerService, TokenizerService>();
             builder.Services.AddSingleton<IOpenAIService, OpenAIService>();
             builder.Services.AddSingleton<IPlatformService, PlatformService>();
