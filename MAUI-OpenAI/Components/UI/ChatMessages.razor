@@ -1,4 +1,11 @@
 <div class="flex-grow p-4 overflow-auto">
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md bg-red text-brightWhite">
+            This is an error message:
+            @ErrorMessage
+        </div>
+    }
     @foreach (var chat in Chats)
     {
         <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md @GetMessageCssClass(chat.Role)">
@@ -17,7 +24,9 @@
             }
             else
             {
-                <p>@chat.Message</p>
+                <p>
+                    @chat.Message
+                </p>
             }
         </div>
     }
@@ -28,18 +37,56 @@
     public List<ChatMessageModel> Chats { get; set; } = new List<ChatMessageModel>();
 
     [Parameter]
+    public string ErrorMessage { get; set; } = string.Empty; // Ensure default value is an empty string
+
+    [Parameter]
     public EventCallback<string> OnImageClick { get; set; }
+    [Parameter]
+    public EventCallback<string> OnError { get; set; } // New parameter for error callback
 
     private string GetMessageCssClass(string role)
     {
-        return role == "user" ? "bg-blue text-brightWhite self-end ml-auto text-right" : "bg-green text-brightWhite self-start mr-auto text-left";
+        try
+        {
+            return role switch
+            {
+                "user" => "bg-blue text-brightWhite self-end ml-auto text-right",
+                "assistant" => "bg-green text-brightWhite self-start mr-auto text-left",
+                "error" => "bg-red text-brightWhite self-start mr-auto text-left",
+                _ => "bg-gray text-brightWhite self-start mr-auto text-left"
+            };
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error generating CSS class: {ex.Message}");
+            return "bg-gray text-brightWhite self-start mr-auto text-left";
+        }
     }
 
     private async Task HandleImageClick(string imageSrc)
     {
-        if (OnImageClick.HasDelegate)
+        try
         {
-            await OnImageClick.InvokeAsync(imageSrc);
+            if (OnImageClick.HasDelegate)
+            {
+                await OnImageClick.InvokeAsync(imageSrc);
+            }
+            else
+            {
+                HandleError("Image click handler is not configured.");
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error handling image click: {ex.Message}");
+        }
+    }
+
+    private void HandleError(string message)
+    {
+        if (OnError.HasDelegate)
+        {
+            OnError.InvokeAsync(message);
         }
     }
 }

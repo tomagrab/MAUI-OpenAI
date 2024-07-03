@@ -49,71 +49,147 @@
     public EventCallback<bool> OnToggleImageGeneration { get; set; }
     [Parameter]
     public EventCallback OnClearMessages { get; set; }
+    [Parameter]
+    public EventCallback<string> OnError { get; set; }
 
     private bool isFocused = false;
     private string platform = "";
 
     protected override void OnInitialized()
     {
-        platform = PlatformService.GetPlatform();
+        try
+        {
+            platform = PlatformService.GetPlatform();
+        }
+        catch (Exception ex)
+        {
+            platform = "Unknown Platform";
+            HandleError($"Failed to get platform information: {ex.Message}");
+        }
     }
 
     private async Task HandleSubmit()
     {
-        if (OnSendMessage.HasDelegate)
+        try
         {
-            await OnSendMessage.InvokeAsync(UserMessage);
-            UserMessage = string.Empty;
+            if (OnSendMessage.HasDelegate)
+            {
+                await OnSendMessage.InvokeAsync(UserMessage);
+                UserMessage = string.Empty;
+                HandleError(""); // Clear any previous error message
+            }
+            else
+            {
+                HandleError("Message sending function is not configured.");
+            }
         }
-        else
+        catch (Exception ex)
         {
-
+            HandleError($"Error sending message: {ex.Message}");
         }
     }
 
     private void ClearMessages()
     {
-        if (OnClearMessages.HasDelegate)
+        try
         {
-            OnClearMessages.InvokeAsync();
+            if (OnClearMessages.HasDelegate)
+            {
+                OnClearMessages.InvokeAsync();
+                HandleError(""); // Clear any previous error message
+            }
+            else
+            {
+                HandleError("Clear messages function is not configured.");
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error clearing messages: {ex.Message}");
         }
     }
 
     private async Task ToggleImageGeneration()
     {
-        IsGeneratingImage = !IsGeneratingImage;
-        if (OnToggleImageGeneration.HasDelegate)
+        try
         {
-            await OnToggleImageGeneration.InvokeAsync(IsGeneratingImage);
+            IsGeneratingImage = !IsGeneratingImage;
+            if (OnToggleImageGeneration.HasDelegate)
+            {
+                await OnToggleImageGeneration.InvokeAsync(IsGeneratingImage);
+                HandleError(""); // Clear any previous error message
+            }
+            else
+            {
+                HandleError("Image generation toggle function is not configured.");
+            }
         }
-        else
+        catch (Exception ex)
         {
+            HandleError($"Error toggling image generation: {ex.Message}");
         }
     }
 
     private async Task HandleKeyDown(KeyboardEventArgs args)
     {
-        if (args.Key == "Enter" && !args.ShiftKey && !IsSending)
+        try
         {
-            await HandleSubmit();
+            if (args.Key == "Enter" && !args.ShiftKey && !IsSending)
+            {
+                await HandleSubmit();
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error handling key down event: {ex.Message}");
         }
     }
 
     private void HandleInputFocus()
     {
-        isFocused = true;
-        StateHasChanged();
+        try
+        {
+            isFocused = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error handling input focus: {ex.Message}");
+        }
     }
 
     private void HandleInputBlur()
     {
-        isFocused = false;
-        StateHasChanged();
+        try
+        {
+            isFocused = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error handling input blur: {ex.Message}");
+        }
     }
 
     private string GetFormContainerCssClass()
     {
-        var baseClass = "p-4 shadow-md";
-        return isFocused && (platform == "iOS" || platform == "Android") ? $"{baseClass} mb-64" : baseClass;
+        try
+        {
+            var baseClass = "p-4 shadow-md";
+            return isFocused && (platform == "iOS" || platform == "Android") ? $"{baseClass} mb-64" : baseClass;
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error generating CSS class: {ex.Message}");
+            return "p-4 shadow-md";
+        }
+    }
+
+    private void HandleError(string message)
+    {
+        if (OnError.HasDelegate)
+        {
+            OnError.InvokeAsync(message);
+        }
     }
 }

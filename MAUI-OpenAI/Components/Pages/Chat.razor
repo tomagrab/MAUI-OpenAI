@@ -2,7 +2,9 @@
 @inject IOpenAIService OpenAIService
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
-    <ChatMessages Chats="chats" OnImageClick="OpenModal" />
+    <ChatMessages
+        Chats="chats" ErrorMessage="@errorMessage" OnImageClick="OpenModal" OnError="HandleError"
+    />
     <ChatInput
         UserMessage="@userMessage"
         IsSending="@isSending"
@@ -10,10 +12,14 @@
         OnSendMessage="HandleSendMessage"
         OnToggleImageGeneration="HandleToggleImageGeneration"
         OnClearMessages="HandleClearMessages"
+        OnError="HandleError"
     />
     @if (showModal)
     {
-        <Modal ImageSrc="@selectedImage" OnClose="HandleModalClose" />
+        <Modal
+            ImageSrc="@selectedImage"
+            OnClose="HandleModalClose" 
+        />
     }
 </div>
 
@@ -25,6 +31,7 @@
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
     private bool showModal = false;
     private string selectedImage = "";
+    private string errorMessage = ""; // Initialize as an empty string
 
     private async Task HandleSendMessage(string message)
     {
@@ -42,76 +49,175 @@
         chats.Add(userChatMessage); // Add user message to chats
         conversation.Add(userChatMessage); // Keep the full conversation context
 
-        if (isGeneratingImage)
+        try
         {
-            var loadingMessage = new ChatMessageModel("", "assistant", true, true);
-            chats.Add(loadingMessage);
-            StateHasChanged();
-
-            await OpenAIService.GenerateImageAsync(tempUserMessage, (imageBytes) =>
+            if (isGeneratingImage)
             {
-                UpdateImageResponse(imageBytes, loadingMessage);
-            }, UpdateErrorResponse);
-        }
-        else
-        {
-            await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), tempUserMessage, UpdateResponse);
-        }
+                var loadingMessage = new ChatMessageModel("", "assistant", true, true);
+                chats.Add(loadingMessage);
+                StateHasChanged();
 
-        isSending = false;
-        StateHasChanged();
+                await OpenAIService.GenerateImageAsync(tempUserMessage, (imageBytes) =>
+                {
+                    try
+                    {
+                        UpdateImageResponse(imageBytes, loadingMessage);
+                    }
+                    catch (Exception ex)
+                    {
+                        RemoveLoadingMessage(loadingMessage);
+                        UpdateErrorResponse($"Error updating image response: {ex.Message}");
+                    }
+                }, (error) =>
+                {
+                    RemoveLoadingMessage(loadingMessage);
+                    UpdateErrorResponse(error);
+                });
+            }
+            else
+            {
+                await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), tempUserMessage, (update) =>
+                {
+                    try
+                    {
+                        UpdateResponse(update);
+                    }
+                    catch (Exception ex)
+                    {
+                        UpdateErrorResponse($"Error updating chat response: {ex.Message}");
+                    }
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error sending message: {ex.Message}");
+        }
+        finally
+        {
+            isSending = false;
+            StateHasChanged();
+        }
     }
 
     private void HandleToggleImageGeneration(bool isGenerating)
     {
-        isGeneratingImage = isGenerating;
+        try
+        {
+            isGeneratingImage = isGenerating;
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error toggling image generation: {ex.Message}");
+        }
     }
 
     private void HandleClearMessages()
     {
-        chats.Clear();
+        try
+        {
+            chats.Clear();
+            conversation.Clear();
+            errorMessage = ""; // Clear error message
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error clearing messages: {ex.Message}");
+        }
+    }
+
+    private void HandleError(string message)
+    {
+        errorMessage = message;
         StateHasChanged();
     }
 
     private void OpenModal(string imageSrc)
     {
-        selectedImage = imageSrc;
-        showModal = true;
+        try
+        {
+            selectedImage = imageSrc;
+            showModal = true;
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error opening modal: {ex.Message}");
+        }
     }
 
     private void HandleModalClose()
     {
-        showModal = false;
+        try
+        {
+            showModal = false;
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error closing modal: {ex.Message}");
+        }
     }
 
     private void UpdateResponse(string update)
     {
-        if (chats.LastOrDefault()?.Role == "assistant")
+        try
         {
-            chats.Last().Message += update;
+            if (chats.LastOrDefault()?.Role == "assistant")
+            {
+                chats.Last().Message += update;
+            }
+            else
+            {
+                var newMessage = new ChatMessageModel(update, "assistant");
+                chats.Add(newMessage);
+                conversation.Add(newMessage);
+            }
+            InvokeAsync(StateHasChanged);
         }
-        else
+        catch (Exception ex)
         {
-            var newMessage = new ChatMessageModel(update, "assistant");
-            chats.Add(newMessage);
-            conversation.Add(newMessage);
+            HandleError($"Error updating response: {ex.Message}");
         }
-        InvokeAsync(StateHasChanged);
     }
 
     private void UpdateImageResponse(byte[] imageBytes, ChatMessageModel loadingMessage)
     {
-        var base64Image = Convert.ToBase64String(imageBytes);
-        loadingMessage.Message = base64Image;
-        loadingMessage.IsLoading = false;
-        conversation.Add(loadingMessage);
-        InvokeAsync(StateHasChanged);
+        try
+        {
+            var base64Image = Convert.ToBase64String(imageBytes);
+            loadingMessage.Message = base64Image;
+            loadingMessage.IsLoading = false;
+            conversation.Add(loadingMessage);
+            InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error updating image response: {ex.Message}");
+        }
     }
 
     private void UpdateErrorResponse(string error)
     {
-        var errorMessage = new ChatMessageModel(error, "assistant");
-        chats.Add(errorMessage);
-        conversation.Add(errorMessage);
+        try
+        {
+            var errorMessageModel = new ChatMessageModel(error, "error"); // Set error message role to "error"
+            errorMessage = error; // Set error message
+            chats.Add(errorMessageModel);
+            conversation.Add(errorMessageModel);
+            InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error updating error response: {ex.Message}");
+        }
+    }
+
+    private void RemoveLoadingMessage(ChatMessageModel loadingMessage)
+    {
+        if (chats.Contains(loadingMessage))
+        {
+            chats.Remove(loadingMessage);
+        }
+        InvokeAsync(StateHasChanged);
     }
 }
