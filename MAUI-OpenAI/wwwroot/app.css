@@ -645,6 +645,18 @@ video {
   margin-right: auto;
 }
 
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.block {
+  display: block;
+}
+
 .flex {
   display: flex;
 }
