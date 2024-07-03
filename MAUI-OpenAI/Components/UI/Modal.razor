@@ -1,6 +1,3 @@
-@using Microsoft.AspNetCore.Components
-@using Microsoft.AspNetCore.Components.Web
-
 <div class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75" @onclick="CloseModal">
     <div class="relative bg-white rounded-lg overflow-hidden shadow-lg w-full max-w-2xl" @onclick:stopPropagation="true">
         <div class="flex justify-end p-2">
@@ -9,23 +6,45 @@
             </button>
         </div>
         <div class="p-4">
-            <img src="@ImageSrc" alt="Modal Image" class="w-full h-auto rounded-lg" />
+            @if (string.IsNullOrEmpty(ErrorMessage))
+            {
+                <img src="@ImageSrc" alt="Modal Image" class="w-full h-auto rounded-lg" />
+            }
+            else
+            {
+                <div class="text-red-500">@ErrorMessage</div>
+            }
         </div>
     </div>
 </div>
 
 @code {
     [Parameter]
-    public string ImageSrc { get; set; }
+    public string? ImageSrc { get; set; }
 
     [Parameter]
     public EventCallback OnClose { get; set; }
 
+    private string ErrorMessage { get; set; } = string.Empty;
+
     private async Task CloseModal()
     {
-        if (OnClose.HasDelegate)
+        try
         {
-            await OnClose.InvokeAsync();
+            if (OnClose.HasDelegate)
+            {
+                await OnClose.InvokeAsync();
+            }
         }
+        catch (Exception ex)
+        {
+            HandleError($"Error closing modal: {ex.Message}");
+        }
+    }
+
+    private void HandleError(string message)
+    {
+        ErrorMessage = message;
+        StateHasChanged();
     }
 }
