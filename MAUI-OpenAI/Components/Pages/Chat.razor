@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inject IOpenAIService OpenAIService
-@inject IPlatformService PlatformService
+@using Microsoft.Extensions.Logging
+@inject ILogger<Chat> Logger
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <ChatMessages Chats="chats" OnImageClick="OpenModal" />
@@ -10,6 +11,7 @@
         IsGeneratingImage="@isGeneratingImage"
         OnSendMessage="HandleSendMessage"
         OnToggleImageGeneration="HandleToggleImageGeneration"
+        OnClearMessages="HandleClearMessages"
     />
     @if (showModal)
     {
@@ -28,15 +30,20 @@
 
     private async Task HandleSendMessage(string message)
     {
+        Logger.LogInformation("HandleSendMessage called with message: {message}");
         if (string.IsNullOrWhiteSpace(message))
+        {
+            Logger.LogWarning("Message is empty or whitespace");
             return;
+        }
 
-        userMessage = message;
-        userMessage = string.Empty; // Clear the input field immediately
+        var tempUserMessage = message;
+        userMessage = string.Empty; // Clear the input field
         isSending = true;
+        Logger.LogInformation("Message sending state set to true");
         StateHasChanged();
 
-        var userChatMessage = new ChatMessageModel(message, "user");
+        var userChatMessage = new ChatMessageModel(tempUserMessage, "user");
         chats.Add(userChatMessage); // Add user message to chats
         conversation.Add(userChatMessage); // Keep the full conversation context
 
@@ -45,40 +52,53 @@
             var loadingMessage = new ChatMessageModel("", "assistant", true, true);
             chats.Add(loadingMessage);
             StateHasChanged();
+            Logger.LogInformation("Image generation initiated");
 
-            await OpenAIService.GenerateImageAsync(message, (imageBytes) =>
+            await OpenAIService.GenerateImageAsync(tempUserMessage, (imageBytes) =>
             {
                 UpdateImageResponse(imageBytes, loadingMessage);
             }, UpdateErrorResponse);
         }
         else
         {
-            await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), message, UpdateResponse);
+            Logger.LogInformation("Chat completion initiated");
+            await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), tempUserMessage, UpdateResponse);
         }
 
         isSending = false;
-        isGeneratingImage = false;
+        Logger.LogInformation("Message sending state set to false");
         StateHasChanged();
     }
 
     private void HandleToggleImageGeneration(bool isGenerating)
     {
+        Logger.LogInformation("HandleToggleImageGeneration called with state: {isGenerating}");
         isGeneratingImage = isGenerating;
+    }
+
+    private void HandleClearMessages()
+    {
+        Logger.LogInformation("HandleClearMessages called");
+        chats.Clear();
+        StateHasChanged();
     }
 
     private void OpenModal(string imageSrc)
     {
+        Logger.LogInformation("OpenModal called with image source: {imageSrc}");
         selectedImage = imageSrc;
         showModal = true;
     }
 
     private void HandleModalClose()
     {
+        Logger.LogInformation("HandleModalClose called");
         showModal = false;
     }
 
     private void UpdateResponse(string update)
     {
+        Logger.LogInformation("UpdateResponse called with update: {update}");
         if (chats.LastOrDefault()?.Role == "assistant")
         {
             chats.Last().Message += update;
@@ -94,6 +114,7 @@
 
     private void UpdateImageResponse(byte[] imageBytes, ChatMessageModel loadingMessage)
     {
+        Logger.LogInformation("UpdateImageResponse called with image bytes length: {length}", imageBytes.Length);
         var base64Image = Convert.ToBase64String(imageBytes);
         loadingMessage.Message = base64Image;
         loadingMessage.IsLoading = false;
@@ -103,9 +124,9 @@
 
     private void UpdateErrorResponse(string error)
     {
+        Logger.LogInformation("UpdateErrorResponse called with error: {error}");
         var errorMessage = new ChatMessageModel(error, "assistant");
         chats.Add(errorMessage);
         conversation.Add(errorMessage);
-        InvokeAsync(StateHasChanged);
     }
 }

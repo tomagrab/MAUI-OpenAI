@@ -1,10 +1,19 @@
+@using Microsoft.Extensions.Logging
+@inject ILogger<ChatInput> Logger
+@inject IPlatformService PlatformService
+
 <div class="@GetFormContainerCssClass() relative">
-    <form class="flex w-full relative" @onsubmit="HandleSubmit">
-        <textarea @bind="UserMessage" @bind:event="oninput" placeholder="Type your message or prompt here"
-            @onfocus="HandleInputFocus" @onblur="HandleInputBlur"
+    <form @onsubmit="HandleSubmit" class="flex w-full relative">
+        <textarea
+            @bind="UserMessage"
+            @bind:event="oninput"
             @onkeydown="HandleKeyDown"
+            @onfocus="HandleInputFocus"
+            @onblur="HandleInputBlur"
+            disabled="@IsSending"
+            placeholder="Type your message or prompt here"
             class="flex-grow p-4 px-10 rounded border border-gray focus:outline-none bg-input text-brightWhite h-28 resize-none"
-            disabled="@IsSending"></textarea>
+        />
         <button type="button" @onclick="ClearMessages" class="absolute left-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightRed focus:outline-none">
             <i class="fas fa-trash"></i>
         </button>
@@ -18,16 +27,19 @@
                 <i class="fas fa-envelope"></i>
             }
         </button>
-        <button type="submit" class="absolute right-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                disabled="@(IsSending || string.IsNullOrWhiteSpace(UserMessage))">
-            <i class="fas fa-check"></i>
+        <button
+            type="submit"
+            disabled="@(IsSending || string.IsNullOrWhiteSpace(UserMessage))"
+            class="absolute right-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        >
+            <i class="fa-solid fa-paper-plane"></i>
         </button>
     </form>
 </div>
 
 @code {
     [Parameter]
-    public string UserMessage { get; set; }
+    public string? UserMessage { get; set; }
     [Parameter]
     public bool IsSending { get; set; }
     [Parameter]
@@ -36,53 +48,83 @@
     public EventCallback<string> OnSendMessage { get; set; }
     [Parameter]
     public EventCallback<bool> OnToggleImageGeneration { get; set; }
-    private bool isInputFocused = false;
+    [Parameter]
+    public EventCallback OnClearMessages { get; set; }
+
+    private bool isFocused = false;
+    private string platform = "";
+
+    protected override void OnInitialized()
+    {
+        platform = PlatformService.GetPlatform();
+        Logger.LogInformation("Platform initialized as: {platform}", platform);
+    }
 
     private async Task HandleSubmit()
     {
+        Logger.LogInformation("HandleSubmit called with message: {UserMessage}");
         if (OnSendMessage.HasDelegate)
         {
             await OnSendMessage.InvokeAsync(UserMessage);
+            Logger.LogInformation("OnSendMessage delegate invoked");
+            UserMessage = string.Empty;
+        }
+        else
+        {
+            Logger.LogWarning("OnSendMessage delegate not set");
         }
     }
 
     private void ClearMessages()
     {
-        UserMessage = string.Empty;
+        Logger.LogInformation("ClearMessages called");
+        if (OnClearMessages.HasDelegate)
+        {
+            OnClearMessages.InvokeAsync();
+        }
     }
 
     private async Task ToggleImageGeneration()
     {
+        Logger.LogInformation("ToggleImageGeneration called, current state: {IsGeneratingImage}");
         IsGeneratingImage = !IsGeneratingImage;
         if (OnToggleImageGeneration.HasDelegate)
         {
             await OnToggleImageGeneration.InvokeAsync(IsGeneratingImage);
+            Logger.LogInformation("OnToggleImageGeneration delegate invoked");
+        }
+        else
+        {
+            Logger.LogWarning("OnToggleImageGeneration delegate not set");
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && !args.ShiftKey && !IsSending)
+        {
+            Logger.LogInformation("HandleKeyDown called with Enter key");
+            await HandleSubmit();
         }
     }
 
     private void HandleInputFocus()
     {
-        isInputFocused = true;
+        Logger.LogInformation("HandleInputFocus called");
+        isFocused = true;
         StateHasChanged();
     }
 
     private void HandleInputBlur()
     {
-        isInputFocused = false;
+        Logger.LogInformation("HandleInputBlur called");
+        isFocused = false;
         StateHasChanged();
-    }
-
-    private async Task HandleKeyDown(KeyboardEventArgs args)
-    {
-        if (args.Key == "Enter" && !IsSending)
-        {
-            await HandleSubmit();
-        }
     }
 
     private string GetFormContainerCssClass()
     {
         var baseClass = "p-4 shadow-md";
-        return baseClass;
+        return isFocused && (platform == "iOS" || platform == "Android") ? $"{baseClass} mb-64" : baseClass;
     }
 }

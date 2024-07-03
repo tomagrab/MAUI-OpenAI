@@ -2,6 +2,7 @@ using OpenAI.Chat;
 using MAUI_OpenAI.Models;
 using System.ClientModel;
 using OpenAI.Images;
+using Microsoft.Extensions.Logging;
 
 namespace MAUI_OpenAI.Services
 {
@@ -9,18 +10,21 @@ namespace MAUI_OpenAI.Services
     {
         private readonly ChatClient _chatClient;
         private readonly ImageClient _imageClient;
+        private readonly ILogger<OpenAIService> _logger;
         private const int MaxTokens = 4096; // Set the token limit according to your model
 
-        public OpenAIService(ChatClient chatClient, ImageClient imageClient)
+        public OpenAIService(ChatClient chatClient, ImageClient imageClient, ILogger<OpenAIService> logger)
         {
             _chatClient = chatClient;
             _imageClient = imageClient;
+            _logger = logger;
         }
 
         public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, string message, Action<string> onUpdate)
         {
             try
             {
+                _logger.LogInformation("GetChatCompletionStreamingAsync called with message: {message}", message);
                 // Append the new message to the conversation
                 conversation.Add(new ChatMessageModel(message, "user"));
 
@@ -44,7 +48,7 @@ namespace MAUI_OpenAI.Services
             }
             catch (Exception ex)
             {
-                // Handle exceptions
+                _logger.LogError(ex, "An error occurred while processing the request");
                 onUpdate("An error occurred while processing the request: " + ex.Message);
             }
         }
@@ -70,6 +74,7 @@ namespace MAUI_OpenAI.Services
         {
             try
             {
+                _logger.LogInformation("GenerateImageAsync called with prompt: {prompt}", prompt);
                 var options = new ImageGenerationOptions
                 {
                     Quality = GeneratedImageQuality.High,
@@ -83,7 +88,7 @@ namespace MAUI_OpenAI.Services
             }
             catch (Exception ex)
             {
-                // Handle exceptions
+                _logger.LogError(ex, "An error occurred while generating the image");
                 onError?.Invoke("An error occurred while generating the image: " + ex.Message);
             }
         }
