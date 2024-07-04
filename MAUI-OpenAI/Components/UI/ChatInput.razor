@@ -5,7 +5,7 @@
 <div class="@GetFormContainerCssClass() relative">
     <form @onsubmit="HandleSubmit" class="flex w-full relative">
         <div class="absolute left-1 top-1 p-1 bg-opacity-75 backdrop-blur-md rounded">
-            <span class="@(tokenCount >= MaxTokens ? "text-red" : "text-brightWhite")">@tokenCount / @MaxTokens Tokens</span>
+            <span class="@(TokenCount >= MaxTokens ? "text-red" : "text-brightWhite")">@TokenCount / @MaxTokens Tokens</span>
         </div>
         <textarea
             @ref="textAreaRef"
@@ -52,9 +52,6 @@
 </div>
 
 @code {
-    private const int MaxTokens = 1000;
-    private const double CharactersPerToken = 3.5;
-    private int tokenCount = 0;
     private ElementReference textAreaRef;
     private bool shouldRegainFocus = false;
 
@@ -66,6 +63,12 @@
     public bool IsGeneratingImage { get; set; }
     [Parameter]
     public bool IsLoading { get; set; } = false;
+    [Parameter]
+    public int TokenCount { get; set; }
+    [Parameter]
+    public int MaxTokens { get; set; }
+    [Parameter]
+    public double CharactersPerToken { get; set; }
     [Parameter]
     public EventCallback<string> OnSendMessage { get; set; }
     [Parameter]
@@ -99,7 +102,7 @@
         }
     }
 
-    private bool IsInputDisabled => IsSending || IsLoading || tokenCount > MaxTokens;
+    private bool IsInputDisabled => IsSending || IsLoading || TokenCount > MaxTokens;
 
     private async Task HandleSubmit()
     {
@@ -109,7 +112,7 @@
             {
                 string tempMessage = UserMessage ?? string.Empty;
                 UserMessage = string.Empty;
-                tokenCount = 0;
+                TokenCount = 0;
                 HandleError("");
                 shouldRegainFocus = true;
                 StateHasChanged();
@@ -133,7 +136,10 @@
             if (OnClearMessages.HasDelegate)
             {
                 OnClearMessages.InvokeAsync();
+                UserMessage = string.Empty;
+                TokenCount = 0;
                 HandleError("");
+                StateHasChanged();
             }
             else
             {
@@ -219,7 +225,7 @@
     private void HandleInput(ChangeEventArgs e)
     {
         UserMessage = e.Value.ToString();
-        tokenCount = TokenizerService.EstimateTokenCount(UserMessage);
+        TokenCount = TokenizerService.EstimateTokenCount(UserMessage);
     }
 
     private async Task FocusTextAreaAsync()

@@ -21,6 +21,9 @@
         IsSending="@isSending"
         IsGeneratingImage="@isGeneratingImage"
         IsLoading="@isImageLoading"
+        TokenCount="@tokenCount"
+        MaxTokens="@MaxTokens"
+        CharactersPerToken="@CharactersPerToken"
         OnSendMessage="HandleSendMessage"
         OnToggleImageGeneration="HandleToggleImageGeneration"
         OnClearMessages="HandleClearMessages"
@@ -47,6 +50,10 @@
     private string selectedImage = "";
     private string errorMessage = "";
     private string currentRole = "";
+
+    private const int MaxTokens = 1000;
+    private const double CharactersPerToken = 3.5;
+    private int tokenCount = 0;
 
     private async Task HandleSendMessage(string message)
     {
@@ -167,6 +174,7 @@
         try
         {
             isGeneratingImage = isGenerating;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
