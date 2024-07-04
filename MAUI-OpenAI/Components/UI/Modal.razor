@@ -7,10 +7,10 @@
         <div class="flex justify-between p-2">
             <div class="flex space-x-2">
                 <button class="text-white hover:text-gray-900" @onclick="SaveImage">
-                    <i class="fas fa-save"></i> Save Image
+                    <i class="@SaveImageIconClass"></i> @SaveImageText
                 </button>
                 <button class="text-white hover:text-gray-900" @onclick="CopyImage">
-                    <i class="fas fa-copy"></i> Copy Image
+                    <i class="@CopyImageIconClass"></i> @CopyImageText
                 </button>
             </div>
             <button class="text-white hover:text-gray-900" @onclick="CloseModal">
@@ -38,16 +38,22 @@
     public EventCallback OnClose { get; set; }
     [Parameter]
     public EventCallback<string> OnError { get; set; }
-    [Parameter]
-    public EventCallback<string> OnSuccess { get; set; }
 
     private string ErrorMessage { get; set; } = string.Empty;
-    private string Platform { get; set; } = string.Empty;
+    private bool isImageSaved = false;
+    private bool isImageCopied = false;
+
+    private string SaveImageIconClass => isImageSaved ? "fas fa-check text-green-500 animate-iconChange" : "fas fa-save animate-iconChange";
+    private string CopyImageIconClass => isImageCopied ? "fas fa-check text-green-500 animate-iconChange" : "fas fa-copy animate-iconChange";
+    private string SaveImageText => isImageSaved ? "Image Saved" : "Save Image";
+    private string CopyImageText => isImageCopied ? "Image Copied" : "Copy Image";
 
     protected override void OnInitialized()
     {
-        Platform = PlatformService.GetPlatform();
+        platformName = PlatformService.GetPlatform();
     }
+
+    private string platformName { get; set; } = string.Empty;
 
     private async Task CloseModal()
     {
@@ -83,10 +89,12 @@
                 var fileName = $"image_{DateTime.Now:yyyyMMdd_HHmmss}.png";
                 await ImageSaveService.SaveImageAsync(ImageSrc, fileName);
 
-                if (OnSuccess.HasDelegate)
-                {
-                    await OnSuccess.InvokeAsync("Image saved successfully.");
-                }
+                isImageSaved = true;
+                StateHasChanged();
+
+                await Task.Delay(2000);
+                isImageSaved = false;
+                StateHasChanged();
             }
             else
             {
@@ -106,10 +114,13 @@
             if (!string.IsNullOrEmpty(ImageSrc))
             {
                 await JS.InvokeVoidAsync("copyImageToClipboard", ImageSrc);
-                if (OnSuccess.HasDelegate)
-                {
-                    await OnSuccess.InvokeAsync("Image copied to clipboard successfully.");
-                }
+
+                isImageCopied = true;
+                StateHasChanged();
+
+                await Task.Delay(2000);
+                isImageCopied = false;
+                StateHasChanged();
             }
             else
             {

@@ -32,7 +32,6 @@
             ImageSrc="@selectedImage"
             OnClose="HandleModalClose"
             OnError="HandleError"
-            OnSuccess="HandleSuccess"
         />
     }
 </div>
@@ -119,19 +118,18 @@
         }
     }
 
-        private void CompleteResponse(ChatMessageModel chatMessage)
+    private void CompleteResponse(ChatMessageModel chatMessage)
+    {
+        try
         {
-            try
-            {
-                chatMessage.HtmlContent = MarkdownService.ConvertToHtml(chatMessage.Message);
-                InvokeAsync(StateHasChanged);
-            }
-            catch (Exception ex)
-            {
-                HandleError($"Error completing response: {ex.Message}");
-            }
+            chatMessage.HtmlContent = MarkdownService.ConvertToHtml(chatMessage.Message);
+            InvokeAsync(StateHasChanged);
         }
-
+        catch (Exception ex)
+        {
+            HandleError($"Error completing response: {ex.Message}");
+        }
+    }
 
     private async Task HandleRoleSelected(string newRolePrompt)
     {
@@ -197,20 +195,13 @@
         StateHasChanged();
     }
 
-    private void HandleSuccess(string message)
-    {
-        var successMessage = new ChatMessageModel(message, "success");
-        chats.Add(successMessage);
-        conversation.Add(successMessage);
-        StateHasChanged();
-    }
-
     private void OpenModal(string imageSrc)
     {
         try
         {
             selectedImage = imageSrc;
             showModal = true;
+            StateHasChanged(); // Make sure to update the state
         }
         catch (Exception ex)
         {
@@ -223,6 +214,7 @@
         try
         {
             showModal = false;
+            StateHasChanged(); // Make sure to update the state
         }
         catch (Exception ex)
         {

@@ -26,6 +26,15 @@ module.exports = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
       },
+      keyframes: {
+        iconChange: {
+          '0%': { opacity: '0', transform: 'scale(0.8)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        }
+      },
+      animation: {
+        iconChange: 'iconChange 0.2s ease-in-out'
+      }
     },
   },
   plugins: [],
