@@ -274,19 +274,19 @@ hr {
 }
 
 .markdown-content blockquote {
-  @apply border-l-4 pl-4 text-brightBlue bg-darkblue mb-4 rounded px-2;
+  @apply border-l-4 pl-4 text-brightBlue bg-darkblue mb-4 rounded px-2 max-w-full;
 }
 
 .markdown-content pre {
-  @apply bg-darkblue border border-border text-brightWhite p-2 overflow-x-auto rounded font-mono;
+  @apply bg-darkblue border border-border text-brightWhite p-2 overflow-x-auto rounded font-mono max-w-full;
 }
 
 .markdown-content code {
-  @apply bg-darkblue rounded px-1 text-brightCyan font-mono;
+  @apply bg-darkblue rounded px-1 text-brightCyan font-mono max-w-full;
 }
 
 .markdown-content pre code {
-  @apply bg-transparent p-0 rounded-none text-inherit;
+  @apply bg-transparent p-0 rounded-none text-inherit max-w-full;
 }
 
 p {

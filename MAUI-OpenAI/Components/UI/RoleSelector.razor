@@ -1,18 +1,7 @@
 @using MAUI_OpenAI.Models
 
 <div class="mb-4 flex gap-4">
-    <select
-        id="roleSelector"
-        @onchange="HandleRoleChange"
-        disabled="@isLoading"
-        class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite"
-    >
-        <option value="">Select Role</option>
-        @foreach (var role in rolePrompts.Keys)
-        {
-            <option value="@role">@role</option>
-        }
-    </select>
+    <ComboBox Items="rolePrompts.Keys.ToList()" OnItemSelected="HandleRoleChange" />
     @if (!string.IsNullOrEmpty(selectedRole))
     {
         <GetAppearance
@@ -39,15 +28,12 @@
     private string selectedRole = "";
     private bool isLoading = false;
 
-    private async Task HandleRoleChange(ChangeEventArgs e)
+    private async Task HandleRoleChange(string value)
     {
-        if (e.Value != null)
+        selectedRole = value;
+        if (OnRoleSelected.HasDelegate && rolePrompts.TryGetValue(selectedRole, out var prompt))
         {
-            selectedRole = e.Value?.ToString() ?? "Helpful Assistant";
-            if (OnRoleSelected.HasDelegate && rolePrompts.TryGetValue(selectedRole, out var prompt))
-            {
-                await OnRoleSelected.InvokeAsync(prompt);
-            }
+            await OnRoleSelected.InvokeAsync(prompt);
         }
     }
 

@@ -9,7 +9,7 @@
     }
     @foreach (var chat in Chats)
     {
-        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md @GetMessageCssClass(chat.Role)">
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm-max-w-md @GetMessageCssClass(chat.Role)">
             @if (chat.IsImage)
             {
                 @if (chat.IsLoading)

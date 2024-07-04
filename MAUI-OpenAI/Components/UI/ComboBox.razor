@@ -1,0 +1,70 @@
+<div class="relative">
+    <input
+        type="text"
+        @bind="SearchText"
+        @bind:event="oninput"
+        @onfocus="ShowDropdown"
+        @onblur="HideDropdown"
+        @onkeydown="HandleKeyDown"
+        class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full"
+        placeholder="Select Role"
+    />
+    @if (DropdownVisible && FilteredItems.Any())
+    {
+        <ul class="absolute z-10 mt-1 bg-darkblue border border-gray rounded w-full max-h-40 overflow-y-auto">
+            @foreach (var item in FilteredItems)
+            {
+                <li
+                    @onclick="() => SelectItem(item)"
+                    class="p-2 cursor-pointer hover:bg-gray-700 text-brightWhite"
+                >
+                    @item
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<string> Items { get; set; } = new List<string>();
+
+    [Parameter]
+    public EventCallback<string> OnItemSelected { get; set; }
+
+    private string SearchText { get; set; } = string.Empty;
+    private bool DropdownVisible { get; set; } = false;
+    private List<string> FilteredItems => string.IsNullOrWhiteSpace(SearchText) 
+        ? Items 
+        : Items.Where(item => item.Contains(SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
+
+    private void ShowDropdown()
+    {
+        DropdownVisible = true;
+    }
+
+    private void HideDropdown()
+    {
+        Task.Run(async () =>
+        {
+            await Task.Delay(200); // Delay to allow click event on items
+            DropdownVisible = false;
+            StateHasChanged();
+        });
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && FilteredItems.Any())
+        {
+            await SelectItem(FilteredItems.First());
+        }
+    }
+
+    private async Task SelectItem(string item)
+    {
+        SearchText = item;
+        DropdownVisible = false;
+        await OnItemSelected.InvokeAsync(item);
+    }
+}

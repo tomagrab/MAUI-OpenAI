@@ -628,6 +628,10 @@ video {
   z-index: 50;
 }
 
+.z-10 {
+  z-index: 10;
+}
+
 .my-2 {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -647,6 +651,10 @@ video {
 
 .mr-auto {
   margin-right: auto;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
 }
 
 .flex {
@@ -675,6 +683,10 @@ video {
 
 .h-full {
   height: 100%;
+}
+
+.max-h-40 {
+  max-height: 10rem;
 }
 
 .w-0 {
@@ -786,6 +798,10 @@ video {
 
 .overflow-hidden {
   overflow: hidden;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
 }
 
 .rounded {
@@ -1500,6 +1516,7 @@ hr {
 
 .markdown-content blockquote {
   margin-bottom: 1rem;
+  max-width: 100%;
   border-radius: 0.25rem;
   border-left-width: 4px;
   --tw-bg-opacity: 1;
@@ -1511,6 +1528,7 @@ hr {
 }
 
 .markdown-content pre {
+  max-width: 100%;
   overflow-x: auto;
   border-radius: 0.25rem;
   border-width: 1px;
@@ -1524,6 +1542,7 @@ hr {
 }
 
 .markdown-content code {
+  max-width: 100%;
   border-radius: 0.25rem;
   --tw-bg-opacity: 1;
   background-color: rgb(22 27 34 / var(--tw-bg-opacity));
@@ -1535,6 +1554,7 @@ hr {
 }
 
 .markdown-content pre code {
+  max-width: 100%;
   border-radius: 0px;
   background-color: transparent;
   padding: 0px;
