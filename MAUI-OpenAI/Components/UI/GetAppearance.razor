@@ -25,7 +25,7 @@
     {
         if (!string.IsNullOrEmpty(Role) && !string.IsNullOrEmpty(Description))
         {
-            var promptForDalle = $"Given this role and description, create a prompt for DALLE-3 to create an image of the role's appearance:\nRole: {Role}\nDescription: {Description}";
+            var promptForDalle = $"Given this role and description, respond with ONLY a prompt for DALLE-3 to create an image of the role's appearance. Do not include any additional text or explanation. Role: {Role}. Description: {Description}.";
 
             try
             {
@@ -58,6 +58,7 @@
         }
     }
 
+
     private async Task<string> GeneratePromptAsync(string inputPrompt)
     {
         string result = "";
@@ -65,6 +66,19 @@
         {
             result += update;
         });
+
+        // Check if the response contains opening and closing quotes
+        if (result.Contains("\""))
+        {
+            // Extract the text between the quotes
+            var match = System.Text.RegularExpressions.Regex.Match(result, "\"([^\"]*)\"");
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+        }
+
+        // Return the full response if no quotes are found
         return result;
     }
 }
