@@ -14,5 +14,6 @@ namespace MAUI_OpenAI.Models
         public string Role { get; set; }
         public bool IsImage { get; set; }
         public bool IsLoading { get; set; }
+        public string HtmlContent { get; set; } = string.Empty;
     }
 }

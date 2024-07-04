@@ -19,7 +19,7 @@ namespace MAUI_OpenAI.Services
             _tokenizerService = tokenizerService;
         }
 
-        public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, string message, Action<string> onUpdate)
+        public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, string message, Action<string> onUpdate, Action onComplete)
         {
             try
             {
@@ -49,6 +49,8 @@ namespace MAUI_OpenAI.Services
                         onUpdate(updatePart.Text);
                     }
                 }
+
+                onComplete();
             }
             catch (ClientResultException cre)
             {
@@ -63,6 +65,8 @@ namespace MAUI_OpenAI.Services
                 onUpdate($"An unexpected error occurred while processing the request: {ex.Message}");
             }
         }
+
+
 
         public async Task GenerateImageAsync(string prompt, Action<byte[]> onImageGenerated, Action<string> onError)
         {

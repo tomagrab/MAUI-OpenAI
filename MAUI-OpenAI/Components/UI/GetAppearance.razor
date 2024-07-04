@@ -58,20 +58,26 @@
         }
     }
 
-
     private async Task<string> GeneratePromptAsync(string inputPrompt)
     {
         string result = "";
         await OpenAIService.GetChatCompletionStreamingAsync(new List<ChatMessageModel>(), inputPrompt, (update) =>
         {
             result += update;
+        }, () =>
+        {
+            result = ExtractDallePrompt(result);
         });
 
+        return result;
+    }
+
+    private string ExtractDallePrompt(string response)
+    {
         // Check if the response contains opening and closing quotes
-        if (result.Contains("\""))
+        if (response.Contains("\""))
         {
-            // Extract the text between the quotes
-            var match = System.Text.RegularExpressions.Regex.Match(result, "\"([^\"]*)\"");
+            var match = System.Text.RegularExpressions.Regex.Match(response, "\"([^\"]*)\"");
             if (match.Success)
             {
                 return match.Groups[1].Value;
@@ -79,6 +85,6 @@
         }
 
         // Return the full response if no quotes are found
-        return result;
+        return response;
     }
 }

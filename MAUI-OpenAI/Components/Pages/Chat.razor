@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject IOpenAIService OpenAIService
+@inject IMarkdownService MarkdownService
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <RoleSelector
@@ -101,6 +102,9 @@
                     {
                         UpdateErrorResponse($"Error updating chat response: {ex.Message}");
                     }
+                }, () =>
+                {
+                    CompleteResponse(chats.Last());
                 });
             }
         }
@@ -114,6 +118,20 @@
             StateHasChanged();
         }
     }
+
+        private void CompleteResponse(ChatMessageModel chatMessage)
+        {
+            try
+            {
+                chatMessage.HtmlContent = MarkdownService.ConvertToHtml(chatMessage.Message);
+                InvokeAsync(StateHasChanged);
+            }
+            catch (Exception ex)
+            {
+                HandleError($"Error completing response: {ex.Message}");
+            }
+        }
+
 
     private async Task HandleRoleSelected(string newRolePrompt)
     {

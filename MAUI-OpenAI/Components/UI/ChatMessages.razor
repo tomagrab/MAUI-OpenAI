@@ -3,13 +3,13 @@
 <div id="chatContainer" class="flex-grow p-4 overflow-auto">
     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
     {
-        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md bg-red text-brightWhite">
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm-max-w-md bg-red text-brightWhite">
             @ErrorMessage
         </div>
     }
     @foreach (var chat in Chats)
     {
-        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md @GetMessageCssClass(chat.Role)">
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md @GetMessageCssClass(chat.Role)">
             @if (chat.IsImage)
             {
                 @if (chat.IsLoading)
@@ -25,15 +25,24 @@
             }
             else
             {
-                <p>
-                    @chat.Message
-                </p>
+                @if (!string.IsNullOrEmpty(chat.HtmlContent))
+                {
+                    <div class="markdown-content">
+                        @((MarkupString)chat.HtmlContent)
+                    </div>
+                }
+                else
+                {
+                    <p>
+                        @chat.Message
+                    </p>
+                }
             }
         </div>
     }
     @if (IsLoading)
     {
-        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md bg-green text-brightWhite self-start mr-auto text-left">
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md bg-green text-brightWhite self-start mr-auto text-left">
             <div class="w-40 h-30 bg-gray-300 rounded-lg flex items-center justify-center">
                 <i class="fa fa-spinner custom-spin text-4xl text-gray-600"></i>
             </div>
