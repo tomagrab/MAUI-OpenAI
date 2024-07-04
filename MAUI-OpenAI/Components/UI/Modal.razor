@@ -42,10 +42,11 @@
     private string ErrorMessage { get; set; } = string.Empty;
     private bool isImageSaved = false;
     private bool isImageCopied = false;
+    private bool isSaveCancelled = false;
 
-    private string SaveImageIconClass => isImageSaved ? "fas fa-check text-green-500 animate-iconChange" : "fas fa-save animate-iconChange";
+    private string SaveImageIconClass => isImageSaved ? "fas fa-check text-green-500 animate-iconChange" : isSaveCancelled ? "fas fa-times text-red-500 animate-iconChange" : "fas fa-save animate-iconChange";
     private string CopyImageIconClass => isImageCopied ? "fas fa-check text-green-500 animate-iconChange" : "fas fa-copy animate-iconChange";
-    private string SaveImageText => isImageSaved ? "Image Saved" : "Save Image";
+    private string SaveImageText => isImageSaved ? "Image Saved" : isSaveCancelled ? "Save Cancelled" : "Save Image";
     private string CopyImageText => isImageCopied ? "Image Copied" : "Copy Image";
 
     protected override void OnInitialized()
@@ -90,6 +91,7 @@
                 await ImageSaveService.SaveImageAsync(ImageSrc, fileName);
 
                 isImageSaved = true;
+                isSaveCancelled = false;
                 StateHasChanged();
 
                 await Task.Delay(2000);
@@ -103,7 +105,19 @@
         }
         catch (Exception ex)
         {
-            HandleError($"Error saving image: {ex.Message}");
+            if (ex.Message.Contains("Operation cancelled"))
+            {
+                isSaveCancelled = true;
+                StateHasChanged();
+
+                await Task.Delay(2000);
+                isSaveCancelled = false;
+                StateHasChanged();
+            }
+            else
+            {
+                HandleError($"Error saving image: {ex.Message}");
+            }
         }
     }
 
