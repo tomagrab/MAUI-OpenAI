@@ -10,7 +10,6 @@ namespace MAUI_OpenAI.Services
             }
             catch (Exception ex)
             {
-                // Handle unexpected errors gracefully and provide a default value
                 return $"Unknown Platform (Error: {ex.Message})";
             }
         }

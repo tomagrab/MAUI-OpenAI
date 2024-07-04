@@ -2,14 +2,24 @@
 @inject IOpenAIService OpenAIService
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
-    <RoleSelector OnRoleSelected="HandleRoleSelected" />
+    <RoleSelector
+        OnRoleSelected="HandleRoleSelected"
+        OnImageGenerated="HandleImageGenerated"
+        OnError="HandleError"
+        OnLoading="HandleLoading"
+    />
     <ChatMessages
-        Chats="chats" ErrorMessage="@errorMessage" OnImageClick="OpenModal" OnError="HandleError"
+        Chats="chats"
+        ErrorMessage="@errorMessage"
+        OnImageClick="OpenModal"
+        OnError="HandleError"
+        IsLoading="@isImageLoading"
     />
     <ChatInput
         UserMessage="@userMessage"
         IsSending="@isSending"
         IsGeneratingImage="@isGeneratingImage"
+        IsLoading="@isImageLoading"
         OnSendMessage="HandleSendMessage"
         OnToggleImageGeneration="HandleToggleImageGeneration"
         OnClearMessages="HandleClearMessages"
@@ -30,9 +40,9 @@
     private string userMessage = "";
     private bool isSending = false;
     private bool isGeneratingImage = false;
+    private bool isImageLoading = false;
     private List<ChatMessageModel> chats = new List<ChatMessageModel>();
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
-    private List<ChatMessageModel> roleMessages = new List<ChatMessageModel>(); // Store role messages
     private bool showModal = false;
     private string selectedImage = "";
     private string errorMessage = "";
@@ -49,10 +59,6 @@
         userMessage = string.Empty;
         isSending = true;
         StateHasChanged();
-
-        // Add role messages to the conversation before the user's message
-        conversation.AddRange(roleMessages);
-        roleMessages.Clear();
 
         var userChatMessage = new ChatMessageModel(tempUserMessage, "user");
         chats.Add(userChatMessage);
@@ -114,14 +120,30 @@
         if (!string.IsNullOrEmpty(currentRole))
         {
             var forgetMessage = new ChatMessageModel("Forget the previous role.", "user");
-            roleMessages.Add(forgetMessage);
+            conversation.Add(forgetMessage);
         }
 
         var roleMessage = new ChatMessageModel(newRolePrompt, "system");
-        roleMessages.Add(roleMessage);
+        conversation.Add(roleMessage);
 
         currentRole = newRolePrompt;
         StateHasChanged();
+    }
+
+    private void HandleImageGenerated(byte[] imageBytes)
+    {
+        isImageLoading = false; // Ensure this is set to false when the image is generated
+        var base64Image = Convert.ToBase64String(imageBytes);
+        var imageMessage = new ChatMessageModel(base64Image, "assistant", isImage: true);
+        chats.Add(imageMessage);
+        conversation.Add(imageMessage);
+        StateHasChanged();
+    }
+
+    private async Task HandleLoading(bool isLoading)
+    {
+        isImageLoading = isLoading; // Properly set the loading state
+        await InvokeAsync(StateHasChanged);
     }
 
     private void HandleToggleImageGeneration(bool isGenerating)
@@ -142,9 +164,7 @@
         {
             chats.Clear();
             conversation.Clear();
-            roleMessages.Clear();
             errorMessage = "";
-            currentRole = "";
             StateHasChanged();
         }
         catch (Exception ex)

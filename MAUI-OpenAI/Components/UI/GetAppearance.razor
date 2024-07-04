@@ -1,0 +1,68 @@
+@inject IOpenAIService OpenAIService
+
+@if (!string.IsNullOrEmpty(Role) && !string.IsNullOrEmpty(Description))
+{
+    <button class="btn btn-base btn-primary" @onclick="HandleGetAppearance">
+        Get Appearance
+    </button>
+}
+
+@code {
+    [Parameter]
+    public string? Role { get; set; }
+    [Parameter]
+    public string? Description { get; set; }
+    [Parameter]
+    public EventCallback<byte[]> OnImageGenerated { get; set; }
+    [Parameter]
+    public EventCallback<string> OnError { get; set; }
+    [Parameter]
+    public EventCallback<bool> OnLoading { get; set; }
+
+    private async Task HandleGetAppearance()
+    {
+        if (!string.IsNullOrEmpty(Role) && !string.IsNullOrEmpty(Description))
+        {
+            var promptForDalle = $"Given this role and description, create a prompt for DALLE-3 to create an image of the role's appearance:\nRole: {Role}\nDescription: {Description}";
+
+            try
+            {
+                await OnLoading.InvokeAsync(true);
+
+                string dallePrompt = await GeneratePromptAsync(promptForDalle);
+                if (!string.IsNullOrEmpty(dallePrompt))
+                {
+                    await OpenAIService.GenerateImageAsync(dallePrompt, async (imageBytes) =>
+                    {
+                        await OnImageGenerated.InvokeAsync(imageBytes);
+                    }, async (error) =>
+                    {
+                        await OnError.InvokeAsync(error);
+                    });
+                }
+                else
+                {
+                    await OnError.InvokeAsync("Failed to generate DALLE prompt.");
+                }
+            }
+            catch (Exception ex)
+            {
+                await OnError.InvokeAsync($"Error generating appearance: {ex.Message}");
+            }
+            finally
+            {
+                await OnLoading.InvokeAsync(false);
+            }
+        }
+    }
+
+    private async Task<string> GeneratePromptAsync(string inputPrompt)
+    {
+        string result = "";
+        await OpenAIService.GetChatCompletionStreamingAsync(new List<ChatMessageModel>(), inputPrompt, (update) =>
+        {
+            result += update;
+        });
+        return result;
+    }
+}

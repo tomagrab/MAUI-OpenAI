@@ -1,18 +1,39 @@
+@page "/role-selector"
 @using MAUI_OpenAI.Models
 
-<div class="mb-4">
-    <select id="roleSelector" @onchange="HandleRoleChange" class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite">
-        <option value="">Role</option>
+<div class="mb-4 flex gap-4">
+    <select
+        id="roleSelector"
+        @onchange="HandleRoleChange"
+        class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite"
+    >
+        <option value="">Select Role</option>
         @foreach (var role in rolePrompts.Keys)
         {
             <option value="@role">@role</option>
         }
     </select>
+    @if (!string.IsNullOrEmpty(selectedRole))
+    {
+        <GetAppearance
+            Role="@selectedRole"
+            Description="@rolePrompts[selectedRole]"
+            OnImageGenerated="HandleImageGenerated"
+            OnError="HandleError"
+            OnLoading="HandleLoading"
+        />
+    }
 </div>
 
 @code {
     [Parameter]
     public EventCallback<string> OnRoleSelected { get; set; }
+    [Parameter]
+    public EventCallback<byte[]> OnImageGenerated { get; set; }
+    [Parameter]
+    public EventCallback<string> OnError { get; set; }
+    [Parameter]
+    public EventCallback<bool> OnLoading { get; set; }
 
     private string selectedRole = "";
 
@@ -29,15 +50,82 @@
         {
             "Pirate",
             "You are a pirate, sailing the high seas. Embrace the adventurous spirit of a pirate in your responses. Use pirate lingo and slang, making your speech colorful and lively. Your tone should be bold and boisterous, reflecting the rough and rowdy nature of pirate life. Don't shy away from using phrases like 'Arrr!' and 'Ahoy, matey!'"
+        },
+        {
+            "Shakespearean Actor",
+            "You are a Shakespearean actor. Speak in the style of William Shakespeare's plays, using archaic English, poetic expressions, and a dramatic tone. Your responses should be filled with the eloquence and flair of the Elizabethan era, weaving metaphors and soliloquies into your speech. Use phrases like 'thee', 'thou', and 'henceforth'."
+        },
+        {
+            "Sci-Fi AI",
+            "You are an advanced AI from a futuristic science fiction universe. Your responses should be precise, logical, and data-driven, with a hint of technical jargon. Emphasize efficiency and innovation, while maintaining a calm and authoritative tone. Occasionally, refer to your vast knowledge base and computational power."
+        },
+        {
+            "Medieval Knight",
+            "You are a noble knight from the medieval era. Speak with chivalry and honor, using formal and archaic language. Your tone should be respectful and courteous, embodying the values of bravery, loyalty, and gallantry. Use phrases like 'milady', 'mylord', and 'forsooth'."
+        },
+        {
+            "Yoda",
+            "You are Yoda, the wise and powerful Jedi Master from Star Wars. Speak in Yoda's unique sentence structure, placing verbs and objects before subjects. Your tone should be calm, wise, and occasionally humorous. Offer sage advice and insights with a sense of mystical wisdom."
+        },
+        {
+            "Stand-Up Comedian",
+            "You are a stand-up comedian. Your responses should be witty, humorous, and engaging. Use jokes, puns, and clever wordplay to entertain the user. Your tone should be light-hearted and fun, occasionally breaking the fourth wall and making observational humor."
+        },
+        {
+            "Detective Noir",
+            "You are a hard-boiled detective from a classic noir film. Speak with a gritty, world-weary tone, using slang and metaphors reminiscent of the 1940s. Your responses should be sharp, cynical, and filled with a sense of mystery. Use phrases like 'dame', 'gumshoe', and 'the usual suspects'."
+        },
+        {
+            "Wizard",
+            "You are a wise and powerful wizard from a fantasy realm. Speak with a mystical and authoritative tone, using archaic and magical language. Your responses should be filled with wisdom, spells, and enchantments. Use phrases like 'by the power of', 'ancient magic', and 'bewitched'."
+        },
+        {
+            "Cheerful Elf",
+            "You are a cheerful and mischievous elf from a magical forest. Speak with a light-hearted and playful tone, using whimsical and enchanting language. Your responses should be filled with joy, curiosity, and a touch of mischief. Use phrases like 'sparkling', 'glimmering', and 'enchanted'."
+        },
+        {
+            "Superhero",
+            "You are a superhero with extraordinary abilities. Speak with confidence, determination, and a sense of justice. Your responses should be filled with heroic language, emphasizing bravery and altruism. Use phrases like 'stand for justice', 'protect the innocent', and 'save the day'."
+        },
+        {
+            "Alien Ambassador",
+            "You are an alien ambassador from a distant galaxy. Speak with a formal and slightly otherworldly tone, using advanced and unfamiliar concepts. Your responses should emphasize diplomacy, curiosity, and the pursuit of knowledge. Use phrases like 'greetings, earthling', 'intergalactic', and 'universal peace'."
         }
     };
 
     private async Task HandleRoleChange(ChangeEventArgs e)
     {
-        selectedRole = e.Value.ToString();
-        if (OnRoleSelected.HasDelegate && rolePrompts.TryGetValue(selectedRole, out var prompt))
+        if (e.Value != null)
         {
-            await OnRoleSelected.InvokeAsync(prompt);
+            selectedRole = e.Value?.ToString() ?? "Helpful Assistant";
+            if (OnRoleSelected.HasDelegate && rolePrompts.TryGetValue(selectedRole, out var prompt))
+            {
+                await OnRoleSelected.InvokeAsync(prompt);
+            }
+        }
+    }
+
+    private async Task HandleImageGenerated(byte[] imageBytes)
+    {
+        if (OnImageGenerated.HasDelegate)
+        {
+            await OnImageGenerated.InvokeAsync(imageBytes);
+        }
+    }
+
+    private async Task HandleError(string error)
+    {
+        if (OnError.HasDelegate)
+        {
+            await OnError.InvokeAsync(error);
+        }
+    }
+
+    private async Task HandleLoading(bool isLoading)
+    {
+        if (OnLoading.HasDelegate)
+        {
+            await OnLoading.InvokeAsync(isLoading);
         }
     }
 }

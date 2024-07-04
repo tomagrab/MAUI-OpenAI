@@ -29,6 +29,14 @@
             }
         </div>
     }
+    @if (IsLoading)
+    {
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md bg-green text-brightWhite self-start mr-auto text-left">
+            <div class="w-40 h-30 bg-gray-300 rounded-lg flex items-center justify-center">
+                <i class="fa fa-spinner custom-spin text-4xl text-gray-600"></i>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
@@ -36,12 +44,15 @@
     public List<ChatMessageModel> Chats { get; set; } = new List<ChatMessageModel>();
 
     [Parameter]
-    public string ErrorMessage { get; set; } = string.Empty; // Ensure default value is an empty string
+    public string ErrorMessage { get; set; } = string.Empty;
 
     [Parameter]
     public EventCallback<string> OnImageClick { get; set; }
     [Parameter]
-    public EventCallback<string> OnError { get; set; } // New parameter for error callback
+    public EventCallback<string> OnError { get; set; }
+
+    [Parameter]
+    public bool IsLoading { get; set; }
 
     private string GetMessageCssClass(string role)
     {
