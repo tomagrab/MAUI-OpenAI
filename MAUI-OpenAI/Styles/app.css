@@ -265,6 +265,30 @@ hr {
   @apply border-red focus:ring-red;
 }
 
+.markdown-content ol {
+  @apply list-decimal my-0 mb-4 ml-8;
+}
+
+.markdown-content ul {
+  @apply list-disc my-0 mb-4 ml-8;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 pl-4 text-brightBlue bg-darkblue mb-4 rounded px-2;
+}
+
+.markdown-content pre {
+  @apply bg-darkblue border border-border text-brightWhite p-2 overflow-x-auto rounded font-mono;
+}
+
+.markdown-content code {
+  @apply bg-darkblue rounded px-1 text-brightCyan font-mono;
+}
+
+.markdown-content pre code {
+  @apply bg-transparent p-0 rounded-none text-inherit;
+}
+
 p {
   @apply text-base md:text-lg lg:text-xl;
 }

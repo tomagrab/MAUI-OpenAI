@@ -1482,6 +1482,65 @@ hr {
   --tw-ring-color: rgb(255 123 114 / var(--tw-ring-opacity));
 }
 
+.markdown-content ol {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-bottom: 1rem;
+  margin-left: 2rem;
+  list-style-type: decimal;
+}
+
+.markdown-content ul {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-bottom: 1rem;
+  margin-left: 2rem;
+  list-style-type: disc;
+}
+
+.markdown-content blockquote {
+  margin-bottom: 1rem;
+  border-radius: 0.25rem;
+  border-left-width: 4px;
+  --tw-bg-opacity: 1;
+  background-color: rgb(22 27 34 / var(--tw-bg-opacity));
+  padding-right: 0.5rem;
+  padding-left: 1rem;
+  --tw-text-opacity: 1;
+  color: rgb(121 192 255 / var(--tw-text-opacity));
+}
+
+.markdown-content pre {
+  overflow-x: auto;
+  border-radius: 0.25rem;
+  border-width: 1px;
+  border-color: hsl(var(--border));
+  --tw-bg-opacity: 1;
+  background-color: rgb(22 27 34 / var(--tw-bg-opacity));
+  padding: 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --tw-text-opacity: 1;
+  color: rgb(240 246 252 / var(--tw-text-opacity));
+}
+
+.markdown-content code {
+  border-radius: 0.25rem;
+  --tw-bg-opacity: 1;
+  background-color: rgb(22 27 34 / var(--tw-bg-opacity));
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --tw-text-opacity: 1;
+  color: rgb(86 212 221 / var(--tw-text-opacity));
+}
+
+.markdown-content pre code {
+  border-radius: 0px;
+  background-color: transparent;
+  padding: 0px;
+  color: inherit;
+}
+
 p {
   font-size: 1rem;
   line-height: 1.5rem;
@@ -1598,12 +1657,6 @@ p {
 
 .disabled\:opacity-50:disabled {
   opacity: 0.5;
-}
-
-@media (min-width: 640px) {
-  .sm\:max-w-md {
-    max-width: 28rem;
-  }
 }
 
 @media (min-width: 768px) {
