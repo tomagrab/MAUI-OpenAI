@@ -132,7 +132,7 @@
 
     private void HandleImageGenerated(byte[] imageBytes)
     {
-        isImageLoading = false; // Ensure this is set to false when the image is generated
+        isImageLoading = false;
         var base64Image = Convert.ToBase64String(imageBytes);
         var imageMessage = new ChatMessageModel(base64Image, "assistant", isImage: true);
         chats.Add(imageMessage);
@@ -142,7 +142,7 @@
 
     private async Task HandleLoading(bool isLoading)
     {
-        isImageLoading = isLoading; // Properly set the loading state
+        isImageLoading = isLoading;
         await InvokeAsync(StateHasChanged);
     }
 

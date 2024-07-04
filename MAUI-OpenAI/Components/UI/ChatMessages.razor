@@ -1,4 +1,6 @@
-<div class="flex-grow p-4 overflow-auto">
+@inject IJSRuntime JS
+
+<div id="chatContainer" class="flex-grow p-4 overflow-auto">
     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
     {
         <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md bg-red text-brightWhite">
@@ -53,6 +55,11 @@
 
     [Parameter]
     public bool IsLoading { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeVoidAsync("scrollToBottom", "chatContainer");
+    }
 
     private string GetMessageCssClass(string role)
     {
