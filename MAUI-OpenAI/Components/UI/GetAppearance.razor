@@ -2,7 +2,7 @@
 
 @if (!string.IsNullOrEmpty(Role) && !string.IsNullOrEmpty(Description))
 {
-    <button class="btn btn-base btn-primary" @onclick="HandleGetAppearance">
+    <button class="btn btn-base btn-primary" @onclick="HandleGetAppearance" disabled="@IsLoading">
         Get Appearance
     </button>
 }
@@ -18,6 +18,8 @@
     public EventCallback<string> OnError { get; set; }
     [Parameter]
     public EventCallback<bool> OnLoading { get; set; }
+    [Parameter]
+    public bool IsLoading { get; set; } // New parameter to disable the button
 
     private async Task HandleGetAppearance()
     {
