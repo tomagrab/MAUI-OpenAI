@@ -9,9 +9,8 @@
         </div>
         <textarea
             @ref="textAreaRef"
-            value="@UserMessage"
+            @bind="UserMessage"
             @oninput="HandleInput"
-            @onkeydown="HandleKeyDown"
             @onfocus="HandleInputFocus"
             @onblur="HandleInputBlur"
             disabled="@IsInputDisabled"
@@ -66,7 +65,7 @@
     [Parameter]
     public bool IsGeneratingImage { get; set; }
     [Parameter]
-    public bool IsLoading { get; set; } = false; // Ensure this is false by default
+    public bool IsLoading { get; set; } = false;
     [Parameter]
     public EventCallback<string> OnSendMessage { get; set; }
     [Parameter]
@@ -113,6 +112,7 @@
                 tokenCount = 0;
                 HandleError("");
                 shouldRegainFocus = true;
+                StateHasChanged();
                 await OnSendMessage.InvokeAsync(tempMessage);
             }
             else
@@ -164,21 +164,6 @@
         catch (Exception ex)
         {
             HandleError($"Error toggling image generation: {ex.Message}");
-        }
-    }
-
-    private async Task HandleKeyDown(KeyboardEventArgs args)
-    {
-        try
-        {
-            if ((args.Key == "Enter" || args.Key == "Return") && !args.ShiftKey && !IsSending)
-            {
-                await HandleSubmit();
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error handling key down event: {ex.Message}");
         }
     }
 
