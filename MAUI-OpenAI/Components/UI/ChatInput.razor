@@ -1,5 +1,6 @@
 @inject IPlatformService PlatformService
 @inject ITokenizerService TokenizerService
+@inject IJSRuntime JS
 
 <div class="@GetFormContainerCssClass() relative">
     <form @onsubmit="HandleSubmit" class="flex w-full relative">
@@ -7,6 +8,7 @@
             <span class="@(tokenCount >= MaxTokens ? "text-red" : "text-brightWhite")">@tokenCount / @MaxTokens Tokens</span>
         </div>
         <textarea
+            @ref="textAreaRef"
             value="@UserMessage"
             @oninput="HandleInput"
             @onkeydown="HandleKeyDown"
@@ -54,6 +56,7 @@
     private const int MaxTokens = 1000;
     private const double CharactersPerToken = 3.5;
     private int tokenCount = 0;
+    private ElementReference textAreaRef;
 
     [Parameter]
     public string? UserMessage { get; set; }
@@ -88,6 +91,14 @@
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!isFocused && !IsSending && !IsLoading)
+        {
+            await FocusTextAreaAsync();
+        }
+    }
+
     private bool IsInputDisabled => IsSending || IsLoading || tokenCount > MaxTokens;
 
     private async Task HandleSubmit()
@@ -96,10 +107,11 @@
         {
             if (OnSendMessage.HasDelegate)
             {
-                await OnSendMessage.InvokeAsync(UserMessage);
+                string tempMessage = UserMessage ?? string.Empty;
                 UserMessage = string.Empty;
                 tokenCount = 0;
                 HandleError("");
+                await OnSendMessage.InvokeAsync(tempMessage);
             }
             else
             {
@@ -157,7 +169,7 @@
     {
         try
         {
-            if (args.Key == "Enter" && !args.ShiftKey && !IsSending)
+            if ((args.Key == "Enter" || args.Key == "Return") && !args.ShiftKey && !IsSending)
             {
                 await HandleSubmit();
             }
@@ -220,5 +232,10 @@
     {
         UserMessage = e.Value.ToString();
         tokenCount = TokenizerService.EstimateTokenCount(UserMessage);
+    }
+
+    private async Task FocusTextAreaAsync()
+    {
+        await JS.InvokeVoidAsync("focusElement", textAreaRef);
     }
 }
