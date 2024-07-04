@@ -1,5 +1,6 @@
 @inject IPlatformService PlatformService
 @inject IImageSaveService ImageSaveService
+@inject IJSRuntime JS
 
 <div class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 backdrop-blur-md" @onclick="CloseModal">
     <div class="relative bg-darkblue bg-opacity-80 backdrop-blur-lg rounded-lg overflow-hidden shadow-lg w-full max-w-2xl" @onclick:stopPropagation="true">
@@ -7,6 +8,9 @@
             <div class="flex space-x-2">
                 <button class="text-white hover:text-gray-900" @onclick="SaveImage">
                     <i class="fas fa-save"></i> Save Image
+                </button>
+                <button class="text-white hover:text-gray-900" @onclick="CopyImage">
+                    <i class="fas fa-copy"></i> Copy Image
                 </button>
             </div>
             <button class="text-white hover:text-gray-900" @onclick="CloseModal">
@@ -92,6 +96,29 @@
         catch (Exception ex)
         {
             HandleError($"Error saving image: {ex.Message}");
+        }
+    }
+
+    private async Task CopyImage()
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(ImageSrc))
+            {
+                await JS.InvokeVoidAsync("copyImageToClipboard", ImageSrc);
+                if (OnSuccess.HasDelegate)
+                {
+                    await OnSuccess.InvokeAsync("Image copied to clipboard successfully.");
+                }
+            }
+            else
+            {
+                HandleError("No image to copy.");
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error copying image: {ex.Message}");
         }
     }
 }
