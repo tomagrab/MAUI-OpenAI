@@ -2,7 +2,13 @@ namespace MAUI_OpenAI.Models
 {
     public class ChatMessageModel
     {
-        public ChatMessageModel(string message, string role, bool isImage = false, bool isLoading = false)
+        public ChatMessageModel
+        (
+            string message,
+            string role,
+            bool isImage = false,
+            bool isLoading = false
+        )
         {
             Message = message;
             Role = role;

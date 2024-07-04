@@ -1,10 +1,11 @@
-<div class="relative">
+@inject IJSRuntime JS
+
+<div class="relative" @ref="comboBoxRef">
     <input
         type="text"
         @bind="SearchText"
         @bind:event="oninput"
         @onfocus="ShowDropdown"
-        @onblur="HideDropdown"
         @onkeydown="HandleKeyDown"
         class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full"
         placeholder="Select Role"
@@ -15,8 +16,8 @@
             @foreach (var item in FilteredItems)
             {
                 <li
-                    @onclick="() => SelectItem(item)"
                     class="p-2 cursor-pointer hover:bg-gray-700 text-brightWhite"
+                    @onclick="() => SelectItem(item)"
                 >
                     @item
                 </li>
@@ -34,9 +35,29 @@
 
     private string SearchText { get; set; } = string.Empty;
     private bool DropdownVisible { get; set; } = false;
-    private List<string> FilteredItems => string.IsNullOrWhiteSpace(SearchText) 
-        ? Items 
+    private ElementReference comboBoxRef;
+
+    private List<string> FilteredItems => string.IsNullOrWhiteSpace(SearchText)
+        ? Items
         : Items.Where(item => item.Contains(SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("registerOutsideClick", DotNetObjectReference.Create(this));
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnOutsideClick(double clientX, double clientY)
+    {
+        var rect = await JS.InvokeAsync<BoundingClientRect>("getBoundingClientRect", comboBoxRef);
+        if (clientX < rect.Left || clientX > rect.Right || clientY < rect.Top || clientY > rect.Bottom)
+        {
+            HideDropdown();
+        }
+    }
 
     private void ShowDropdown()
     {
@@ -45,12 +66,8 @@
 
     private void HideDropdown()
     {
-        Task.Run(async () =>
-        {
-            await Task.Delay(200); // Delay to allow click event on items
-            DropdownVisible = false;
-            StateHasChanged();
-        });
+        DropdownVisible = false;
+        StateHasChanged();
     }
 
     private async Task HandleKeyDown(KeyboardEventArgs e)
@@ -66,5 +83,13 @@
         SearchText = item;
         DropdownVisible = false;
         await OnItemSelected.InvokeAsync(item);
+    }
+
+    private class BoundingClientRect
+    {
+        public double Left { get; set; }
+        public double Right { get; set; }
+        public double Top { get; set; }
+        public double Bottom { get; set; }
     }
 }
