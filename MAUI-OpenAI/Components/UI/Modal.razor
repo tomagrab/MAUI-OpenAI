@@ -1,7 +1,5 @@
 @inject IPlatformService PlatformService
-@inject CommunityToolkit.Maui.Storage.IFileSaver FileSaver
-@using CommunityToolkit.Maui.Storage
-@using Microsoft.Maui.Storage
+@inject IImageSaveService ImageSaveService
 
 <div class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 backdrop-blur-md" @onclick="CloseModal">
     <div class="relative bg-darkblue bg-opacity-80 backdrop-blur-lg rounded-lg overflow-hidden shadow-lg w-full max-w-2xl" @onclick:stopPropagation="true">
@@ -78,23 +76,12 @@
         {
             if (!string.IsNullOrEmpty(ImageSrc))
             {
-                var base64Data = ImageSrc.Substring(ImageSrc.IndexOf(',') + 1);
-                var imageBytes = Convert.FromBase64String(base64Data);
-
-                using var stream = new MemoryStream(imageBytes);
                 var fileName = $"image_{DateTime.Now:yyyyMMdd_HHmmss}.png";
-                var result = await FileSaver.SaveAsync(fileName, stream, default);
+                await ImageSaveService.SaveImageAsync(ImageSrc, fileName);
 
-                if (result.IsSuccessful)
+                if (OnSuccess.HasDelegate)
                 {
-                    if (OnSuccess.HasDelegate)
-                    {
-                        await OnSuccess.InvokeAsync("Image saved successfully.");
-                    }
-                }
-                else
-                {
-                    HandleError($"Error saving image: {result.Exception?.Message ?? "Unknown error"}");
+                    await OnSuccess.InvokeAsync("Image saved successfully.");
                 }
             }
             else

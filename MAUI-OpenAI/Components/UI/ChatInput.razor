@@ -57,6 +57,7 @@
     private const double CharactersPerToken = 3.5;
     private int tokenCount = 0;
     private ElementReference textAreaRef;
+    private bool shouldRegainFocus = false;
 
     [Parameter]
     public string? UserMessage { get; set; }
@@ -93,7 +94,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!isFocused && !IsSending && !IsLoading)
+        if (shouldRegainFocus && !isFocused && !IsSending && !IsLoading)
         {
             await FocusTextAreaAsync();
         }
@@ -111,6 +112,7 @@
                 UserMessage = string.Empty;
                 tokenCount = 0;
                 HandleError("");
+                shouldRegainFocus = true;
                 await OnSendMessage.InvokeAsync(tempMessage);
             }
             else
@@ -185,6 +187,7 @@
         try
         {
             isFocused = true;
+            shouldRegainFocus = false;
             StateHasChanged();
         }
         catch (Exception ex)
