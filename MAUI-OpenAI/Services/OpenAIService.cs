@@ -66,8 +66,6 @@ namespace MAUI_OpenAI.Services
             }
         }
 
-
-
         public async Task GenerateImageAsync(string prompt, Action<byte[]> onImageGenerated, Action<string> onError)
         {
             try

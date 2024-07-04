@@ -1,18 +1,22 @@
-@using Microsoft.Extensions.Logging
 @inject IPlatformService PlatformService
+@inject ITokenizerService TokenizerService
 
 <div class="@GetFormContainerCssClass() relative">
     <form @onsubmit="HandleSubmit" class="flex w-full relative">
+        <div class="absolute left-1 top-1 p-1 bg-opacity-75 backdrop-blur-md rounded">
+            <span class="@(tokenCount >= MaxTokens ? "text-red" : "text-brightWhite")">@tokenCount / @MaxTokens Tokens</span>
+        </div>
         <textarea
-            @bind="UserMessage"
-            @bind:event="oninput"
+            value="@UserMessage"
+            @oninput="HandleInput"
             @onkeydown="HandleKeyDown"
             @onfocus="HandleInputFocus"
             @onblur="HandleInputBlur"
             disabled="@IsInputDisabled"
             placeholder="Type your message or prompt here"
-            class="flex-grow p-4 px-10 rounded border border-gray focus:outline-none bg-input text-brightWhite h-28 resize-none disabled:cursor-not-allowed disabled:opacity-50"
-        />
+            class="flex-grow p-4 pt-10 px-10 rounded border border-gray focus:outline-none bg-input text-brightWhite h-28 resize-none disabled:cursor-not-allowed disabled:opacity-50"
+            maxlength="@(MaxTokens * CharactersPerToken)"
+        ></textarea>
         <button
             @onclick="ClearMessages"
             type="button"
@@ -47,6 +51,10 @@
 </div>
 
 @code {
+    private const int MaxTokens = 1000;
+    private const double CharactersPerToken = 3.5;
+    private int tokenCount = 0;
+
     [Parameter]
     public string? UserMessage { get; set; }
     [Parameter]
@@ -80,7 +88,7 @@
         }
     }
 
-    private bool IsInputDisabled => IsSending || IsLoading;
+    private bool IsInputDisabled => IsSending || IsLoading || tokenCount > MaxTokens;
 
     private async Task HandleSubmit()
     {
@@ -90,6 +98,7 @@
             {
                 await OnSendMessage.InvokeAsync(UserMessage);
                 UserMessage = string.Empty;
+                tokenCount = 0;
                 HandleError("");
             }
             else
@@ -205,5 +214,11 @@
         {
             OnError.InvokeAsync(message);
         }
+    }
+
+    private void HandleInput(ChangeEventArgs e)
+    {
+        UserMessage = e.Value.ToString();
+        tokenCount = TokenizerService.EstimateTokenCount(UserMessage);
     }
 }
