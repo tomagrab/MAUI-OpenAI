@@ -36,6 +36,8 @@
     public bool IsImageLoading { get; set; } = false;
     [Parameter]
     public bool IsAppearanceLoading { get; set; } = false;
+    [Parameter]
+    public List<ChatMessageModel> ChatMessageList { get; set; } = new List<ChatMessageModel>();
 
     private string selectedRole = "";
     private bool isAppearanceGenerating = false;
@@ -51,6 +53,9 @@
     {
         isAppearanceGenerating = false;
         await RoleSelectorService.HandleImageGeneratedAsync(imageBytes, OnImageGenerated);
+        var chatMessage = new ChatMessageModel(Convert.ToBase64String(imageBytes), "assistant", isImage: true);
+        ChatMessageList.Add(chatMessage);
+        StateHasChanged();
     }
 
     private async Task HandleError(string error)

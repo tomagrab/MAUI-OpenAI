@@ -19,12 +19,10 @@ namespace MAUI_OpenAI.Services
             _tokenizerService = tokenizerService;
         }
 
-        public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, string message, Action<string> onUpdate, Action onComplete)
+        public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, Action<string> onUpdate, Action onComplete)
         {
             try
             {
-                conversation.Add(new ChatMessageModel(message, "user"));
-
                 var textConversation = conversation.Where(c => !c.IsImage).ToList();
 
                 List<ChatMessageModel> trimmedConversation;

@@ -8,13 +8,25 @@ namespace MAUI_OpenAI.Services
         public async Task<string> GeneratePromptAsync(string inputPrompt, IOpenAIService openAIService)
         {
             string result = "";
-            await openAIService.GetChatCompletionStreamingAsync(new List<ChatMessageModel>(), inputPrompt, (update) =>
+            var conversation = new List<ChatMessageModel>
             {
-                result += update;
-            }, () =>
+                new ChatMessageModel(inputPrompt, "user")
+            };
+
+            try
             {
-                result = ExtractDallePrompt(result);
-            });
+                await openAIService.GetChatCompletionStreamingAsync(conversation, (update) =>
+                {
+                    result += update;
+                }, () =>
+                {
+                    result = ExtractDallePrompt(result);
+                });
+            }
+            catch (Exception ex)
+            {
+                result = ex.Message;
+            }
 
             return result;
         }
