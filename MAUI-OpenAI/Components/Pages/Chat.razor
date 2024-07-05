@@ -82,10 +82,6 @@
     private async Task HandleImageGenerated(byte[] imageBytes)
     {
         isImageLoading = false;
-        var base64Image = Convert.ToBase64String(imageBytes);
-        var imageMessage = new ChatMessageModel(base64Image, "assistant", isImage: true);
-        chatMessages.Add(imageMessage);
-        conversation.Add(imageMessage);
         StateHasChanged();
     }
 

@@ -6,6 +6,13 @@ namespace MAUI_OpenAI.Services
 {
     public class ChatService : IChatService
     {
+        private readonly IOpenAIService openAIService;
+
+        public ChatService(IOpenAIService openAIService)
+        {
+            this.openAIService = openAIService;
+        }
+
         public async Task HandleSendMessageAsync(string message, List<ChatMessageModel> chatMessages, List<ChatMessageModel> conversation, bool isImageGenerationMode, IOpenAIService openAIService, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated)
         {
             if (string.IsNullOrWhiteSpace(message)) return;
@@ -17,7 +24,7 @@ namespace MAUI_OpenAI.Services
             {
                 if (isImageGenerationMode)
                 {
-                    await GenerateImageResponseAsync(message, chatMessages, conversation, openAIService, onError, onStateChange, onImageGenerated);
+                    await GenerateImageResponseAsync(message, chatMessages, onError, onStateChange, onImageGenerated);
                 }
                 else
                 {
@@ -46,7 +53,7 @@ namespace MAUI_OpenAI.Services
             conversation.Add(userChatMessage);
         }
 
-        public async Task GenerateImageResponseAsync(string message, List<ChatMessageModel> chatMessages, List<ChatMessageModel> conversation, IOpenAIService openAIService, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated)
+        public async Task GenerateImageResponseAsync(string message, List<ChatMessageModel> chatMessages, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated)
         {
             var loadingMessage = AddLoadingMessage(chatMessages, onStateChange);
 
@@ -54,7 +61,8 @@ namespace MAUI_OpenAI.Services
             {
                 try
                 {
-                    await UpdateImageResponseAsync(imageBytes, loadingMessage, conversation, onStateChange, onImageGenerated, onError);
+                    RemoveLoadingMessage(loadingMessage, chatMessages, onStateChange);
+                    await UpdateImageResponseAsync(imageBytes, chatMessages, onStateChange, onImageGenerated, onError);
                 }
                 catch (Exception ex)
                 {
@@ -82,7 +90,7 @@ namespace MAUI_OpenAI.Services
             {
                 try
                 {
-                    UpdateResponse(update, chatMessages, onStateChange, onError);
+                    UpdateResponse(update, chatMessages, conversation, onStateChange, onError);
                     await onStateChange();
                 }
                 catch (Exception ex)
@@ -113,17 +121,19 @@ namespace MAUI_OpenAI.Services
             }
         }
 
-        private void UpdateResponse(string update, List<ChatMessageModel> chatMessages, Func<Task> onStateChange, EventCallback<string> onError)
+        private void UpdateResponse(string update, List<ChatMessageModel> chatMessages, List<ChatMessageModel> conversation, Func<Task> onStateChange, EventCallback<string> onError)
         {
             try
             {
                 if (chatMessages.LastOrDefault()?.Role == "assistant")
                 {
                     chatMessages.Last().Message += update;
+                    conversation.Last().Message += update;
                 }
                 else
                 {
-                    AddNewAssistantMessage(update, chatMessages);
+                    var newMessage = AddNewAssistantMessage(update, chatMessages);
+                    conversation.Add(newMessage);
                 }
             }
             catch (Exception ex)
@@ -132,20 +142,20 @@ namespace MAUI_OpenAI.Services
             }
         }
 
-        private void AddNewAssistantMessage(string update, List<ChatMessageModel> chatMessages)
+        private ChatMessageModel AddNewAssistantMessage(string update, List<ChatMessageModel> chatMessages)
         {
             var newMessage = new ChatMessageModel(update, "assistant");
             chatMessages.Add(newMessage);
+            return newMessage;
         }
 
-        private async Task UpdateImageResponseAsync(byte[] imageBytes, ChatMessageModel loadingMessage, List<ChatMessageModel> conversation, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated, EventCallback<string> onError)
+        private async Task UpdateImageResponseAsync(byte[] imageBytes, List<ChatMessageModel> chatMessages, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated, EventCallback<string> onError)
         {
             try
             {
                 var base64Image = Convert.ToBase64String(imageBytes);
-                loadingMessage.Message = base64Image;
-                loadingMessage.IsImageLoading = false;
-                conversation.Add(loadingMessage);
+                var imageMessage = new ChatMessageModel(base64Image, "assistant", isImage: true);
+                chatMessages.Add(imageMessage);
                 await onImageGenerated.InvokeAsync(imageBytes);
                 onStateChange();
             }
