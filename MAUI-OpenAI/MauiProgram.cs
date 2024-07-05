@@ -40,13 +40,13 @@ namespace MAUI_OpenAI
             builder.Services.AddSingleton<IPlatformService, PlatformService>();
             builder.Services.AddSingleton<IMarkdownService, MarkdownService>();
             builder.Services.AddSingleton<IImageSaveService, ImageSaveService>();
+            builder.Services.AddSingleton<IChatService, ChatService>();
             builder.Services.AddSingleton<IChatInputService, ChatInputService>();
             builder.Services.AddSingleton<IChatMessagesService, ChatMessagesService>();
             builder.Services.AddSingleton<IComboBoxService, ComboBoxService>();
             builder.Services.AddSingleton<IGetAppearanceService, GetAppearanceService>();
             builder.Services.AddSingleton<IModalService, ModalService>();
             builder.Services.AddSingleton<IRoleSelectorService, RoleSelectorService>();
-            builder.Services.AddSingleton<IChatService, ChatService>();
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
