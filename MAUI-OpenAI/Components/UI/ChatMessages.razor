@@ -7,7 +7,7 @@
             @ErrorMessage
         </div>
     }
-    @foreach (var chat in Chats)
+    @foreach (var chat in ChatMessageList)
     {
         <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm-max-w-md @GetMessageCssClass(chat.Role)">
             @if (chat.IsImage)
@@ -52,7 +52,7 @@
 
 @code {
     [Parameter]
-    public List<ChatMessageModel> Chats { get; set; } = new List<ChatMessageModel>();
+    public List<ChatMessageModel> ChatMessageList { get; set; } = new List<ChatMessageModel>();
 
     [Parameter]
     public string ErrorMessage { get; set; } = string.Empty;
