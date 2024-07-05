@@ -10,7 +10,7 @@
         OnLoading="HandleLoading"
     />
     <ChatMessages
-        ChatMessageList="chatMessageList"
+        ChatMessageList="chatMessages"
         ErrorMessage="@errorMessage"
         OnImageClick="OpenModal"
         OnError="HandleError"
@@ -44,7 +44,7 @@
     private bool isSending = false;
     private bool isGeneratingImage = false;
     private bool isImageLoading = false;
-    private List<ChatMessageModel> chatMessageList = new List<ChatMessageModel>();
+    private List<ChatMessageModel> chatMessages = new List<ChatMessageModel>();
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
     private bool showModal = false;
     private string selectedImage = "";
@@ -57,61 +57,20 @@
 
     private async Task HandleSendMessage(string message)
     {
-        if (string.IsNullOrWhiteSpace(message))
-        {
-            return;
-        }
+        if (string.IsNullOrWhiteSpace(message)) return;
 
-        var tempUserMessage = message;
-        userMessage = string.Empty;
-        isSending = true;
-        StateHasChanged();
-
-        var userChatMessage = new ChatMessageModel(tempUserMessage, "user");
-        chatMessageList.Add(userChatMessage);
-        conversation.Add(userChatMessage);
+        PrepareForMessageSend(message);
+        AddUserMessage(message);
 
         try
         {
             if (isGeneratingImage)
             {
-                var loadingMessage = new ChatMessageModel("", "assistant", true, true);
-                chatMessageList.Add(loadingMessage);
-                StateHasChanged();
-
-                await OpenAIService.GenerateImageAsync(tempUserMessage, (imageBytes) =>
-                {
-                    try
-                    {
-                        UpdateImageResponse(imageBytes, loadingMessage);
-                    }
-                    catch (Exception ex)
-                    {
-                        RemoveLoadingMessage(loadingMessage);
-                        UpdateErrorResponse($"Error updating image response: {ex.Message}");
-                    }
-                }, (error) =>
-                {
-                    RemoveLoadingMessage(loadingMessage);
-                    UpdateErrorResponse(error);
-                });
+                await GenerateImageResponse(message);
             }
             else
             {
-                await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), tempUserMessage, (update) =>
-                {
-                    try
-                    {
-                        UpdateResponse(update);
-                    }
-                    catch (Exception ex)
-                    {
-                        UpdateErrorResponse($"Error updating chat response: {ex.Message}");
-                    }
-                }, () =>
-                {
-                    CompleteResponse(chatMessageList.Last());
-                });
+                await GenerateChatResponse(message);
             }
         }
         catch (Exception ex)
@@ -120,9 +79,76 @@
         }
         finally
         {
-            isSending = false;
-            StateHasChanged();
+            FinishMessageSend();
         }
+    }
+
+    private void PrepareForMessageSend(string message)
+    {
+        userMessage = string.Empty;
+        isSending = true;
+        StateHasChanged();
+    }
+
+    private void AddUserMessage(string message)
+    {
+        var userChatMessage = new ChatMessageModel(message, "user");
+        chatMessages.Add(userChatMessage);
+        conversation.Add(userChatMessage);
+    }
+
+    private async Task GenerateImageResponse(string message)
+    {
+        var loadingMessage = AddLoadingMessage();
+
+        await OpenAIService.GenerateImageAsync(message, (imageBytes) =>
+        {
+            try
+            {
+                UpdateImageResponse(imageBytes, loadingMessage);
+            }
+            catch (Exception ex)
+            {
+                RemoveLoadingMessage(loadingMessage);
+                HandleError($"Error updating image response: {ex.Message}");
+            }
+        }, (error) =>
+        {
+            RemoveLoadingMessage(loadingMessage);
+            HandleError(error);
+        });
+    }
+
+    private ChatMessageModel AddLoadingMessage()
+    {
+        var loadingMessage = new ChatMessageModel("", "assistant", true, true);
+        chatMessages.Add(loadingMessage);
+        StateHasChanged();
+        return loadingMessage;
+    }
+
+    private async Task GenerateChatResponse(string message)
+    {
+        await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), message, (update) =>
+        {
+            try
+            {
+                UpdateResponse(update);
+            }
+            catch (Exception ex)
+            {
+                HandleError($"Error updating chat response: {ex.Message}");
+            }
+        }, () =>
+        {
+            CompleteResponse(chatMessages.Last());
+        });
+    }
+
+    private void FinishMessageSend()
+    {
+        isSending = false;
+        StateHasChanged();
     }
 
     private void CompleteResponse(ChatMessageModel chatMessage)
@@ -140,27 +166,41 @@
 
     private async Task HandleRoleSelected(string newRolePrompt)
     {
-        if (!string.IsNullOrEmpty(currentRole))
-        {
-            var forgetMessage = new ChatMessageModel("Forget the previous role.", "user");
-            conversation.Add(forgetMessage);
-        }
-
-        var roleMessage = new ChatMessageModel(newRolePrompt, "system");
-        conversation.Add(roleMessage);
+        AddForgetPreviousRoleMessage();
+        AddRoleMessage(newRolePrompt);
 
         currentRole = newRolePrompt;
         StateHasChanged();
     }
 
+    private void AddForgetPreviousRoleMessage()
+    {
+        if (!string.IsNullOrEmpty(currentRole))
+        {
+            var forgetMessage = new ChatMessageModel("Forget the previous role.", "user");
+            conversation.Add(forgetMessage);
+        }
+    }
+
+    private void AddRoleMessage(string newRolePrompt)
+    {
+        var roleMessage = new ChatMessageModel(newRolePrompt, "system");
+        conversation.Add(roleMessage);
+    }
+
     private void HandleImageGenerated(byte[] imageBytes)
     {
         isImageLoading = false;
+        AddImageMessage(imageBytes);
+        StateHasChanged();
+    }
+
+    private void AddImageMessage(byte[] imageBytes)
+    {
         var base64Image = Convert.ToBase64String(imageBytes);
         var imageMessage = new ChatMessageModel(base64Image, "assistant", isImage: true);
-        chatMessageList.Add(imageMessage);
+        chatMessages.Add(imageMessage);
         conversation.Add(imageMessage);
-        StateHasChanged();
     }
 
     private async Task HandleLoading(bool isLoading)
@@ -186,15 +226,20 @@
     {
         try
         {
-            chatMessageList.Clear();
-            conversation.Clear();
-            errorMessage = "";
+            ClearAllMessages();
             StateHasChanged();
         }
         catch (Exception ex)
         {
             HandleError($"Error clearing messages: {ex.Message}");
         }
+    }
+
+    private void ClearAllMessages()
+    {
+        chatMessages.Clear();
+        conversation.Clear();
+        errorMessage = "";
     }
 
     private void HandleError(string message)
@@ -209,7 +254,7 @@
         {
             selectedImage = imageSrc;
             showModal = true;
-            StateHasChanged(); // Make sure to update the state
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -222,7 +267,7 @@
         try
         {
             showModal = false;
-            StateHasChanged(); // Make sure to update the state
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -234,15 +279,13 @@
     {
         try
         {
-            if (chatMessageList.LastOrDefault()?.Role == "assistant")
+            if (chatMessages.LastOrDefault()?.Role == "assistant")
             {
-                chatMessageList.Last().Message += update;
+                chatMessages.Last().Message += update;
             }
             else
             {
-                var newMessage = new ChatMessageModel(update, "assistant");
-                chatMessageList.Add(newMessage);
-                conversation.Add(newMessage);
+                AddNewAssistantMessage(update);
             }
             InvokeAsync(StateHasChanged);
         }
@@ -250,6 +293,13 @@
         {
             HandleError($"Error updating response: {ex.Message}");
         }
+    }
+
+    private void AddNewAssistantMessage(string update)
+    {
+        var newMessage = new ChatMessageModel(update, "assistant");
+        chatMessages.Add(newMessage);
+        conversation.Add(newMessage);
     }
 
     private void UpdateImageResponse(byte[] imageBytes, ChatMessageModel loadingMessage)
@@ -272,10 +322,7 @@
     {
         try
         {
-            var errorMessageModel = new ChatMessageModel(error, "error");
-            errorMessage = error;
-            chatMessageList.Add(errorMessageModel);
-            conversation.Add(errorMessageModel);
+            AddErrorMessage(error);
             InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
@@ -284,11 +331,19 @@
         }
     }
 
+    private void AddErrorMessage(string error)
+    {
+        var errorMessageModel = new ChatMessageModel(error, "error");
+        errorMessage = error;
+        chatMessages.Add(errorMessageModel);
+        conversation.Add(errorMessageModel);
+    }
+
     private void RemoveLoadingMessage(ChatMessageModel loadingMessage)
     {
-        if (chatMessageList.Contains(loadingMessage))
+        if (chatMessages.Contains(loadingMessage))
         {
-            chatMessageList.Remove(loadingMessage);
+            chatMessages.Remove(loadingMessage);
         }
         InvokeAsync(StateHasChanged);
     }
