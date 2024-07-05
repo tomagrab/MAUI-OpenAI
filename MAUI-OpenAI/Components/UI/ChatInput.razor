@@ -67,6 +67,8 @@
     [Parameter]
     public bool IsImageGenerationMode { get; set; } = false;
     [Parameter]
+    public bool IsAppearanceLoading { get; set; } = false;
+    [Parameter]
     public int TokenCount { get; set; }
     [Parameter]
     public int MaxTokens { get; set; }
@@ -81,7 +83,7 @@
     [Parameter]
     public EventCallback<string> OnError { get; set; }
 
-    private bool IsInputDisabled => IsSendingMessage || IsImageLoading || TokenCount > MaxTokens;
+    private bool IsInputDisabled => IsSendingMessage || IsImageLoading || IsAppearanceLoading || TokenCount > MaxTokens;
 
     protected override void OnInitialized()
     {

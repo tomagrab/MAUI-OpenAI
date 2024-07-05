@@ -7,6 +7,7 @@
         Items="RolePrompts.Roles.Keys.ToList()"
         OnItemSelected="HandleRoleChange"
         @ref="comboBoxRef"
+        InputDisabled="isAppearanceGenerating"
     />
     @if (!string.IsNullOrEmpty(selectedRole))
     {

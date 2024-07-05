@@ -36,13 +36,7 @@
     [Parameter]
     public EventCallback<string> OnItemSelected { get; set; }
     [Parameter]
-    public bool IsSendingMessage { get; set; } = false;
-    [Parameter]
-    public bool IsImageLoading { get; set; } = false;
-    [Parameter]
-    public bool IsImageGenerationMode { get; set; } = false;
-
-    private bool InputDisabled => IsSendingMessage || IsImageLoading;
+    public bool InputDisabled { get; set; } = false;
 
     private string SearchText { get; set; } = string.Empty;
     private bool DropdownVisible { get; set; } = false;
