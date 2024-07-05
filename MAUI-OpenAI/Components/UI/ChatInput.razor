@@ -108,8 +108,8 @@
         {
             if (OnSendMessage.HasDelegate)
             {
-                await ClearInputAsync();
                 await OnSendMessage.InvokeAsync(UserMessage ?? string.Empty);
+                await ClearInputAsync();
             }
             else
             {
