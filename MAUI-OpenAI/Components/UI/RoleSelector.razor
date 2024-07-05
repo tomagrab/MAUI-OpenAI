@@ -2,7 +2,11 @@
 @using MAUI_OpenAI.Models
 
 <div class="mb-4 flex gap-4">
-    <ComboBox Items="RolePrompts.Roles.Keys.ToList()" OnItemSelected="HandleRoleChange" />
+    <ComboBox 
+        Items="RolePrompts.Roles.Keys.ToList()" 
+        OnItemSelected="HandleRoleChange" 
+        @ref="comboBoxRef" 
+    />
     @if (!string.IsNullOrEmpty(selectedRole))
     {
         <GetAppearance
@@ -28,6 +32,7 @@
 
     private string selectedRole = "";
     private bool isLoading = false;
+    private ComboBox comboBoxRef; // Declare comboBoxRef
 
     private async Task HandleRoleChange(string value)
     {
@@ -63,5 +68,15 @@
         {
             await OnLoading.InvokeAsync(loading);
         }
+    }
+
+    public async Task ClearRoleAsync()
+    {
+        selectedRole = "";
+        if (comboBoxRef != null)
+        {
+            await comboBoxRef.ClearAsync();
+        }
+        StateHasChanged();
     }
 }

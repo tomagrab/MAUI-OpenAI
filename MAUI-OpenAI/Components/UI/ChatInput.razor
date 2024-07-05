@@ -110,12 +110,8 @@
             if (OnSendMessage.HasDelegate)
             {
                 string tempMessage = UserMessage ?? string.Empty;
-                UserMessage = string.Empty;
-                TokenCount = 0;
-                HandleError("");
-                shouldRegainFocus = true;
-                StateHasChanged();
                 await OnSendMessage.InvokeAsync(tempMessage);
+                await ClearInputAsync();
             }
             else
             {
@@ -135,10 +131,7 @@
             if (OnClearMessages.HasDelegate)
             {
                 await OnClearMessages.InvokeAsync();
-                UserMessage = string.Empty;
-                TokenCount = 0;
-                HandleError("");
-                StateHasChanged();
+                await ClearInputAsync();
             }
             else
             {
@@ -149,6 +142,15 @@
         {
             HandleError($"Error clearing messages: {ex.Message}");
         }
+    }
+
+    private async Task ClearInputAsync()
+    {
+        UserMessage = string.Empty;
+        TokenCount = 0;
+        HandleError("");
+        shouldRegainFocus = true;
+        StateHasChanged();
     }
 
     private async Task ToggleImageGenerationAsync()

@@ -4,6 +4,7 @@
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <RoleSelector
+        @ref="roleSelectorRef"
         OnRoleSelected="HandleRoleSelected"
         OnImageGenerated="HandleImageGenerated"
         OnError="HandleError"
@@ -50,6 +51,7 @@
     private string selectedImage = "";
     private string errorMessage = "";
     private string currentRole = "";
+    private RoleSelector roleSelectorRef;
 
     private const int MaxTokens = 1000;
     private const double CharactersPerToken = 3.5;
@@ -222,11 +224,12 @@
         }
     }
 
-    private void HandleClearMessages()
+    private async Task HandleClearMessages()
     {
         try
         {
             ClearAllMessages();
+            await roleSelectorRef.ClearRoleAsync();
             StateHasChanged();
         }
         catch (Exception ex)

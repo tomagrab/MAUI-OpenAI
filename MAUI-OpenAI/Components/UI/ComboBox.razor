@@ -7,6 +7,7 @@
         @bind:event="oninput"
         @onfocus="ShowDropdown"
         @onkeydown="HandleKeyDown"
+        @onclick="ShowDropdown"
         class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full"
         placeholder="Select Role"
     />
@@ -83,6 +84,13 @@
         SearchText = item;
         DropdownVisible = false;
         await OnItemSelected.InvokeAsync(item);
+    }
+
+    public async Task ClearAsync()
+    {
+        SearchText = string.Empty;
+        DropdownVisible = false;
+        await Task.CompletedTask;
     }
 
     private class BoundingClientRect
