@@ -7,7 +7,7 @@
         Items="RolePrompts.Roles.Keys.ToList()"
         OnItemSelected="HandleRoleChange"
         @ref="comboBoxRef"
-        InputDisabled="isAppearanceGenerating"
+        InputDisabled="@inputDisabled"
     />
     @if (!string.IsNullOrEmpty(selectedRole))
     {
@@ -18,6 +18,8 @@
             OnError="HandleError"
             OnLoading="HandleLoading"
             IsAppearanceGenerating="@isAppearanceGenerating"
+            IsSendingMessage="IsSendingMessage"
+            IsImageLoading="IsImageLoading"
         />
     }
 </div>
@@ -40,6 +42,7 @@
     [Parameter]
     public List<ChatMessageModel> ChatMessageList { get; set; } = new List<ChatMessageModel>();
 
+    private bool inputDisabled => isAppearanceGenerating || IsSendingMessage || IsImageLoading;
     private string selectedRole = "";
     private bool isAppearanceGenerating = false;
     private ComboBox comboBoxRef;

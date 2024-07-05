@@ -28,6 +28,7 @@
         IsSendingMessage="@isSendingMessage"
         IsImageGenerationMode="@isImageGenerationMode"
         IsAppearanceLoading="@isAppearanceLoading"
+        IsImageLoading="@isImageLoading"
         TokenCount="@tokenCount"
         MaxTokens="@MaxTokens"
         CharactersPerToken="@CharactersPerToken"
@@ -69,7 +70,9 @@
 
     private async Task HandleSendMessage(string message)
     {
+        isSendingMessage = true;
         await ChatService.HandleSendMessageAsync(message, chatMessages, conversation, isImageGenerationMode, OpenAIService, MarkdownService, OnError, () => InvokeAsync(StateHasChanged), OnImageGenerated);
+        isSendingMessage = false;
     }
 
     private async Task HandleRoleSelected(string newRolePrompt)
