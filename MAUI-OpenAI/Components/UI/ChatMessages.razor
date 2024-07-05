@@ -1,4 +1,5 @@
 @inject IJSRuntime JS
+@inject IChatMessagesService ChatMessagesService
 
 <div id="chatContainer" class="flex-grow p-4 overflow-auto">
     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
@@ -9,7 +10,7 @@
     }
     @foreach (var chat in ChatMessageList)
     {
-        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md @GetMessageCssClass(chat.Role)">
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md @ChatMessagesService.GetMessageCssClass(chat.Role, OnError)">
             @if (chat.IsImage)
             {
                 @if (chat.IsImageLoading)
@@ -80,50 +81,8 @@
         await JS.InvokeVoidAsync("scrollToBottom", "chatContainer");
     }
 
-    private string GetMessageCssClass(string role)
-    {
-        try
-        {
-            return role switch
-            {
-                "user" => "bg-blue text-brightWhite self-end ml-auto text-right",
-                "assistant" => "bg-green text-brightWhite self-start mr-auto text-left",
-                "error" => "bg-red text-brightWhite self-start mr-auto text-left",
-                "success" => "bg-brightGreen text-brightWhite self-start mr-auto text-left",
-                _ => "bg-gray text-brightWhite self-start mr-auto text-left"
-            };
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error generating CSS class: {ex.Message}");
-            return "bg-gray text-brightWhite self-start mr-auto text-left";
-        }
-    }
-
     private async Task HandleImageClick(string imageSrc)
     {
-        try
-        {
-            if (OnImageClick.HasDelegate)
-            {
-                await OnImageClick.InvokeAsync(imageSrc);
-            }
-            else
-            {
-                HandleError("Image click handler is not configured.");
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error handling image click: {ex.Message}");
-        }
-    }
-
-    private void HandleError(string message)
-    {
-        if (OnError.HasDelegate)
-        {
-            OnError.InvokeAsync(message);
-        }
+        await ChatMessagesService.HandleImageClickAsync(imageSrc, OnImageClick, OnError);
     }
 }

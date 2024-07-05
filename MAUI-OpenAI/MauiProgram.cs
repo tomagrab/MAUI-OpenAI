@@ -41,6 +41,7 @@ namespace MAUI_OpenAI
             builder.Services.AddSingleton<IMarkdownService, MarkdownService>();
             builder.Services.AddSingleton<IImageSaveService, ImageSaveService>();
             builder.Services.AddSingleton<IChatInputService, ChatInputService>();
+            builder.Services.AddSingleton<IChatMessagesService, ChatMessagesService>();
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
