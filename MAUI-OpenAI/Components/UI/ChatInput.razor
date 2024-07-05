@@ -3,7 +3,7 @@
 @inject IJSRuntime JS
 
 <div class="@GetFormContainerCssClass() relative">
-    <form @onsubmit="HandleSubmit" class="flex w-full relative">
+    <form @onsubmit="HandleSubmitAsync" class="flex w-full relative">
         <div class="absolute left-1 top-1 p-1 bg-opacity-75 backdrop-blur-md rounded">
             <span class="@(TokenCount >= MaxTokens ? "text-red" : "text-brightWhite")">@TokenCount / @MaxTokens Tokens</span>
         </div>
@@ -19,7 +19,7 @@
             maxlength="@(MaxTokens * CharactersPerToken)"
         ></textarea>
         <button
-            @onclick="ClearMessages"
+            @onclick="ClearMessagesAsync"
             type="button"
             disabled="@IsInputDisabled"
             class="absolute left-2 bottom-2 text-brightWhite p-2 rounded-full hover:text-brightRed focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
@@ -27,7 +27,7 @@
             <i class="fas fa-trash"></i>
         </button>
         <button
-            @onclick="ToggleImageGeneration"
+            @onclick="ToggleImageGenerationAsync"
             type="button"
             disabled="@IsInputDisabled"
             class="absolute right-2 top-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
@@ -54,6 +54,8 @@
 @code {
     private ElementReference textAreaRef;
     private bool shouldRegainFocus = false;
+    private bool isFocused = false;
+    private string platform = "";
 
     [Parameter]
     public string? UserMessage { get; set; }
@@ -78,9 +80,6 @@
     [Parameter]
     public EventCallback<string> OnError { get; set; }
 
-    private bool isFocused = false;
-    private string platform = "";
-
     protected override void OnInitialized()
     {
         try
@@ -104,7 +103,7 @@
 
     private bool IsInputDisabled => IsSending || IsLoading || TokenCount > MaxTokens;
 
-    private async Task HandleSubmit()
+    private async Task HandleSubmitAsync()
     {
         try
         {
@@ -129,13 +128,13 @@
         }
     }
 
-    private void ClearMessages()
+    private async Task ClearMessagesAsync()
     {
         try
         {
             if (OnClearMessages.HasDelegate)
             {
-                OnClearMessages.InvokeAsync();
+                await OnClearMessages.InvokeAsync();
                 UserMessage = string.Empty;
                 TokenCount = 0;
                 HandleError("");
@@ -152,7 +151,7 @@
         }
     }
 
-    private async Task ToggleImageGeneration()
+    private async Task ToggleImageGenerationAsync()
     {
         try
         {
