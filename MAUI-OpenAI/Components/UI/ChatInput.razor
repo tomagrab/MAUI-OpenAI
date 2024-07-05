@@ -88,7 +88,6 @@
         }
         catch (Exception ex)
         {
-            platform = "Unknown Platform";
             HandleError($"Failed to get platform information: {ex.Message}");
         }
     }
@@ -132,6 +131,7 @@
             {
                 await OnClearMessages.InvokeAsync();
                 await ClearInputAsync();
+                await ClearInputAsync();
             }
             else
             {
@@ -153,6 +153,15 @@
         StateHasChanged();
     }
 
+    private async Task ClearInputAsync()
+    {
+        UserMessage = string.Empty;
+        TokenCount = 0;
+        HandleError("");
+        shouldRegainFocus = true;
+        StateHasChanged();
+    }
+
     private async Task ToggleImageGenerationAsync()
     {
         try
@@ -161,7 +170,6 @@
             if (OnToggleImageGeneration.HasDelegate)
             {
                 await OnToggleImageGeneration.InvokeAsync(IsGeneratingImage);
-                HandleError("");
             }
             else
             {
@@ -176,43 +184,21 @@
 
     private void HandleInputFocus()
     {
-        try
-        {
-            isFocused = true;
-            shouldRegainFocus = false;
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error handling input focus: {ex.Message}");
-        }
+        isFocused = true;
+        shouldRegainFocus = false;
+        StateHasChanged();
     }
 
     private void HandleInputBlur()
     {
-        try
-        {
-            isFocused = false;
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error handling input blur: {ex.Message}");
-        }
+        isFocused = false;
+        StateHasChanged();
     }
 
     private string GetFormContainerCssClass()
     {
-        try
-        {
-            var baseClass = "p-4 shadow-md";
-            return isFocused && (platform == "iOS" || platform == "Android") ? $"{baseClass} mb-64" : baseClass;
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error generating CSS class: {ex.Message}");
-            return "p-4 shadow-md";
-        }
+        var baseClass = "p-4 shadow-md";
+        return isFocused && (platform == "iOS" || platform == "Android") ? $"{baseClass} mb-64" : baseClass;
     }
 
     private void HandleError(string message)
