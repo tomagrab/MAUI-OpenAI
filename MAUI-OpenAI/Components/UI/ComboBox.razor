@@ -37,11 +37,11 @@
     [Parameter]
     public bool IsSendingMessage { get; set; } = false;
     [Parameter]
-    public bool IsGeneratingImage { get; set; } = false;
-    [Parameter]
     public bool IsImageLoading { get; set; } = false;
+    [Parameter]
+    public bool IsImageGenerationMode { get; set; } = false;
 
-    private bool InputDisabled => IsSendingMessage || IsGeneratingImage || IsImageLoading;
+    private bool InputDisabled => IsSendingMessage || IsImageLoading;
 
     private string SearchText { get; set; } = string.Empty;
     private bool DropdownVisible { get; set; } = false;

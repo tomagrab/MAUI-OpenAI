@@ -3,9 +3,6 @@
 
 <div class="mb-4 flex gap-4">
     <ComboBox
-        IsSendingMessage="@IsSendingMessage"
-        IsGeneratingImage="@IsGeneratingImage"
-        IsImageLoading="@IsImageLoading"
         Items="RolePrompts.Roles.Keys.ToList()"
         OnItemSelected="HandleRoleChange"
         @ref="comboBoxRef"
@@ -13,9 +10,6 @@
     @if (!string.IsNullOrEmpty(selectedRole))
     {
         <GetAppearance
-            IsSendingMessage="@IsSendingMessage"
-            IsGeneratingImage="@IsGeneratingImage"
-            IsImageLoading="@IsImageLoading"
             Role="@selectedRole"
             Description="@RolePrompts.Roles[selectedRole]"
             OnImageGenerated="HandleImageGenerated"
@@ -38,9 +32,9 @@
     [Parameter]
     public bool IsSendingMessage { get; set; } = false;
     [Parameter]
-    public bool IsGeneratingImage { get; set; } = false;
-    [Parameter]
     public bool IsImageLoading { get; set; } = false;
+    [Parameter]
+    public bool IsAppearanceLoading { get; set; } = false;
 
     private string selectedRole = "";
     private bool isAppearanceGenerating = false;

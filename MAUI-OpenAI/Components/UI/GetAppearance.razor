@@ -27,11 +27,11 @@
     [Parameter]
     public bool IsSendingMessage { get; set; } = false;
     [Parameter]
-    public bool IsGeneratingImage { get; set; } = false;
-    [Parameter]
     public bool IsImageLoading { get; set; } = false;
+    [Parameter]
+    public bool IsAppearanceLoading { get; set; } = false;
 
-    private bool InputDisabled => IsAppearanceGenerating || IsSendingMessage || IsGeneratingImage || IsImageLoading;
+    private bool InputDisabled => IsAppearanceGenerating || IsSendingMessage || IsImageLoading;
 
     private async Task HandleGetAppearance()
     {
@@ -86,7 +86,6 @@
 
     private string ExtractDallePrompt(string response)
     {
-        // Check if the response contains opening and closing quotes
         if (response.Contains("\""))
         {
             var match = System.Text.RegularExpressions.Regex.Match(response, "\"([^\"]*)\"");
@@ -96,7 +95,6 @@
             }
         }
 
-        // Return the full response if no quotes are found
         return response;
     }
 }

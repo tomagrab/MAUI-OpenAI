@@ -32,7 +32,7 @@
             disabled="@IsInputDisabled"
             class="absolute right-2 top-2 text-brightWhite p-2 rounded-full hover:text-brightBlue focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         >
-            @if (IsGeneratingImage)
+            @if (IsImageGenerationMode)
             {
                 <i class="fas fa-image"></i>
             }
@@ -62,9 +62,9 @@
     [Parameter]
     public bool IsSendingMessage { get; set; }
     [Parameter]
-    public bool IsGeneratingImage { get; set; }
-    [Parameter]
     public bool IsImageLoading { get; set; } = false;
+    [Parameter]
+    public bool IsImageGenerationMode { get; set; } = false;
     [Parameter]
     public int TokenCount { get; set; }
     [Parameter]
@@ -157,10 +157,9 @@
     {
         try
         {
-            IsGeneratingImage = !IsGeneratingImage;
             if (OnToggleImageGeneration.HasDelegate)
             {
-                await OnToggleImageGeneration.InvokeAsync(IsGeneratingImage);
+                await OnToggleImageGeneration.InvokeAsync(!IsImageGenerationMode);
                 HandleError("");
             }
             else

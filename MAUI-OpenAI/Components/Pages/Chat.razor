@@ -4,10 +4,10 @@
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <RoleSelector
-        IsSendingMessage="@isSendingMessage"
-        IsGeneratingImage="@isGeneratingImage"
-        IsImageLoading="@isImageLoading"
         @ref="roleSelectorRef"
+        IsSendingMessage="@isSendingMessage"
+        IsImageLoading="@isImageLoading"
+        IsAppearanceLoading="@isAppearanceLoading"
         OnRoleSelected="HandleRoleSelected"
         OnImageGenerated="HandleImageGenerated"
         OnError="HandleError"
@@ -16,6 +16,7 @@
     <ChatMessages
         ErrorMessage="@errorMessage"
         IsImageLoading="@isImageLoading"
+        IsAppearanceLoading="@isAppearanceLoading"
         ChatMessageList="chatMessages"
         OnImageClick="OpenModal"
         OnError="HandleError"
@@ -23,8 +24,7 @@
     <ChatInput
         UserMessage="@userMessage"
         IsSendingMessage="@isSendingMessage"
-        IsGeneratingImage="@isGeneratingImage"
-        IsImageLoading="@isImageLoading"
+        IsImageGenerationMode="@isImageGenerationMode"
         TokenCount="@tokenCount"
         MaxTokens="@MaxTokens"
         CharactersPerToken="@CharactersPerToken"
@@ -46,8 +46,9 @@
 @code {
     private string userMessage = "";
     private bool isSendingMessage = false;
-    private bool isGeneratingImage = false;
     private bool isImageLoading = false;
+    private bool isAppearanceLoading = false;
+    private bool isImageGenerationMode = false;
     private List<ChatMessageModel> chatMessages = new List<ChatMessageModel>();
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
     private bool showModal = false;
@@ -69,7 +70,7 @@
 
         try
         {
-            if (isGeneratingImage)
+            if (isImageGenerationMode)
             {
                 await GenerateImageResponse(message);
             }
@@ -134,11 +135,12 @@
 
     private async Task GenerateChatResponse(string message)
     {
-        await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), message, (update) =>
+        await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), message, async (update) =>
         {
             try
             {
                 UpdateResponse(update);
+                await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex)
             {
@@ -210,7 +212,14 @@
 
     private async Task HandleLoading(bool isLoading)
     {
-        isImageLoading = isLoading;
+        if (isImageGenerationMode)
+        {
+            isImageLoading = isLoading;
+        }
+        else
+        {
+            isAppearanceLoading = isLoading;
+        }
         await InvokeAsync(StateHasChanged);
     }
 
@@ -218,7 +227,7 @@
     {
         try
         {
-            isGeneratingImage = isGenerating;
+            isImageGenerationMode = isGenerating;
             StateHasChanged();
         }
         catch (Exception ex)
@@ -293,7 +302,6 @@
             {
                 AddNewAssistantMessage(update);
             }
-            InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
