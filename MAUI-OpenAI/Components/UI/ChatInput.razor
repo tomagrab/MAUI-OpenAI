@@ -1,8 +1,9 @@
 @inject IPlatformService PlatformService
 @inject ITokenizerService TokenizerService
 @inject IJSRuntime JS
+@inject IChatInputService ChatInputService
 
-<div class="@GetFormContainerCssClass() relative">
+<div class="@ChatInputService.GetFormContainerCssClass(isFocused, platform) relative">
     <form @onsubmit="HandleSubmitAsync" class="flex w-full relative">
         <div class="absolute left-1 top-1 p-1 bg-opacity-75 backdrop-blur-md rounded">
             <span class="@(TokenCount >= MaxTokens ? "text-red" : "text-brightWhite")">@TokenCount / @MaxTokens Tokens</span>
@@ -91,7 +92,7 @@
         catch (Exception ex)
         {
             platform = "Unknown Platform";
-            HandleError($"Failed to get platform information: {ex.Message}");
+            ChatInputService.HandleError($"Failed to get platform information: {ex.Message}", OnError);
         }
     }
 
@@ -99,78 +100,34 @@
     {
         if (shouldRegainFocus && !isFocused && !IsSendingMessage && !IsImageLoading)
         {
-            await FocusTextAreaAsync();
+            await ChatInputService.FocusTextAreaAsync(textAreaRef, JS);
         }
     }
 
     private async Task HandleSubmitAsync()
     {
-        try
-        {
-            if (OnSendMessage.HasDelegate)
-            {
-                string tempMessage = UserMessage ?? string.Empty;
-                await OnSendMessage.InvokeAsync(tempMessage);
-                await ClearInputAsync();
-            }
-            else
-            {
-                HandleError("Message sending function is not configured.");
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error sending message: {ex.Message}");
-        }
+        await ChatInputService.HandleSubmitAsync(UserMessage, OnSendMessage, OnError);
+        await ClearInputAsync();
     }
 
     private async Task ClearMessagesAsync()
     {
-        try
-        {
-            if (OnClearMessages.HasDelegate)
-            {
-                await OnClearMessages.InvokeAsync();
-                await ClearInputAsync();
-            }
-            else
-            {
-                HandleError("Clear messages function is not configured.");
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error clearing messages: {ex.Message}");
-        }
+        await ChatInputService.ClearMessagesAsync(OnClearMessages, OnError);
+        await ClearInputAsync();
+    }
+
+    private async Task ToggleImageGenerationAsync()
+    {
+        await ChatInputService.ToggleImageGenerationAsync(IsImageGenerationMode, OnToggleImageGeneration, OnError);
     }
 
     private async Task ClearInputAsync()
     {
         UserMessage = string.Empty;
         TokenCount = 0;
-        HandleError("");
+        ChatInputService.HandleError("", OnError);
         shouldRegainFocus = true;
         StateHasChanged();
-    }
-
-    private async Task ToggleImageGenerationAsync()
-    {
-        try
-        {
-            if (OnToggleImageGeneration.HasDelegate)
-            {
-                await OnToggleImageGeneration.InvokeAsync(!IsImageGenerationMode);
-                HandleError("");
-            }
-            else
-            {
-                HandleError("Image generation toggle function is not configured.");
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error toggling image generation: {ex.Message}");
-        }
     }
 
     private void HandleInputFocus()
@@ -183,7 +140,7 @@
         }
         catch (Exception ex)
         {
-            HandleError($"Error handling input focus: {ex.Message}");
+            ChatInputService.HandleError($"Error handling input focus: {ex.Message}", OnError);
         }
     }
 
@@ -196,40 +153,13 @@
         }
         catch (Exception ex)
         {
-            HandleError($"Error handling input blur: {ex.Message}");
-        }
-    }
-
-    private string GetFormContainerCssClass()
-    {
-        try
-        {
-            var baseClass = "p-4 shadow-md";
-            return isFocused && (platform == "iOS" || platform == "Android") ? $"{baseClass} mb-64" : baseClass;
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error generating CSS class: {ex.Message}");
-            return "p-4 shadow-md";
-        }
-    }
-
-    private void HandleError(string message)
-    {
-        if (OnError.HasDelegate)
-        {
-            OnError.InvokeAsync(message);
+            ChatInputService.HandleError($"Error handling input blur: {ex.Message}", OnError);
         }
     }
 
     private void HandleInput(ChangeEventArgs e)
     {
         UserMessage = e.Value.ToString();
-        TokenCount = TokenizerService.EstimateTokenCount(UserMessage);
-    }
-
-    private async Task FocusTextAreaAsync()
-    {
-        await JS.InvokeVoidAsync("focusElement", textAreaRef);
+        TokenCount = ChatInputService.EstimateTokenCount(UserMessage, TokenizerService);
     }
 }
