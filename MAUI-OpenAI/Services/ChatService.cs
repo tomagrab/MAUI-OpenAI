@@ -86,11 +86,19 @@ namespace MAUI_OpenAI.Services
 
         public async Task GenerateChatResponseAsync(string message, List<ChatMessageModel> conversation, List<ChatMessageModel> chatMessages, IOpenAIService openAIService, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange)
         {
+            var assistantMessage = new ChatMessageModel("", "assistant");
+            bool isFirstUpdateReceived = false;
+
             await openAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), message, async (update) =>
             {
                 try
                 {
-                    UpdateResponse(update, chatMessages, conversation, onStateChange, onError);
+                    if (!isFirstUpdateReceived)
+                    {
+                        chatMessages.Add(assistantMessage);
+                        isFirstUpdateReceived = true;
+                    }
+                    UpdateResponse(update, assistantMessage, onStateChange, onError);
                     await onStateChange();
                 }
                 catch (Exception ex)
@@ -99,7 +107,7 @@ namespace MAUI_OpenAI.Services
                 }
             }, () =>
             {
-                CompleteResponse(chatMessages.Last(), markdownService, onStateChange, onError);
+                CompleteResponse(assistantMessage, markdownService, onStateChange, onError);
             });
         }
 
@@ -121,20 +129,11 @@ namespace MAUI_OpenAI.Services
             }
         }
 
-        private void UpdateResponse(string update, List<ChatMessageModel> chatMessages, List<ChatMessageModel> conversation, Func<Task> onStateChange, EventCallback<string> onError)
+        private void UpdateResponse(string update, ChatMessageModel assistantMessage, Func<Task> onStateChange, EventCallback<string> onError)
         {
             try
             {
-                if (chatMessages.LastOrDefault()?.Role == "assistant")
-                {
-                    chatMessages.Last().Message += update;
-                    conversation.Last().Message += update;
-                }
-                else
-                {
-                    var newMessage = AddNewAssistantMessage(update, chatMessages);
-                    conversation.Add(newMessage);
-                }
+                assistantMessage.Message += update;
             }
             catch (Exception ex)
             {
