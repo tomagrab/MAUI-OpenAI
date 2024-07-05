@@ -2,7 +2,11 @@
 
 @if (!string.IsNullOrEmpty(Role) && !string.IsNullOrEmpty(Description))
 {
-    <button class="btn btn-base btn-primary" @onclick="HandleGetAppearance" disabled="@IsLoading">
+    <button
+        @onclick="HandleGetAppearance"
+        disabled="@IsInputDisabled"
+        class="btn btn-base btn-primary disabled:cursor-not-allowed"
+    >
         Get Appearance
     </button>
 }
@@ -19,7 +23,11 @@
     [Parameter]
     public EventCallback<bool> OnLoading { get; set; }
     [Parameter]
-    public bool IsLoading { get; set; } // New parameter to disable the button
+    public bool IsAppearanceLoading { get; set; } = false;
+    [Parameter]
+    public bool IsSending { get; set; } = false;
+
+    private bool IsInputDisabled => IsAppearanceLoading || IsSending;
 
     private async Task HandleGetAppearance()
     {
@@ -74,7 +82,6 @@
 
     private string ExtractDallePrompt(string response)
     {
-        // Check if the response contains opening and closing quotes
         if (response.Contains("\""))
         {
             var match = System.Text.RegularExpressions.Regex.Match(response, "\"([^\"]*)\"");
@@ -84,7 +91,6 @@
             }
         }
 
-        // Return the full response if no quotes are found
         return response;
     }
 }

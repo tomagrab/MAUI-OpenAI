@@ -4,6 +4,8 @@
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <RoleSelector
+        IsImageLoading="@isImageLoading"
+        IsSending="@isSending"
         OnRoleSelected="HandleRoleSelected"
         OnImageGenerated="HandleImageGenerated"
         OnError="HandleError"
@@ -20,7 +22,7 @@
         UserMessage="@userMessage"
         IsSending="@isSending"
         IsGeneratingImage="@isGeneratingImage"
-        IsLoading="@isImageLoading"
+        IsImageLoading="@isImageLoading"
         TokenCount="@tokenCount"
         MaxTokens="@MaxTokens"
         CharactersPerToken="@CharactersPerToken"
@@ -44,6 +46,7 @@
     private bool isSending = false;
     private bool isGeneratingImage = false;
     private bool isImageLoading = false;
+    private bool isMessageReceiving = false;
     private List<ChatMessageModel> chatMessages = new List<ChatMessageModel>();
     private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
     private bool showModal = false;
