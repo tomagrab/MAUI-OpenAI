@@ -4,9 +4,6 @@
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <RoleSelector
-        @ref="roleSelectorRef"
-        IsImageLoading="@isImageLoading"
-        IsSending="@isSending"
         OnRoleSelected="HandleRoleSelected"
         OnImageGenerated="HandleImageGenerated"
         OnError="HandleError"
@@ -23,7 +20,7 @@
         UserMessage="@userMessage"
         IsSending="@isSending"
         IsGeneratingImage="@isGeneratingImage"
-        IsImageLoading="@isImageLoading"
+        IsLoading="@isImageLoading"
         TokenCount="@tokenCount"
         MaxTokens="@MaxTokens"
         CharactersPerToken="@CharactersPerToken"

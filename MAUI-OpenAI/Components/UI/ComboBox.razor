@@ -7,8 +7,7 @@
         @bind:event="oninput"
         @onfocus="ShowDropdown"
         @onkeydown="HandleKeyDown"
-        disabled="@IsInputDisabled"
-        class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full disabled:cursor-not-allowed disabled:opacity-50"
+        class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full"
         placeholder="Select Role"
     />
     @if (DropdownVisible && FilteredItems.Any())
@@ -33,12 +32,7 @@
 
     [Parameter]
     public EventCallback<string> OnItemSelected { get; set; }
-    [Parameter]
-    public bool IsAppearanceLoading { get; set; } = false;
-    [Parameter]
-    public bool IsSending { get; set; } = false;
 
-    private bool IsInputDisabled => IsAppearanceLoading || IsSending;
     private string SearchText { get; set; } = string.Empty;
     private bool DropdownVisible { get; set; } = false;
     private ElementReference comboBoxRef;

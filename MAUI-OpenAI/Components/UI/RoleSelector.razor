@@ -2,23 +2,16 @@
 @using MAUI_OpenAI.Models
 
 <div class="mb-4 flex gap-4">
-    <ComboBox
-        IsAppearanceLoading="@isAppearanceLoading"
-        IsSending="@IsSending"
-        Items="RolePrompts.Roles.Keys.ToList()"
-        OnItemSelected="HandleRoleChange"
-        @ref="comboBoxRef"
-    />
+    <ComboBox Items="RolePrompts.Roles.Keys.ToList()" OnItemSelected="HandleRoleChange" />
     @if (!string.IsNullOrEmpty(selectedRole))
     {
         <GetAppearance
             Role="@selectedRole"
             Description="@RolePrompts.Roles[selectedRole]"
-            IsAppearanceLoading="@isAppearanceLoading"
-            IsSending="@IsSending"
             OnImageGenerated="HandleImageGenerated"
             OnError="HandleError"
             OnLoading="HandleLoading"
+            IsLoading="@isLoading"
         />
     }
 </div>
@@ -32,14 +25,9 @@
     public EventCallback<string> OnError { get; set; }
     [Parameter]
     public EventCallback<bool> OnLoading { get; set; }
-    [Parameter]
-    public bool IsImageLoading { get; set; } = false;
-    [Parameter]
-    public bool IsSending { get; set; } = false;
 
     private string selectedRole = "";
-    private bool isAppearanceLoading = false;
-    private ComboBox comboBoxRef;
+    private bool isLoading = false;
 
     private async Task HandleRoleChange(string value)
     {
@@ -52,7 +40,7 @@
 
     private async Task HandleImageGenerated(byte[] imageBytes)
     {
-        isAppearanceLoading = false;
+        isLoading = false;
         if (OnImageGenerated.HasDelegate)
         {
             await OnImageGenerated.InvokeAsync(imageBytes);
@@ -61,7 +49,7 @@
 
     private async Task HandleError(string error)
     {
-        isAppearanceLoading = false;
+        isLoading = false;
         if (OnError.HasDelegate)
         {
             await OnError.InvokeAsync(error);
@@ -70,7 +58,7 @@
 
     private async Task HandleLoading(bool loading)
     {
-        isAppearanceLoading = loading;
+        isLoading = loading;
         if (OnLoading.HasDelegate)
         {
             await OnLoading.InvokeAsync(loading);

@@ -64,7 +64,7 @@
     [Parameter]
     public bool IsGeneratingImage { get; set; }
     [Parameter]
-    public bool IsImageLoading { get; set; } = false;
+    public bool IsLoading { get; set; } = false;
     [Parameter]
     public int TokenCount { get; set; }
     [Parameter]
@@ -94,13 +94,13 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (shouldRegainFocus && !isFocused && !IsSending && !IsImageLoading)
+        if (shouldRegainFocus && !isFocused && !IsSending && !IsLoading)
         {
             await FocusTextAreaAsync();
         }
     }
 
-    private bool IsInputDisabled => IsSending || IsImageLoading || TokenCount > MaxTokens;
+    private bool IsInputDisabled => IsSending || IsLoading || TokenCount > MaxTokens;
 
     private async Task HandleSubmitAsync()
     {
