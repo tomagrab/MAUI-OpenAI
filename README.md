@@ -68,4 +68,13 @@ Whether you're sparking imagination, enhancing productivity, or just having fun,
 
 ## License 📄
 
-    Airole is licensed under the MIT License. See the [LICENSE]() file for more information.
+
+    Airole is licensed under the MIT License. See the [License](https://github.com/tomagrab/MAUI-OpenAI/tree/main) file for more information.
+
+
+## Acknowledgements 🙏
+
+    We would like to thank the following resources for their valuable contributions to this project:
+    - OpenAI API
+    - .NET MAUI Community
+    - Visual Studio 2022
