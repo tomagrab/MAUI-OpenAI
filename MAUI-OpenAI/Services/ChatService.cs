@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using MAUI_OpenAI.Models;
+using MAUI_OpenAI.Data;
 
 namespace MAUI_OpenAI.Services
 {
@@ -161,6 +162,24 @@ namespace MAUI_OpenAI.Services
                 chatMessages.Remove(loadingMessage);
             }
             onStateChange();
+        }
+
+        public void AddForgetPreviousRoleMessage(string currentRole, List<ChatMessageModel> conversation)
+        {
+            if (!string.IsNullOrEmpty(currentRole))
+            {
+                var forgetMessage = new ChatMessageModel("Forget the previous role.", "user");
+                conversation.Add(forgetMessage);
+            }
+        }
+
+        public void AddRoleMessage(string roleName, List<ChatMessageModel> conversation)
+        {
+            if (RolePrompts.Roles.TryGetValue(roleName, out var roleDescription))
+            {
+                var roleMessage = new ChatMessageModel(roleDescription, "system");
+                conversation.Add(roleMessage);
+            }
         }
     }
 }

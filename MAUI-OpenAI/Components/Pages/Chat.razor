@@ -72,26 +72,11 @@
 
     private async Task HandleRoleSelected(string newRolePrompt)
     {
-        AddForgetPreviousRoleMessage();
-        AddRoleMessage(newRolePrompt);
+        ChatService.AddForgetPreviousRoleMessage(currentRole, conversation);
+        ChatService.AddRoleMessage(newRolePrompt, conversation);
 
         currentRole = newRolePrompt;
         StateHasChanged();
-    }
-
-    private void AddForgetPreviousRoleMessage()
-    {
-        if (!string.IsNullOrEmpty(currentRole))
-        {
-            var forgetMessage = new ChatMessageModel("Forget the previous role.", "user");
-            conversation.Add(forgetMessage);
-        }
-    }
-
-    private void AddRoleMessage(string newRolePrompt)
-    {
-        var roleMessage = new ChatMessageModel(newRolePrompt, "system");
-        conversation.Add(roleMessage);
     }
 
     private async Task HandleImageGenerated(byte[] imageBytes)

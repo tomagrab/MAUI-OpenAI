@@ -11,5 +11,7 @@ namespace MAUI_OpenAI.Services
         Task GenerateImageResponseAsync(string message, List<ChatMessageModel> chatMessages, List<ChatMessageModel> conversation, IOpenAIService openAIService, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated);
         Task GenerateChatResponseAsync(string message, List<ChatMessageModel> conversation, List<ChatMessageModel> chatMessages, IOpenAIService openAIService, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange);
         void FinishMessageSend(Func<Task> onStateChange);
+        void AddForgetPreviousRoleMessage(string currentRole, List<ChatMessageModel> conversation);
+        void AddRoleMessage(string newRolePrompt, List<ChatMessageModel> conversation);
     }
 }
