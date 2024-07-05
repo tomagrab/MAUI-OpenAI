@@ -91,6 +91,13 @@
         await OnItemSelected.InvokeAsync(item);
     }
 
+    public async Task ClearAsync()
+    {
+        SearchText = string.Empty;
+        DropdownVisible = false;
+        await Task.CompletedTask;
+    }
+
     private class BoundingClientRect
     {
         public double Left { get; set; }

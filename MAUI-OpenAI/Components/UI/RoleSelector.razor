@@ -7,6 +7,7 @@
         IsSending="@IsSending"
         Items="RolePrompts.Roles.Keys.ToList()"
         OnItemSelected="HandleRoleChange"
+        @ref="comboBoxRef"
     />
     @if (!string.IsNullOrEmpty(selectedRole))
     {
@@ -38,6 +39,7 @@
 
     private string selectedRole = "";
     private bool isAppearanceLoading = false;
+    private ComboBox comboBoxRef;
 
     private async Task HandleRoleChange(string value)
     {
@@ -73,5 +75,12 @@
         {
             await OnLoading.InvokeAsync(loading);
         }
+    }
+
+    public async Task ClearRoleAsync()
+    {
+        selectedRole = "";
+        await comboBoxRef.ClearAsync();
+        StateHasChanged();
     }
 }
