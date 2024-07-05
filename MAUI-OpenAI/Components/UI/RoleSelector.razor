@@ -1,5 +1,6 @@
 @using MAUI_OpenAI.Data
 @using MAUI_OpenAI.Models
+@inject IRoleSelectorService RoleSelectorService
 
 <div class="mb-4 flex gap-4">
     <ComboBox
@@ -43,37 +44,25 @@
     private async Task HandleRoleChange(string value)
     {
         selectedRole = value;
-        if (OnRoleSelected.HasDelegate && RolePrompts.Roles.TryGetValue(selectedRole, out var prompt))
-        {
-            await OnRoleSelected.InvokeAsync(prompt);
-        }
+        await RoleSelectorService.HandleRoleChangeAsync(value, OnRoleSelected);
     }
 
     private async Task HandleImageGenerated(byte[] imageBytes)
     {
         isAppearanceGenerating = false;
-        if (OnImageGenerated.HasDelegate)
-        {
-            await OnImageGenerated.InvokeAsync(imageBytes);
-        }
+        await RoleSelectorService.HandleImageGeneratedAsync(imageBytes, OnImageGenerated);
     }
 
     private async Task HandleError(string error)
     {
         isAppearanceGenerating = false;
-        if (OnError.HasDelegate)
-        {
-            await OnError.InvokeAsync(error);
-        }
+        await RoleSelectorService.HandleErrorAsync(error, OnError);
     }
 
     private async Task HandleLoading(bool loading)
     {
         isAppearanceGenerating = loading;
-        if (OnLoading.HasDelegate)
-        {
-            await OnLoading.InvokeAsync(loading);
-        }
+        await RoleSelectorService.HandleLoadingAsync(loading, OnLoading);
     }
 
     public async Task ClearRoleAsync()
