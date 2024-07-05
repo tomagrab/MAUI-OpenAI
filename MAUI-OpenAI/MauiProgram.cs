@@ -46,6 +46,7 @@ namespace MAUI_OpenAI
             builder.Services.AddSingleton<IGetAppearanceService, GetAppearanceService>();
             builder.Services.AddSingleton<IModalService, ModalService>();
             builder.Services.AddSingleton<IRoleSelectorService, RoleSelectorService>();
+            builder.Services.AddSingleton<IChatService, ChatService>();
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG

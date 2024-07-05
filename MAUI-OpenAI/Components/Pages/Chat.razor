@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inject IOpenAIService OpenAIService
 @inject IMarkdownService MarkdownService
+@inject IChatService ChatService
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <RoleSelector
@@ -61,114 +62,12 @@
     private const double CharactersPerToken = 3.5;
     private int tokenCount = 0;
 
+    private EventCallback<string> OnError => EventCallback.Factory.Create<string>(this, HandleError);
+    private EventCallback<byte[]> OnImageGenerated => EventCallback.Factory.Create<byte[]>(this, HandleImageGenerated);
+
     private async Task HandleSendMessage(string message)
     {
-        if (string.IsNullOrWhiteSpace(message)) return;
-
-        PrepareForMessageSend(message);
-        AddUserMessage(message);
-
-        try
-        {
-            if (isImageGenerationMode)
-            {
-                await GenerateImageResponse(message);
-            }
-            else
-            {
-                await GenerateChatResponse(message);
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error sending message: {ex.Message}");
-        }
-        finally
-        {
-            FinishMessageSend();
-        }
-    }
-
-    private void PrepareForMessageSend(string message)
-    {
-        userMessage = string.Empty;
-        isSendingMessage = true;
-        StateHasChanged();
-    }
-
-    private void AddUserMessage(string message)
-    {
-        var userChatMessage = new ChatMessageModel(message, "user");
-        chatMessages.Add(userChatMessage);
-        conversation.Add(userChatMessage);
-    }
-
-    private async Task GenerateImageResponse(string message)
-    {
-        var loadingMessage = AddLoadingMessage();
-
-        await OpenAIService.GenerateImageAsync(message, (imageBytes) =>
-        {
-            try
-            {
-                UpdateImageResponse(imageBytes, loadingMessage);
-            }
-            catch (Exception ex)
-            {
-                RemoveLoadingMessage(loadingMessage);
-                HandleError($"Error updating image response: {ex.Message}");
-            }
-        }, (error) =>
-        {
-            RemoveLoadingMessage(loadingMessage);
-            HandleError(error);
-        });
-    }
-
-    private ChatMessageModel AddLoadingMessage()
-    {
-        var loadingMessage = new ChatMessageModel("", "assistant", true, true);
-        chatMessages.Add(loadingMessage);
-        StateHasChanged();
-        return loadingMessage;
-    }
-
-    private async Task GenerateChatResponse(string message)
-    {
-        await OpenAIService.GetChatCompletionStreamingAsync(conversation.Where(c => !c.IsImage).ToList(), message, async (update) =>
-        {
-            try
-            {
-                UpdateResponse(update);
-                await InvokeAsync(StateHasChanged);
-            }
-            catch (Exception ex)
-            {
-                HandleError($"Error updating chat response: {ex.Message}");
-            }
-        }, () =>
-        {
-            CompleteResponse(chatMessages.Last());
-        });
-    }
-
-    private void FinishMessageSend()
-    {
-        isSendingMessage = false;
-        StateHasChanged();
-    }
-
-    private void CompleteResponse(ChatMessageModel chatMessage)
-    {
-        try
-        {
-            chatMessage.HtmlContent = MarkdownService.ConvertToHtml(chatMessage.Message);
-            InvokeAsync(StateHasChanged);
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error completing response: {ex.Message}");
-        }
+        await ChatService.HandleSendMessageAsync(message, chatMessages, conversation, isImageGenerationMode, OpenAIService, MarkdownService, OnError, () => InvokeAsync(StateHasChanged), OnImageGenerated);
     }
 
     private async Task HandleRoleSelected(string newRolePrompt)
@@ -195,19 +94,14 @@
         conversation.Add(roleMessage);
     }
 
-    private void HandleImageGenerated(byte[] imageBytes)
+    private async Task HandleImageGenerated(byte[] imageBytes)
     {
         isImageLoading = false;
-        AddImageMessage(imageBytes);
-        StateHasChanged();
-    }
-
-    private void AddImageMessage(byte[] imageBytes)
-    {
         var base64Image = Convert.ToBase64String(imageBytes);
         var imageMessage = new ChatMessageModel(base64Image, "assistant", isImage: true);
         chatMessages.Add(imageMessage);
         conversation.Add(imageMessage);
+        StateHasChanged();
     }
 
     private async Task HandleLoading(bool isLoading)
@@ -288,77 +182,5 @@
         {
             HandleError($"Error closing modal: {ex.Message}");
         }
-    }
-
-    private void UpdateResponse(string update)
-    {
-        try
-        {
-            if (chatMessages.LastOrDefault()?.Role == "assistant")
-            {
-                chatMessages.Last().Message += update;
-            }
-            else
-            {
-                AddNewAssistantMessage(update);
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error updating response: {ex.Message}");
-        }
-    }
-
-    private void AddNewAssistantMessage(string update)
-    {
-        var newMessage = new ChatMessageModel(update, "assistant");
-        chatMessages.Add(newMessage);
-        conversation.Add(newMessage);
-    }
-
-    private void UpdateImageResponse(byte[] imageBytes, ChatMessageModel loadingMessage)
-    {
-        try
-        {
-            var base64Image = Convert.ToBase64String(imageBytes);
-            loadingMessage.Message = base64Image;
-            loadingMessage.IsImageLoading = false;
-            conversation.Add(loadingMessage);
-            InvokeAsync(StateHasChanged);
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error updating image response: {ex.Message}");
-        }
-    }
-
-    private void UpdateErrorResponse(string error)
-    {
-        try
-        {
-            AddErrorMessage(error);
-            InvokeAsync(StateHasChanged);
-        }
-        catch (Exception ex)
-        {
-            HandleError($"Error updating error response: {ex.Message}");
-        }
-    }
-
-    private void AddErrorMessage(string error)
-    {
-        var errorMessageModel = new ChatMessageModel(error, "error");
-        errorMessage = error;
-        chatMessages.Add(errorMessageModel);
-        conversation.Add(errorMessageModel);
-    }
-
-    private void RemoveLoadingMessage(ChatMessageModel loadingMessage)
-    {
-        if (chatMessages.Contains(loadingMessage))
-        {
-            chatMessages.Remove(loadingMessage);
-        }
-        InvokeAsync(StateHasChanged);
     }
 }
