@@ -7,19 +7,19 @@ namespace MAUI_OpenAI.Models
             string message,
             string role,
             bool isImage = false,
-            bool isLoading = false
+            bool isImageLoading = false
         )
         {
             Message = message;
             Role = role;
             IsImage = isImage;
-            IsLoading = isLoading;
+            IsImageLoading = isImageLoading;
         }
 
         public string Message { get; set; }
         public string Role { get; set; }
         public bool IsImage { get; set; }
-        public bool IsLoading { get; set; }
+        public bool IsImageLoading { get; set; }
         public string HtmlContent { get; set; } = string.Empty;
     }
 }

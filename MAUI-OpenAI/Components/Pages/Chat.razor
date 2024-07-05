@@ -4,6 +4,9 @@
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <RoleSelector
+        IsSendingMessage="@isSendingMessage"
+        IsGeneratingImage="@isGeneratingImage"
+        IsImageLoading="@isImageLoading"
         @ref="roleSelectorRef"
         OnRoleSelected="HandleRoleSelected"
         OnImageGenerated="HandleImageGenerated"
@@ -11,17 +14,17 @@
         OnLoading="HandleLoading"
     />
     <ChatMessages
-        ChatMessageList="chatMessages"
         ErrorMessage="@errorMessage"
+        IsImageLoading="@isImageLoading"
+        ChatMessageList="chatMessages"
         OnImageClick="OpenModal"
         OnError="HandleError"
-        IsLoading="@isImageLoading"
     />
     <ChatInput
         UserMessage="@userMessage"
-        IsSending="@isSending"
+        IsSendingMessage="@isSendingMessage"
         IsGeneratingImage="@isGeneratingImage"
-        IsLoading="@isImageLoading"
+        IsImageLoading="@isImageLoading"
         TokenCount="@tokenCount"
         MaxTokens="@MaxTokens"
         CharactersPerToken="@CharactersPerToken"
@@ -42,7 +45,7 @@
 
 @code {
     private string userMessage = "";
-    private bool isSending = false;
+    private bool isSendingMessage = false;
     private bool isGeneratingImage = false;
     private bool isImageLoading = false;
     private List<ChatMessageModel> chatMessages = new List<ChatMessageModel>();
@@ -88,7 +91,7 @@
     private void PrepareForMessageSend(string message)
     {
         userMessage = string.Empty;
-        isSending = true;
+        isSendingMessage = true;
         StateHasChanged();
     }
 
@@ -149,7 +152,7 @@
 
     private void FinishMessageSend()
     {
-        isSending = false;
+        isSendingMessage = false;
         StateHasChanged();
     }
 
@@ -311,7 +314,7 @@
         {
             var base64Image = Convert.ToBase64String(imageBytes);
             loadingMessage.Message = base64Image;
-            loadingMessage.IsLoading = false;
+            loadingMessage.IsImageLoading = false;
             conversation.Add(loadingMessage);
             InvokeAsync(StateHasChanged);
         }

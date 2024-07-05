@@ -12,7 +12,7 @@
         <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm-max-w-md @GetMessageCssClass(chat.Role)">
             @if (chat.IsImage)
             {
-                @if (chat.IsLoading)
+                @if (chat.IsImageLoading)
                 {
                     <div class="w-40 h-30 bg-gray-300 rounded-lg flex items-center justify-center">
                         <i class="fa fa-spinner custom-spin text-4xl text-gray-600"></i>
@@ -40,7 +40,7 @@
             }
         </div>
     }
-    @if (IsLoading)
+    @if (IsImageLoading)
     {
         <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md bg-green text-brightWhite self-start mr-auto text-left">
             <div class="w-40 h-30 bg-gray-300 rounded-lg flex items-center justify-center">
@@ -63,7 +63,7 @@
     public EventCallback<string> OnError { get; set; }
 
     [Parameter]
-    public bool IsLoading { get; set; }
+    public bool IsImageLoading { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

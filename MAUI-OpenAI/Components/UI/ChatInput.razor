@@ -60,11 +60,11 @@
     [Parameter]
     public string? UserMessage { get; set; }
     [Parameter]
-    public bool IsSending { get; set; }
+    public bool IsSendingMessage { get; set; }
     [Parameter]
     public bool IsGeneratingImage { get; set; }
     [Parameter]
-    public bool IsLoading { get; set; } = false;
+    public bool IsImageLoading { get; set; } = false;
     [Parameter]
     public int TokenCount { get; set; }
     [Parameter]
@@ -80,6 +80,8 @@
     [Parameter]
     public EventCallback<string> OnError { get; set; }
 
+    private bool IsInputDisabled => IsSendingMessage || IsImageLoading || TokenCount > MaxTokens;
+
     protected override void OnInitialized()
     {
         try
@@ -88,19 +90,18 @@
         }
         catch (Exception ex)
         {
+            platform = "Unknown Platform";
             HandleError($"Failed to get platform information: {ex.Message}");
         }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (shouldRegainFocus && !isFocused && !IsSending && !IsLoading)
+        if (shouldRegainFocus && !isFocused && !IsSendingMessage && !IsImageLoading)
         {
             await FocusTextAreaAsync();
         }
     }
-
-    private bool IsInputDisabled => IsSending || IsLoading || TokenCount > MaxTokens;
 
     private async Task HandleSubmitAsync()
     {
@@ -131,7 +132,6 @@
             {
                 await OnClearMessages.InvokeAsync();
                 await ClearInputAsync();
-                await ClearInputAsync();
             }
             else
             {
@@ -153,15 +153,6 @@
         StateHasChanged();
     }
 
-    private async Task ClearInputAsync()
-    {
-        UserMessage = string.Empty;
-        TokenCount = 0;
-        HandleError("");
-        shouldRegainFocus = true;
-        StateHasChanged();
-    }
-
     private async Task ToggleImageGenerationAsync()
     {
         try
@@ -170,6 +161,7 @@
             if (OnToggleImageGeneration.HasDelegate)
             {
                 await OnToggleImageGeneration.InvokeAsync(IsGeneratingImage);
+                HandleError("");
             }
             else
             {
@@ -184,21 +176,43 @@
 
     private void HandleInputFocus()
     {
-        isFocused = true;
-        shouldRegainFocus = false;
-        StateHasChanged();
+        try
+        {
+            isFocused = true;
+            shouldRegainFocus = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error handling input focus: {ex.Message}");
+        }
     }
 
     private void HandleInputBlur()
     {
-        isFocused = false;
-        StateHasChanged();
+        try
+        {
+            isFocused = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error handling input blur: {ex.Message}");
+        }
     }
 
     private string GetFormContainerCssClass()
     {
-        var baseClass = "p-4 shadow-md";
-        return isFocused && (platform == "iOS" || platform == "Android") ? $"{baseClass} mb-64" : baseClass;
+        try
+        {
+            var baseClass = "p-4 shadow-md";
+            return isFocused && (platform == "iOS" || platform == "Android") ? $"{baseClass} mb-64" : baseClass;
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error generating CSS class: {ex.Message}");
+            return "p-4 shadow-md";
+        }
     }
 
     private void HandleError(string message)

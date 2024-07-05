@@ -2,20 +2,26 @@
 @using MAUI_OpenAI.Models
 
 <div class="mb-4 flex gap-4">
-    <ComboBox 
-        Items="RolePrompts.Roles.Keys.ToList()" 
-        OnItemSelected="HandleRoleChange" 
-        @ref="comboBoxRef" 
+    <ComboBox
+        IsSendingMessage="@IsSendingMessage"
+        IsGeneratingImage="@IsGeneratingImage"
+        IsImageLoading="@IsImageLoading"
+        Items="RolePrompts.Roles.Keys.ToList()"
+        OnItemSelected="HandleRoleChange"
+        @ref="comboBoxRef"
     />
     @if (!string.IsNullOrEmpty(selectedRole))
     {
         <GetAppearance
+            IsSendingMessage="@IsSendingMessage"
+            IsGeneratingImage="@IsGeneratingImage"
+            IsImageLoading="@IsImageLoading"
             Role="@selectedRole"
             Description="@RolePrompts.Roles[selectedRole]"
             OnImageGenerated="HandleImageGenerated"
             OnError="HandleError"
             OnLoading="HandleLoading"
-            IsLoading="@isLoading"
+            IsAppearanceGenerating="@isAppearanceGenerating"
         />
     }
 </div>
@@ -29,10 +35,16 @@
     public EventCallback<string> OnError { get; set; }
     [Parameter]
     public EventCallback<bool> OnLoading { get; set; }
+    [Parameter]
+    public bool IsSendingMessage { get; set; } = false;
+    [Parameter]
+    public bool IsGeneratingImage { get; set; } = false;
+    [Parameter]
+    public bool IsImageLoading { get; set; } = false;
 
     private string selectedRole = "";
-    private bool isLoading = false;
-    private ComboBox comboBoxRef; // Declare comboBoxRef
+    private bool isAppearanceGenerating = false;
+    private ComboBox comboBoxRef;
 
     private async Task HandleRoleChange(string value)
     {
@@ -45,7 +57,7 @@
 
     private async Task HandleImageGenerated(byte[] imageBytes)
     {
-        isLoading = false;
+        isAppearanceGenerating = false;
         if (OnImageGenerated.HasDelegate)
         {
             await OnImageGenerated.InvokeAsync(imageBytes);
@@ -54,7 +66,7 @@
 
     private async Task HandleError(string error)
     {
-        isLoading = false;
+        isAppearanceGenerating = false;
         if (OnError.HasDelegate)
         {
             await OnError.InvokeAsync(error);
@@ -63,7 +75,7 @@
 
     private async Task HandleLoading(bool loading)
     {
-        isLoading = loading;
+        isAppearanceGenerating = loading;
         if (OnLoading.HasDelegate)
         {
             await OnLoading.InvokeAsync(loading);

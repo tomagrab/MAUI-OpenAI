@@ -8,7 +8,8 @@
         @onfocus="ShowDropdown"
         @onkeydown="HandleKeyDown"
         @onclick="ShowDropdown"
-        class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full"
+        disabled="@InputDisabled"
+        class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full disabled:cursor-not-allowed disabled:opacity-50"
         placeholder="Select Role"
     />
     @if (DropdownVisible && FilteredItems.Any())
@@ -33,6 +34,14 @@
 
     [Parameter]
     public EventCallback<string> OnItemSelected { get; set; }
+    [Parameter]
+    public bool IsSendingMessage { get; set; } = false;
+    [Parameter]
+    public bool IsGeneratingImage { get; set; } = false;
+    [Parameter]
+    public bool IsImageLoading { get; set; } = false;
+
+    private bool InputDisabled => IsSendingMessage || IsGeneratingImage || IsImageLoading;
 
     private string SearchText { get; set; } = string.Empty;
     private bool DropdownVisible { get; set; } = false;
