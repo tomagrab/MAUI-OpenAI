@@ -14,7 +14,7 @@ namespace MAUI_OpenAI.Services
             await InvokeIfHasDelegateAsync(onImageGenerated, imageBytes);
         }
 
-        public async Task HandleErrorAsync(string error, EventCallback<string> onError)
+        public new async Task HandleErrorAsync(string error, EventCallback<string> onError)
         {
             await base.HandleErrorAsync(error, onError);
         }
