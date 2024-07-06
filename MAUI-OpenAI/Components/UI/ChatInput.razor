@@ -7,7 +7,10 @@
 <div class="@ChatInputService.GetFormContainerCssClass(isFocused, platform) relative">
     <form @onsubmit="HandleSubmitAsync" class="flex w-full relative">
         <div class="absolute left-1 top-1 p-1 bg-opacity-75 backdrop-blur-md rounded">
-            <span class="@(TokenCount >= MaxTokens ? "text-red" : "text-brightWhite")">@TokenCount / @MaxTokens Tokens</span>
+            <span class="@(TokenCount >= MaxTokens ? "text-red" : "text-brightWhite")">
+                @TokenCount / @MaxTokens Tokens
+                <i @onclick="OpenModal" class="fas fa-info-circle cursor-pointer"></i>
+            </span>
         </div>
         <textarea
             @ref="textAreaRef"
@@ -51,6 +54,14 @@
             <i class="fa-solid fa-paper-plane"></i>
         </button>
     </form>
+    @if (showModal)
+    {
+        <Modal
+            MarkupContent="@modalContent"
+            OnClose="HandleModalClose"
+            OnError="HandleError"
+        />
+    }
 </div>
 
 @code {
@@ -84,6 +95,8 @@
     [Parameter]
     public EventCallback<string> OnError { get; set; }
 
+    private bool showModal = false;
+    private string modalContent = string.Empty;
     private bool IsInputDisabled => IsSendingMessage || IsImageLoading || IsAppearanceLoading || TokenCount > MaxTokens;
 
     protected override void OnInitialized()
@@ -170,5 +183,56 @@
     private void HandleError(string message)
     {
         BaseService.HandleError(message, OnError);
+    }
+
+    private void OpenModal()
+    {
+        try
+        {
+            modalContent = GetTokenInfoMarkup();
+            showModal = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error opening modal: {ex.Message}");
+        }
+    }
+
+    private void HandleModalClose()
+    {
+        try
+        {
+            showModal = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error closing modal: {ex.Message}");
+        }
+    }
+
+    private string GetTokenInfoMarkup()
+    {
+        return @"
+            <h2>Understanding Tokens</h2>
+            <p>Tokens can be thought of as pieces of words. Before processing a request, the input is broken down into tokens. These tokens can include trailing spaces and even sub-words.</p>
+            <p>Here are some helpful rules of thumb for understanding tokens in terms of lengths:</p>
+            <ul>
+                <li>1 token ≈ 4 chars in English</li>
+                <li>1 token ≈ ¾ words</li>
+                <li>100 tokens ≈ 75 words</li>
+                <li>1-2 sentences ≈ 30 tokens</li>
+                <li>1 paragraph ≈ 100 tokens</li>
+                <li>1,500 words ≈ 2048 tokens</li>
+                <li>Note: The token count is an estimate and may vary.</li>
+            </ul>
+            <p>For example:</p>
+            <ul>
+                <li>Wayne Gretzky&apos;s quote “You miss 100% of the shots you don&apos;t take” contains 11 tokens.</li>
+                <li>The US Declaration of Independence contains 1,695 tokens.</li>
+            </ul>
+            <p>The tokenization process varies between languages.</p>
+        ";
     }
 }

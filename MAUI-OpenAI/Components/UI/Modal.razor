@@ -7,25 +7,38 @@
     <div class="relative bg-darkblue bg-opacity-80 backdrop-blur-lg rounded-lg overflow-hidden shadow-lg w-full max-w-2xl" @onclick:stopPropagation="true">
         <div class="flex justify-between p-2">
             <div class="flex space-x-2">
-                <button class="text-white hover:text-gray-900" @onclick="SaveImage">
-                    <i class="@SaveImageIconClass"></i> @SaveImageText
-                </button>
-                <button class="text-white hover:text-gray-900" @onclick="CopyImage">
-                    <i class="@CopyImageIconClass"></i> @CopyImageText
-                </button>
+                @if (!string.IsNullOrEmpty(ImageSrc))
+                {
+                    <button class="text-white hover:text-gray-900" @onclick="SaveImage">
+                        <i class="@SaveImageIconClass"></i> @SaveImageText
+                    </button>
+                    <button class="text-white hover:text-gray-900" @onclick="CopyImage">
+                        <i class="@CopyImageIconClass"></i> @CopyImageText
+                    </button>
+                }
             </div>
             <button class="text-white hover:text-gray-900" @onclick="CloseModal">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <div class="p-4">
-            @if (string.IsNullOrEmpty(ErrorMessage))
+            @if (!string.IsNullOrEmpty(ErrorMessage))
             {
-                <img src="@ImageSrc" alt="Modal Image" class="w-full h-auto rounded-lg" />
+                <div class="text-red-500">@ErrorMessage</div>
             }
             else
             {
-                <div class="text-red-500">@ErrorMessage</div>
+                @if (!string.IsNullOrEmpty(ImageSrc))
+                {
+                    <img src="@ImageSrc" alt="Modal Image" class="w-full h-auto rounded-lg" />
+                }
+
+                @if (!string.IsNullOrEmpty(MarkupContent))
+                {
+                    <div class="markdown-content">
+                        @((MarkupString)MarkupContent)
+                    </div>
+                }
             }
         </div>
     </div>
@@ -34,6 +47,9 @@
 @code {
     [Parameter]
     public string? ImageSrc { get; set; }
+
+    [Parameter]
+    public string? MarkupContent { get; set; }
 
     [Parameter]
     public EventCallback OnClose { get; set; }
