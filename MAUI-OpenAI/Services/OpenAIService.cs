@@ -2,10 +2,11 @@ using OpenAI.Chat;
 using MAUI_OpenAI.Models;
 using System.ClientModel;
 using OpenAI.Images;
+using Microsoft.AspNetCore.Components;
 
 namespace MAUI_OpenAI.Services
 {
-    public class OpenAIService : IOpenAIService
+    public class OpenAIService : BaseService, IOpenAIService
     {
         private readonly ChatClient _chatClient;
         private readonly ImageClient _imageClient;
@@ -19,7 +20,7 @@ namespace MAUI_OpenAI.Services
             _tokenizerService = tokenizerService;
         }
 
-        public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, Action<string> onUpdate, Action onComplete)
+        public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, EventCallback<string> onUpdate, EventCallback onComplete, EventCallback<string> onError)
         {
             try
             {
@@ -28,11 +29,11 @@ namespace MAUI_OpenAI.Services
                 List<ChatMessageModel> trimmedConversation;
                 try
                 {
-                    trimmedConversation = _tokenizerService.TrimConversationToTokenLimit(textConversation, MaxTokens);
+                    trimmedConversation = _tokenizerService.TrimConversationToTokenLimit(textConversation, MaxTokens, onError);
                 }
                 catch (Exception tex)
                 {
-                    onUpdate($"An error occurred while trimming the conversation: {tex.Message}");
+                    await HandleErrorAsync($"An error occurred while trimming the conversation: {tex.Message}", onError);
                     return;
                 }
 
@@ -44,27 +45,27 @@ namespace MAUI_OpenAI.Services
                 {
                     foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
                     {
-                        onUpdate(updatePart.Text);
+                        await onUpdate.InvokeAsync(updatePart.Text);
                     }
                 }
 
-                onComplete();
+                await onComplete.InvokeAsync();
             }
             catch (ClientResultException cre)
             {
-                onUpdate($"An error occurred while processing the request: {cre.Message}");
+                await HandleErrorAsync($"An error occurred while processing the request: {cre.Message}", onError);
             }
             catch (TimeoutException te)
             {
-                onUpdate("Request timed out: " + te.Message);
+                await HandleErrorAsync("Request timed out: " + te.Message, onError);
             }
             catch (Exception ex)
             {
-                onUpdate($"An unexpected error occurred while processing the request: {ex.Message}");
+                await HandleErrorAsync($"An unexpected error occurred while processing the request: {ex.Message}", onError);
             }
         }
 
-        public async Task GenerateImageAsync(string prompt, Action<byte[]> onImageGenerated, Action<string> onError)
+        public async Task GenerateImageAsync(string prompt, EventCallback<byte[]> onImageGenerated, EventCallback<string> onError)
         {
             try
             {
@@ -77,19 +78,19 @@ namespace MAUI_OpenAI.Services
                 };
 
                 GeneratedImage image = await _imageClient.GenerateImageAsync(prompt, options);
-                onImageGenerated?.Invoke(image.ImageBytes.ToArray());
+                await onImageGenerated.InvokeAsync(image.ImageBytes.ToArray());
             }
             catch (ClientResultException cre)
             {
-                onError?.Invoke($"An error occurred while generating the image: {cre.Message}");
+                await HandleErrorAsync($"An error occurred while generating the image: {cre.Message}", onError);
             }
             catch (TimeoutException te)
             {
-                onError?.Invoke("Image generation request timed out: " + te.Message);
+                await HandleErrorAsync("Image generation request timed out: " + te.Message, onError);
             }
             catch (Exception ex)
             {
-                onError?.Invoke($"An unexpected error occurred while generating the image: {ex.Message}");
+                await HandleErrorAsync($"An unexpected error occurred while generating the image: {ex.Message}", onError);
             }
         }
     }
