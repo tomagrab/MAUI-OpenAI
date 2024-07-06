@@ -5,13 +5,18 @@ namespace MAUI_OpenAI.Services
 {
     public interface IChatService
     {
-        Task HandleSendMessageAsync(string message, List<ChatMessageModel> chatMessages, List<ChatMessageModel> conversation, bool isImageGenerationMode, IOpenAIService openAIService, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated);
+        Task HandleSendMessageAsync(string message, List<ChatMessageModel> chatMessages, bool isImageGenerationMode, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated);
+        
         void PrepareForMessageSend(Func<Task> onStateChange);
-        void AddUserMessage(string message, List<ChatMessageModel> chatMessages, List<ChatMessageModel> conversation);
+
         Task GenerateImageResponseAsync(string message, List<ChatMessageModel> chatMessages, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated);
-        Task GenerateChatResponseAsync(List<ChatMessageModel> conversation, List<ChatMessageModel> chatMessages, IOpenAIService openAIService, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange);
+
+        Task GenerateChatResponseAsync(List<ChatMessageModel> chatMessages, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange);
+
         void FinishMessageSend(Func<Task> onStateChange);
-        void AddForgetPreviousRoleMessage(string currentRole, List<ChatMessageModel> conversation);
-        void AddRoleMessage(string newRolePrompt, List<ChatMessageModel> conversation);
+
+        void AddForgetPreviousRoleMessage(string currentRole, EventCallback<string> onError);
+
+        void AddRoleMessage(string roleName, EventCallback<string> onError);
     }
 }

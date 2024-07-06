@@ -2,6 +2,7 @@
 @inject IOpenAIService OpenAIService
 @inject IMarkdownService MarkdownService
 @inject IChatService ChatService
+@inject IConversationService ConversationService
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <RoleSelector
@@ -19,7 +20,6 @@
         ErrorMessage="@errorMessage"
         IsImageLoading="@isImageLoading"
         IsAppearanceLoading="@isAppearanceLoading"
-        ChatMessageList="chatMessages"
         OnImageClick="OpenModal"
         OnError="HandleError"
     />
@@ -53,8 +53,7 @@
     private bool isImageLoading = false;
     private bool isAppearanceLoading = false;
     private bool isImageGenerationMode = false;
-    private List<ChatMessageModel> chatMessages = new List<ChatMessageModel>();
-    private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
+    private List<ChatMessageModel> chatMessages => ConversationService.GetConversation();
     private bool showModal = false;
     private string selectedImage = "";
     private string errorMessage = "";
@@ -71,14 +70,14 @@
     private async Task HandleSendMessage(string message)
     {
         isSendingMessage = true;
-        await ChatService.HandleSendMessageAsync(message, chatMessages, conversation, isImageGenerationMode, OpenAIService, MarkdownService, OnError, () => InvokeAsync(StateHasChanged), OnImageGenerated);
+        await ChatService.HandleSendMessageAsync(message, chatMessages, isImageGenerationMode, MarkdownService, OnError, () => InvokeAsync(StateHasChanged), OnImageGenerated);
         isSendingMessage = false;
     }
 
     private async Task HandleRoleSelected(string newRolePrompt)
     {
-        ChatService.AddForgetPreviousRoleMessage(currentRole, conversation);
-        ChatService.AddRoleMessage(newRolePrompt, conversation);
+        ConversationService.AddForgetPreviousRoleMessage(currentRole, OnError);
+        ConversationService.AddRoleMessage(newRolePrompt, OnError);
 
         currentRole = newRolePrompt;
         StateHasChanged();
@@ -133,7 +132,7 @@
     private void ClearAllMessages()
     {
         chatMessages.Clear();
-        conversation.Clear();
+        ConversationService.ClearConversation(OnError);
         errorMessage = "";
     }
 

@@ -7,10 +7,36 @@ namespace MAUI_OpenAI.Services
     public class ConversationService : BaseService, IConversationService
     {
         private List<ChatMessageModel> conversation = new List<ChatMessageModel>();
+        private readonly ITokenizerService _tokenizerService;
+        private const int MaxTokens = 80000;
+
+        public ConversationService(ITokenizerService tokenizerService)
+        {
+            _tokenizerService = tokenizerService;
+        }
 
         public List<ChatMessageModel> GetConversation()
         {
             return conversation;
+        }
+
+        public List<ChatMessageModel> GetTextConversation()
+        {
+            return conversation.Where(c => !c.IsImage).ToList();
+        }
+
+        public async Task<List<ChatMessageModel>> GetTrimmedConversationAsync(EventCallback<string> onError)
+        {
+            try
+            {
+                var textConversation = GetTextConversation();
+                return _tokenizerService.TrimConversationToTokenLimit(textConversation, MaxTokens, onError);
+            }
+            catch (Exception ex)
+            {
+                await HandleErrorAsync($"An error occurred while trimming the conversation: {ex.Message}", onError);
+                return new List<ChatMessageModel>();
+            }
         }
 
         public void AddMessage(ChatMessageModel message, EventCallback<string> onError)
@@ -44,7 +70,7 @@ namespace MAUI_OpenAI.Services
             {
                 if (!string.IsNullOrEmpty(currentRole))
                 {
-                    var forgetMessage = new ChatMessageModel("Forget the previous role.", "user");
+                    var forgetMessage = new ChatMessageModel("Forget the previous role.", "user") { DisplayInUI = false };
                     AddMessage(forgetMessage, onError);
                 }
             }
@@ -60,7 +86,7 @@ namespace MAUI_OpenAI.Services
             {
                 if (RolePrompts.Roles.TryGetValue(roleName, out var roleDescription))
                 {
-                    var roleMessage = new ChatMessageModel(roleDescription, "system");
+                    var roleMessage = new ChatMessageModel(roleDescription, "system") { DisplayInUI = false };
                     AddMessage(roleMessage, onError);
                 }
             }

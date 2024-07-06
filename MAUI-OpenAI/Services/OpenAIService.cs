@@ -1,5 +1,4 @@
 using OpenAI.Chat;
-using MAUI_OpenAI.Models;
 using System.ClientModel;
 using OpenAI.Images;
 using Microsoft.AspNetCore.Components;
@@ -10,34 +9,21 @@ namespace MAUI_OpenAI.Services
     {
         private readonly ChatClient _chatClient;
         private readonly ImageClient _imageClient;
-        private readonly ITokenizerService _tokenizerService;
-        private const int MaxTokens = 80000;
+        private readonly IConversationService _conversationService;
 
-        public OpenAIService(ChatClient chatClient, ImageClient imageClient, ITokenizerService tokenizerService)
+        public OpenAIService(ChatClient chatClient, ImageClient imageClient, IConversationService conversationService)
         {
             _chatClient = chatClient;
             _imageClient = imageClient;
-            _tokenizerService = tokenizerService;
+            _conversationService = conversationService;
         }
 
-        public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, EventCallback<string> onUpdate, EventCallback onComplete, EventCallback<string> onError)
+        public async Task GetChatCompletionStreamingAsync(EventCallback<string> onUpdate, EventCallback onComplete, EventCallback<string> onError)
         {
             try
             {
-                var textConversation = conversation.Where(c => !c.IsImage).ToList();
-
-                List<ChatMessageModel> trimmedConversation;
-                try
-                {
-                    trimmedConversation = _tokenizerService.TrimConversationToTokenLimit(textConversation, MaxTokens, onError);
-                }
-                catch (Exception tex)
-                {
-                    await HandleErrorAsync($"An error occurred while trimming the conversation: {tex.Message}", onError);
-                    return;
-                }
-
-                var messages = trimmedConversation.Select(c => new UserChatMessage(c.Message)).ToArray();
+                var conversation = await _conversationService.GetTrimmedConversationAsync(onError);
+                var messages = conversation.Select(c => new UserChatMessage(c.Message)).ToArray();
 
                 AsyncResultCollection<StreamingChatCompletionUpdate> updates = _chatClient.CompleteChatStreamingAsync(messages);
 

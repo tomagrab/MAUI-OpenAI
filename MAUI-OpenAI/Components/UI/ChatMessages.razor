@@ -1,14 +1,15 @@
 @inject IJSRuntime JS
 @inject IChatMessagesService ChatMessagesService
+@inject IConversationService ConversationService
 
 <div id="chatContainer" class="flex-grow p-4 overflow-auto">
     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
     {
-        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm-max-w-md bg-red text-brightWhite">
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md bg-red text-brightWhite">
             @ErrorMessage
         </div>
     }
-    @foreach (var chat in ChatMessageList)
+    @foreach (var chat in ConversationService.GetConversation().Where(m => m.DisplayInUI))
     {
         <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md @ChatMessagesService.GetMessageCssClass(chat.Role, OnError)">
             @if (chat.IsImage)
@@ -60,9 +61,6 @@
 </div>
 
 @code {
-    [Parameter]
-    public List<ChatMessageModel> ChatMessageList { get; set; } = new List<ChatMessageModel>();
-
     [Parameter]
     public string ErrorMessage { get; set; } = string.Empty;
 

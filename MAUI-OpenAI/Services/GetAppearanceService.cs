@@ -1,22 +1,27 @@
 using System.Text.RegularExpressions;
-using MAUI_OpenAI.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace MAUI_OpenAI.Services
 {
     public class GetAppearanceService : BaseService, IGetAppearanceService
     {
+        private readonly IConversationService _conversationService;
+
+        public GetAppearanceService(IConversationService conversationService)
+        {
+            _conversationService = conversationService;
+        }
+
         public async Task<string> GeneratePromptAsync(string inputPrompt, IOpenAIService openAIService, EventCallback<string> onError)
         {
             string result = "";
-            var conversation = new List<ChatMessageModel>
-            {
-                new ChatMessageModel(inputPrompt, "user")
-            };
 
             try
             {
-                await openAIService.GetChatCompletionStreamingAsync(conversation, EventCallback.Factory.Create<string>(this, (update) =>
+                _conversationService.ClearConversation(onError);
+                _conversationService.AddUserMessage(inputPrompt, onError);
+
+                await openAIService.GetChatCompletionStreamingAsync(EventCallback.Factory.Create<string>(this, (update) =>
                 {
                     result += update;
                 }), EventCallback.Factory.Create(this, () =>

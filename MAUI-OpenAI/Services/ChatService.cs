@@ -1,24 +1,25 @@
 using Microsoft.AspNetCore.Components;
 using MAUI_OpenAI.Models;
-using MAUI_OpenAI.Data;
 
 namespace MAUI_OpenAI.Services
 {
     public class ChatService : BaseService, IChatService
     {
-        private readonly IOpenAIService openAIService;
+        private readonly IOpenAIService _openAIService;
+        private readonly IConversationService _conversationService;
 
-        public ChatService(IOpenAIService openAIService)
+        public ChatService(IOpenAIService openAIService, IConversationService conversationService)
         {
-            this.openAIService = openAIService;
+            _openAIService = openAIService;
+            _conversationService = conversationService;
         }
 
-        public async Task HandleSendMessageAsync(string message, List<ChatMessageModel> chatMessages, List<ChatMessageModel> conversation, bool isImageGenerationMode, IOpenAIService openAIService, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated)
+        public async Task HandleSendMessageAsync(string message, List<ChatMessageModel> chatMessages, bool isImageGenerationMode, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated)
         {
             if (string.IsNullOrWhiteSpace(message)) return;
 
             PrepareForMessageSend(onStateChange);
-            AddUserMessage(message, chatMessages, conversation);
+            _conversationService.AddUserMessage(message, onError);
 
             try
             {
@@ -28,7 +29,7 @@ namespace MAUI_OpenAI.Services
                 }
                 else
                 {
-                    await GenerateChatResponseAsync(conversation, chatMessages, openAIService, markdownService, onError, onStateChange);
+                    await GenerateChatResponseAsync(chatMessages, markdownService, onError, onStateChange);
                 }
             }
             catch (Exception ex)
@@ -46,18 +47,11 @@ namespace MAUI_OpenAI.Services
             onStateChange();
         }
 
-        public void AddUserMessage(string message, List<ChatMessageModel> chatMessages, List<ChatMessageModel> conversation)
-        {
-            var userChatMessage = new ChatMessageModel(message, "user");
-            chatMessages.Add(userChatMessage);
-            conversation.Add(userChatMessage);
-        }
-
         public async Task GenerateImageResponseAsync(string message, List<ChatMessageModel> chatMessages, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated)
         {
             var loadingMessage = AddLoadingMessage(chatMessages, onStateChange);
 
-            await openAIService.GenerateImageAsync(message, EventCallback.Factory.Create<byte[]>(this, async (imageBytes) =>
+            await _openAIService.GenerateImageAsync(message, EventCallback.Factory.Create<byte[]>(this, async (imageBytes) =>
             {
                 try
                 {
@@ -84,12 +78,12 @@ namespace MAUI_OpenAI.Services
             return loadingMessage;
         }
 
-        public async Task GenerateChatResponseAsync(List<ChatMessageModel> conversation, List<ChatMessageModel> chatMessages, IOpenAIService openAIService, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange)
+        public async Task GenerateChatResponseAsync(List<ChatMessageModel> chatMessages, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange)
         {
             var assistantMessage = new ChatMessageModel("", "assistant");
             bool isFirstUpdateReceived = false;
 
-            await openAIService.GetChatCompletionStreamingAsync(conversation, EventCallback.Factory.Create<string>(this, async (update) =>
+            await _openAIService.GetChatCompletionStreamingAsync(EventCallback.Factory.Create<string>(this, async (update) =>
             {
                 try
                 {
@@ -141,13 +135,6 @@ namespace MAUI_OpenAI.Services
             }
         }
 
-        private ChatMessageModel AddNewAssistantMessage(string update, List<ChatMessageModel> chatMessages)
-        {
-            var newMessage = new ChatMessageModel(update, "assistant");
-            chatMessages.Add(newMessage);
-            return newMessage;
-        }
-
         private async Task UpdateImageResponseAsync(byte[] imageBytes, List<ChatMessageModel> chatMessages, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated, EventCallback<string> onError)
         {
             try
@@ -173,22 +160,14 @@ namespace MAUI_OpenAI.Services
             onStateChange();
         }
 
-        public void AddForgetPreviousRoleMessage(string currentRole, List<ChatMessageModel> conversation)
+        public void AddForgetPreviousRoleMessage(string currentRole, EventCallback<string> onError)
         {
-            if (!string.IsNullOrEmpty(currentRole))
-            {
-                var forgetMessage = new ChatMessageModel("Forget the previous role.", "user");
-                conversation.Add(forgetMessage);
-            }
+            _conversationService.AddForgetPreviousRoleMessage(currentRole, onError);
         }
 
-        public void AddRoleMessage(string roleName, List<ChatMessageModel> conversation)
+        public void AddRoleMessage(string roleName, EventCallback<string> onError)
         {
-            if (RolePrompts.Roles.TryGetValue(roleName, out var roleDescription))
-            {
-                var roleMessage = new ChatMessageModel(roleDescription, "system");
-                conversation.Add(roleMessage);
-            }
+            _conversationService.AddRoleMessage(roleName, onError);
         }
     }
 }
