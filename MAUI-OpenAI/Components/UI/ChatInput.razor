@@ -95,7 +95,7 @@
         catch (Exception ex)
         {
             platform = "Unknown Platform";
-            ChatInputService.HandleError($"Failed to get platform information: {ex.Message}", OnError);
+            BaseService.HandleError($"Failed to get platform information: {ex.Message}", OnError);
         }
     }
 
@@ -109,7 +109,7 @@
 
     private async Task HandleSubmitAsync()
     {
-        await ChatInputService.HandleSubmitAsync(UserMessage, OnSendMessage, OnError);
+        await ChatInputService.HandleSubmitAsync(UserMessage ?? string.Empty, OnSendMessage, OnError);
         await ClearInputAsync();
     }
 
@@ -126,9 +126,10 @@
 
     private async Task ClearInputAsync()
     {
+        await Task.Yield(); // This makes the method asynchronous
         UserMessage = string.Empty;
         TokenCount = 0;
-        ChatInputService.HandleError("", OnError);
+        BaseService.HandleError("", OnError);
         shouldRegainFocus = true;
         StateHasChanged();
     }
@@ -143,7 +144,7 @@
         }
         catch (Exception ex)
         {
-            ChatInputService.HandleError($"Error handling input focus: {ex.Message}", OnError);
+            BaseService.HandleError($"Error handling input focus: {ex.Message}", OnError);
         }
     }
 
@@ -156,18 +157,18 @@
         }
         catch (Exception ex)
         {
-            ChatInputService.HandleError($"Error handling input blur: {ex.Message}", OnError);
+            BaseService.HandleError($"Error handling input blur: {ex.Message}", OnError);
         }
     }
 
     private void HandleInput(ChangeEventArgs e)
     {
-        UserMessage = e.Value.ToString();
+        UserMessage = e.Value?.ToString() ?? string.Empty;
         TokenCount = ChatInputService.EstimateTokenCount(UserMessage, TokenizerService, OnError);
     }
 
     private void HandleError(string message)
     {
-        ChatInputService.HandleError(message, OnError);
+        BaseService.HandleError(message, OnError);
     }
 }
