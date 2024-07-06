@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Components;
+
 namespace MAUI_OpenAI.Services
 {
-    public class PlatformService : IPlatformService
+    public class PlatformService : BaseService, IPlatformService
     {
-        public string GetPlatform()
+        public string GetPlatform(EventCallback<string> onError)
         {
             try
             {
@@ -10,7 +12,8 @@ namespace MAUI_OpenAI.Services
             }
             catch (Exception ex)
             {
-                return $"Unknown Platform (Error: {ex.Message})";
+                HandleError($"Unknown Platform (Error: {ex.Message})", onError);
+                return "Unknown Platform";
             }
         }
     }
