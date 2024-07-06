@@ -23,10 +23,10 @@ Whether you're sparking imagination, enhancing productivity, or just having fun,
   - The custom tokenizer is implemented in the `TokenizerService.cs` file in the `Services` folder.
   - The custom tokenizer in this project is more conservative than the default OpenAI tokenizer.
     - OpenAI provides the following estimates for their tokenizer:
-      - 1 token ≈ 4 chars in English
+      - 1 token ≈ 4 characters in English
       - 1 token ≈ ¾ words
       - 100 tokens ≈ 75 words
-    - The custom tokenizer in this project estimates 1 token ≈ 3.5 chars in English.
+    - The custom tokenizer in this project estimates 1 token ≈ 3.5 characters in English.
   - User and assistant messages are appended to a `Conversation` list, which is then tokenized and sent to the OpenAI API.
     - The `Conversation` object allows for a maximum of 80,000 tokens.
       - Once the conversation reaches 80,000 tokens, the oldest messages are removed to make room for new messages.
