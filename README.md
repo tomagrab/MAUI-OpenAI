@@ -64,7 +64,7 @@ Whether you're sparking imagination, enhancing productivity, or just having fun,
 
 ## Open Source 🌍
 
-    Airole is an open-source project. We welcome contributions and feedback from the community. Feel free to fork the repository, submit pull requests, or open issues to help improve the app.
+Airole is an open-source project. We welcome contributions and feedback from the community. Feel free to fork the repository, submit pull requests, or open issues to help improve the app.
 
 ## License 📄
 
