@@ -107,7 +107,7 @@ namespace MAUI_OpenAI.Services
                 }
             }, () =>
             {
-                CompleteResponse(assistantMessage, markdownService, onStateChange, onError);
+                CompleteResponseAsync(assistantMessage, markdownService, onStateChange, onError);
             });
         }
 
@@ -116,12 +116,12 @@ namespace MAUI_OpenAI.Services
             onStateChange();
         }
 
-        private void CompleteResponse(ChatMessageModel chatMessage, IMarkdownService markdownService, Func<Task> onStateChange, EventCallback<string> onError)
+        private async void CompleteResponseAsync(ChatMessageModel chatMessage, IMarkdownService markdownService, Func<Task> onStateChange, EventCallback<string> onError)
         {
             try
             {
-                chatMessage.HtmlContent = markdownService.ConvertToHtml(chatMessage.Message);
-                onStateChange();
+                chatMessage.HtmlContent = await markdownService.ConvertToHtmlAsync(chatMessage.Message, onError);
+                await onStateChange();
             }
             catch (Exception ex)
             {
@@ -156,7 +156,7 @@ namespace MAUI_OpenAI.Services
                 var imageMessage = new ChatMessageModel(base64Image, "assistant", isImage: true);
                 chatMessages.Add(imageMessage);
                 await InvokeIfHasDelegateAsync(onImageGenerated, imageBytes);
-                onStateChange();
+                await onStateChange();
             }
             catch (Exception ex)
             {
