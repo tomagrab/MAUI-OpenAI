@@ -1,7 +1,8 @@
 @inject IPlatformService PlatformService
 @inject ITokenizerService TokenizerService
-@inject IJSRuntime JS
 @inject IChatInputService ChatInputService
+@inject IBaseService BaseService
+@inject IJSRuntime JS
 
 <div class="@ChatInputService.GetFormContainerCssClass(isFocused, platform) relative">
     <form @onsubmit="HandleSubmitAsync" class="flex w-full relative">
@@ -89,7 +90,7 @@
     {
         try
         {
-            platform = PlatformService.GetPlatform();
+            platform = PlatformService.GetPlatform(EventCallback.Factory.Create<string>(this, HandleError));
         }
         catch (Exception ex)
         {
@@ -162,6 +163,11 @@
     private void HandleInput(ChangeEventArgs e)
     {
         UserMessage = e.Value.ToString();
-        TokenCount = ChatInputService.EstimateTokenCount(UserMessage, TokenizerService);
+        TokenCount = ChatInputService.EstimateTokenCount(UserMessage, TokenizerService, OnError);
+    }
+
+    private void HandleError(string message)
+    {
+        ChatInputService.HandleError(message, OnError);
     }
 }

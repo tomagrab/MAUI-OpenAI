@@ -52,7 +52,7 @@
 
     protected override void OnInitialized()
     {
-        platformName = PlatformService.GetPlatform();
+        platformName = PlatformService.GetPlatform(OnError);
     }
 
     private string platformName { get; set; } = string.Empty;
@@ -105,7 +105,7 @@
 
     private async Task CopyImage()
     {
-        await ModalService.CopyImageAsync(ImageSrc, JS, OnError);
+        await ModalService.CopyImageAsync(ImageSrc, JS, EventCallback.Factory.Create<string>(this, HandleError));
         isImageCopied = true;
         StateHasChanged();
 

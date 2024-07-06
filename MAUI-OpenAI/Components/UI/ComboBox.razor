@@ -37,6 +37,8 @@
     public EventCallback<string> OnItemSelected { get; set; }
     [Parameter]
     public bool InputDisabled { get; set; } = false;
+    [Parameter]
+    public EventCallback<string> OnError { get; set; }
 
     private string SearchText { get; set; } = string.Empty;
     private bool DropdownVisible { get; set; } = false;
@@ -56,7 +58,7 @@
     public async Task OnOutsideClick(double clientX, double clientY)
     {
         var rect = new BoundingClientRect();
-        if (await ComboBoxService.IsClickOutsideAsync(clientX, clientY, rect, JS, comboBoxRef))
+        if (await ComboBoxService.IsClickOutsideAsync(clientX, clientY, rect, JS, comboBoxRef, OnError))
         {
             HideDropdown();
         }

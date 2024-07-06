@@ -17,11 +17,11 @@ namespace MAUI_OpenAI.Services
             catch (Exception ex)
             {
                 HandleError($"Error filtering items: {ex.Message}", EventCallback.Factory.Create<string>(this, message => { }));
-                return new List<string>(); // Return an empty list in case of error
+                return new List<string>();
             }
         }
 
-        public async Task<bool> IsClickOutsideAsync(double clientX, double clientY, BoundingClientRect rect, IJSRuntime js, ElementReference comboBoxRef)
+        public async Task<bool> IsClickOutsideAsync(double clientX, double clientY, BoundingClientRect rect, IJSRuntime js, ElementReference comboBoxRef, EventCallback<string> onError)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace MAUI_OpenAI.Services
             }
             catch (Exception ex)
             {
-                await HandleErrorAsync($"Error checking if click is outside: {ex.Message}", EventCallback.Factory.Create<string>(this, message => { }));
+                await HandleErrorAsync($"Error checking if click is outside: {ex.Message}", onError);
                 return false;
             }
         }

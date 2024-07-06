@@ -82,9 +82,9 @@ namespace MAUI_OpenAI.Services
             await js.InvokeVoidAsync("focusElement", textAreaRef);
         }
 
-        public int EstimateTokenCount(string userMessage, ITokenizerService tokenizerService)
+        public int EstimateTokenCount(string userMessage, ITokenizerService tokenizerService, EventCallback<string> onError)
         {
-            return tokenizerService.EstimateTokenCount(userMessage);
+            return tokenizerService.EstimateTokenCount(userMessage, onError);
         }
     }
 }

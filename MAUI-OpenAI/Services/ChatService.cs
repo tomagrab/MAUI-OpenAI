@@ -57,7 +57,7 @@ namespace MAUI_OpenAI.Services
         {
             var loadingMessage = AddLoadingMessage(chatMessages, onStateChange);
 
-            await openAIService.GenerateImageAsync(message, async (imageBytes) =>
+            await openAIService.GenerateImageAsync(message, EventCallback.Factory.Create<byte[]>(this, async (imageBytes) =>
             {
                 try
                 {
@@ -69,11 +69,11 @@ namespace MAUI_OpenAI.Services
                     RemoveLoadingMessage(loadingMessage, chatMessages, onStateChange);
                     await HandleErrorAsync($"Error updating image response: {ex.Message}", onError);
                 }
-            }, async (error) =>
+            }), EventCallback.Factory.Create<string>(this, async (error) =>
             {
                 RemoveLoadingMessage(loadingMessage, chatMessages, onStateChange);
                 await HandleErrorAsync(error, onError);
-            });
+            }));
         }
 
         private ChatMessageModel AddLoadingMessage(List<ChatMessageModel> chatMessages, Func<Task> onStateChange)
@@ -89,7 +89,7 @@ namespace MAUI_OpenAI.Services
             var assistantMessage = new ChatMessageModel("", "assistant");
             bool isFirstUpdateReceived = false;
 
-            await openAIService.GetChatCompletionStreamingAsync(conversation, async (update) =>
+            await openAIService.GetChatCompletionStreamingAsync(conversation, EventCallback.Factory.Create<string>(this, async (update) =>
             {
                 try
                 {
@@ -105,10 +105,10 @@ namespace MAUI_OpenAI.Services
                 {
                     await HandleErrorAsync($"Error updating chat response: {ex.Message}", onError);
                 }
-            }, () =>
+            }), EventCallback.Factory.Create(this, () =>
             {
                 CompleteResponseAsync(assistantMessage, markdownService, onStateChange, onError);
-            });
+            }), onError);
         }
 
         public void FinishMessageSend(Func<Task> onStateChange)

@@ -1,5 +1,6 @@
 @inject IGetAppearanceService GetAppearanceService
 @inject IOpenAIService OpenAIService
+@inject IBaseService BaseService
 
 @if (!string.IsNullOrEmpty(Role) && !string.IsNullOrEmpty(Description))
 {
@@ -44,30 +45,38 @@
             {
                 await OnLoading.InvokeAsync(true);
 
-                string dallePrompt = await GetAppearanceService.GeneratePromptAsync(promptForDalle, OpenAIService);
+                string dallePrompt = await GetAppearanceService.GeneratePromptAsync(promptForDalle, OpenAIService, OnError);
                 if (!string.IsNullOrEmpty(dallePrompt))
                 {
-                    await OpenAIService.GenerateImageAsync(dallePrompt, async (imageBytes) =>
-                    {
-                        await OnImageGenerated.InvokeAsync(imageBytes);
-                    }, async (error) =>
-                    {
-                        await OnError.InvokeAsync(error);
-                    });
+                    await OpenAIService.GenerateImageAsync(
+                        dallePrompt,
+                        EventCallback.Factory.Create<byte[]>(this, HandleImageGenerated),
+                        EventCallback.Factory.Create<string>(this, HandleError)
+                    );
                 }
                 else
                 {
-                    await OnError.InvokeAsync("Failed to generate DALLE prompt.");
+                    await BaseService.HandleErrorAsync("Failed to generate DALLE prompt.", OnError);
                 }
             }
             catch (Exception ex)
             {
-                await OnError.InvokeAsync($"Error generating appearance: {ex.Message}");
+                await BaseService.HandleErrorAsync($"Error generating appearance: {ex.Message}", OnError);
             }
             finally
             {
                 await OnLoading.InvokeAsync(false);
             }
         }
+    }
+
+    private async Task HandleImageGenerated(byte[] imageBytes)
+    {
+        await OnImageGenerated.InvokeAsync(imageBytes);
+    }
+
+    private async Task HandleError(string error)
+    {
+        await BaseService.HandleErrorAsync(error, OnError);
     }
 }

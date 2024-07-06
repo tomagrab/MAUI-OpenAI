@@ -11,7 +11,7 @@ namespace MAUI_OpenAI.Services
             {
                 if (!string.IsNullOrEmpty(imageSrc))
                 {
-                    var fileName = $"image_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                    var fileName = $"DALLE_{DateTime.Now:yyyyMMdd_HHmmss}.png";
                     await imageSaveService.SaveImageAsync(imageSrc, fileName);
                     return "Saved";
                 }

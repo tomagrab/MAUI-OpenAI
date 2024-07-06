@@ -6,7 +6,7 @@ namespace MAUI_OpenAI.Services
 {
     public class GetAppearanceService : BaseService, IGetAppearanceService
     {
-        public async Task<string> GeneratePromptAsync(string inputPrompt, IOpenAIService openAIService)
+        public async Task<string> GeneratePromptAsync(string inputPrompt, IOpenAIService openAIService, EventCallback<string> onError)
         {
             string result = "";
             var conversation = new List<ChatMessageModel>
@@ -16,17 +16,17 @@ namespace MAUI_OpenAI.Services
 
             try
             {
-                await openAIService.GetChatCompletionStreamingAsync(conversation, (update) =>
+                await openAIService.GetChatCompletionStreamingAsync(conversation, EventCallback.Factory.Create<string>(this, (update) =>
                 {
                     result += update;
-                }, () =>
+                }), EventCallback.Factory.Create(this, () =>
                 {
                     result = ExtractDallePrompt(result);
-                });
+                }), onError);
             }
             catch (Exception ex)
             {
-                await HandleErrorAsync($"Error generating prompt: {ex.Message}", EventCallback.Factory.Create<string>(this, message => { }));
+                await HandleErrorAsync($"Error generating prompt: {ex.Message}", onError);
                 result = ex.Message;
             }
 

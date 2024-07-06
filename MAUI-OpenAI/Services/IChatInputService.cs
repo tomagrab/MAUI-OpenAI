@@ -12,6 +12,6 @@ namespace MAUI_OpenAI.Services
         string GetFormContainerCssClass(bool isFocused, string platform);
         Task FocusTextAreaAsync(ElementReference textAreaRef, IJSRuntime js);
         void HandleError(string message, EventCallback<string> onError);
-        int EstimateTokenCount(string userMessage, ITokenizerService tokenizerService);
+        int EstimateTokenCount(string userMessage, ITokenizerService tokenizerService, EventCallback<string> onError);
     }
 }
