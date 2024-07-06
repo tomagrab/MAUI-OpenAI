@@ -36,6 +36,7 @@ namespace MAUI_OpenAI
             builder.Services.AddSingleton(imageClient);
             builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
             builder.Services.AddSingleton<IBaseService, BaseService>();
+            builder.Services.AddSingleton<IConversationService, ConversationService>();
             builder.Services.AddSingleton<ITokenizerService, TokenizerService>();
             builder.Services.AddSingleton<IOpenAIService, OpenAIService>();
             builder.Services.AddSingleton<IPlatformService, PlatformService>();
