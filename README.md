@@ -14,6 +14,28 @@ Whether you're sparking imagination, enhancing productivity, or just having fun,
 - **Dynamic Conversations:** Engage in dynamic, creative conversations with the AI, tailored to the role you've selected.
 - **Immersive Experience:** Immerse yourself in a unique, interactive experience that brings your chats to life.
 - **Personalized Interactions:** Customize your interactions with the AI to suit your preferences and create a more engaging experience.
+- **Custom Tokenizer:** This project uses a custom tokenizer to process the input text before sending it to the OpenAI API.
+
+## Custom Tokenizer 🧠
+
+- **Purpose:** The custom tokenizer is designed to preprocess the input text before sending it to the OpenAI API.
+- **Important Information:**
+  - The custom tokenizer is implemented in the `TokenizerService.cs` file in the `Services` folder.
+  - The custom tokenizer in this project is more conservative than the default OpenAI tokenizer.
+    - OpenAI provides the following estimates for their tokenizer:
+      - 1 token ≈ 4 chars in English
+      - 1 token ≈ ¾ words
+      - 100 tokens ≈ 75 words
+    - The custom tokenizer in this project estimates 1 token ≈ 3.5 chars in English.
+  - User and assistant messages are appended to a `Conversation` object, which is then tokenized and sent to the OpenAI API.
+    - The `Conversation` object is defined in the `Models` folder.
+    - The `Conversation` object allows for a maximum of 80,000 tokens.
+      - Once the conversation reaches 80,000 tokens, the oldest messages are removed to make room for new messages.
+      - GPT-4o model allows for a maximum of 128,000 tokens in the Context Window.
+        - The purpose of such conservative tokenization is to ensure that the conversation remains within the token limit, while the model can still retain context from previous messages.
+  - Each user message allows for a maximum of 1000 tokens.
+    - If the user message reaches 1000 tokens, further input is disabled.
+
 
 ## Tools Needed 🛠️
 
