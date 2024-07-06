@@ -5,7 +5,7 @@ namespace MAUI_OpenAI.Services
 {
     public interface IModalService
     {
-        Task SaveImageAsync(string imageSrc, IImageSaveService imageSaveService, EventCallback<string> onError, string platform);
+        Task<string> SaveImageAsync(string imageSrc, IImageSaveService imageSaveService, string platform);
         Task CopyImageAsync(string imageSrc, IJSRuntime jsRuntime, EventCallback<string> onError);
     }
 }

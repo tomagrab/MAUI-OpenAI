@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Components;
 
 namespace MAUI_OpenAI.Services
 {
-    public class ModalService : IModalService
+    public class ModalService : BaseService, IModalService
     {
-        public async Task SaveImageAsync(string imageSrc, IImageSaveService imageSaveService, EventCallback<string> onError, string platform)
+        public async Task<string> SaveImageAsync(string imageSrc, IImageSaveService imageSaveService, string platform)
         {
             try
             {
@@ -13,21 +13,22 @@ namespace MAUI_OpenAI.Services
                 {
                     var fileName = $"image_{DateTime.Now:yyyyMMdd_HHmmss}.png";
                     await imageSaveService.SaveImageAsync(imageSrc, fileName);
+                    return "Saved";
                 }
                 else
                 {
-                    await HandleErrorAsync("No image to save.", onError);
+                    return "No image to save.";
                 }
             }
             catch (Exception ex)
             {
                 if (ex.Message.Contains("Operation cancelled"))
                 {
-                    await HandleErrorAsync("Save operation was cancelled.", onError);
+                    return "Cancelled";
                 }
                 else
                 {
-                    await HandleErrorAsync($"Error saving image: {ex.Message}", onError);
+                    return $"Error saving image: {ex.Message}";
                 }
             }
         }
@@ -48,14 +49,6 @@ namespace MAUI_OpenAI.Services
             catch (Exception ex)
             {
                 await HandleErrorAsync($"Error copying image: {ex.Message}", onError);
-            }
-        }
-
-        private async Task HandleErrorAsync(string message, EventCallback<string> onError)
-        {
-            if (onError.HasDelegate)
-            {
-                await onError.InvokeAsync(message);
             }
         }
     }

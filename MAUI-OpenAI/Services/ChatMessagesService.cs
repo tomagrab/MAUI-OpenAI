@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace MAUI_OpenAI.Services
 {
-    public class ChatMessagesService : IChatMessagesService
+    public class ChatMessagesService : BaseService, IChatMessagesService
     {
         public string GetMessageCssClass(string role, EventCallback<string> onError)
         {
@@ -28,26 +28,11 @@ namespace MAUI_OpenAI.Services
         {
             try
             {
-                if (onImageClick.HasDelegate)
-                {
-                    await onImageClick.InvokeAsync(imageSrc);
-                }
-                else
-                {
-                    HandleError("Image click handler is not configured.", onError);
-                }
+                await InvokeIfHasDelegateAsync(onImageClick, imageSrc);
             }
             catch (Exception ex)
             {
-                HandleError($"Error handling image click: {ex.Message}", onError);
-            }
-        }
-
-        public void HandleError(string message, EventCallback<string> onError)
-        {
-            if (onError.HasDelegate)
-            {
-                onError.InvokeAsync(message);
+                await HandleErrorAsync($"Error handling image click: {ex.Message}", onError);
             }
         }
     }

@@ -4,7 +4,7 @@ using MAUI_OpenAI.Data;
 
 namespace MAUI_OpenAI.Services
 {
-    public class ChatService : IChatService
+    public class ChatService : BaseService, IChatService
     {
         private readonly IOpenAIService openAIService;
 
@@ -33,7 +33,7 @@ namespace MAUI_OpenAI.Services
             }
             catch (Exception ex)
             {
-                await onError.InvokeAsync($"Error sending message: {ex.Message}");
+                await HandleErrorAsync($"Error sending message: {ex.Message}", onError);
             }
             finally
             {
@@ -67,12 +67,12 @@ namespace MAUI_OpenAI.Services
                 catch (Exception ex)
                 {
                     RemoveLoadingMessage(loadingMessage, chatMessages, onStateChange);
-                    await onError.InvokeAsync($"Error updating image response: {ex.Message}");
+                    await HandleErrorAsync($"Error updating image response: {ex.Message}", onError);
                 }
             }, async (error) =>
             {
                 RemoveLoadingMessage(loadingMessage, chatMessages, onStateChange);
-                await onError.InvokeAsync(error);
+                await HandleErrorAsync(error, onError);
             });
         }
 
@@ -103,7 +103,7 @@ namespace MAUI_OpenAI.Services
                 }
                 catch (Exception ex)
                 {
-                    await onError.InvokeAsync($"Error updating chat response: {ex.Message}");
+                    await HandleErrorAsync($"Error updating chat response: {ex.Message}", onError);
                 }
             }, () =>
             {
@@ -125,7 +125,7 @@ namespace MAUI_OpenAI.Services
             }
             catch (Exception ex)
             {
-                onError.InvokeAsync($"Error completing response: {ex.Message}");
+                HandleError($"Error completing response: {ex.Message}", onError);
             }
         }
 
@@ -137,7 +137,7 @@ namespace MAUI_OpenAI.Services
             }
             catch (Exception ex)
             {
-                onError.InvokeAsync($"Error updating response: {ex.Message}");
+                HandleError($"Error updating response: {ex.Message}", onError);
             }
         }
 
@@ -155,12 +155,12 @@ namespace MAUI_OpenAI.Services
                 var base64Image = Convert.ToBase64String(imageBytes);
                 var imageMessage = new ChatMessageModel(base64Image, "assistant", isImage: true);
                 chatMessages.Add(imageMessage);
-                await onImageGenerated.InvokeAsync(imageBytes);
+                await InvokeIfHasDelegateAsync(onImageGenerated, imageBytes);
                 onStateChange();
             }
             catch (Exception ex)
             {
-                await onError.InvokeAsync($"Error updating image response: {ex.Message}");
+                await HandleErrorAsync($"Error updating image response: {ex.Message}", onError);
             }
         }
 

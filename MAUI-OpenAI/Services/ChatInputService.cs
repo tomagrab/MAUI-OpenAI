@@ -3,7 +3,7 @@ using Microsoft.JSInterop;
 
 namespace MAUI_OpenAI.Services
 {
-    public class ChatInputService : IChatInputService
+    public class ChatInputService : BaseService, IChatInputService
     {
         public async Task HandleSubmitAsync(string userMessage, EventCallback<string> onSendMessage, EventCallback<string> onError)
         {
@@ -16,12 +16,12 @@ namespace MAUI_OpenAI.Services
                 }
                 else
                 {
-                    HandleError("Message sending function is not configured.", onError);
+                    await HandleErrorAsync("Message sending function is not configured.", onError);
                 }
             }
             catch (Exception ex)
             {
-                HandleError($"Error sending message: {ex.Message}", onError);
+                await HandleErrorAsync($"Error sending message: {ex.Message}", onError);
             }
         }
 
@@ -35,12 +35,12 @@ namespace MAUI_OpenAI.Services
                 }
                 else
                 {
-                    HandleError("Clear messages function is not configured.", onError);
+                    await HandleErrorAsync("Clear messages function is not configured.", onError);
                 }
             }
             catch (Exception ex)
             {
-                HandleError($"Error clearing messages: {ex.Message}", onError);
+                await HandleErrorAsync($"Error clearing messages: {ex.Message}", onError);
             }
         }
 
@@ -54,12 +54,12 @@ namespace MAUI_OpenAI.Services
                 }
                 else
                 {
-                    HandleError("Image generation toggle function is not configured.", onError);
+                    await HandleErrorAsync("Image generation toggle function is not configured.", onError);
                 }
             }
             catch (Exception ex)
             {
-                HandleError($"Error toggling image generation: {ex.Message}", onError);
+                await HandleErrorAsync($"Error toggling image generation: {ex.Message}", onError);
             }
         }
 
@@ -80,14 +80,6 @@ namespace MAUI_OpenAI.Services
         public async Task FocusTextAreaAsync(ElementReference textAreaRef, IJSRuntime js)
         {
             await js.InvokeVoidAsync("focusElement", textAreaRef);
-        }
-
-        public void HandleError(string message, EventCallback<string> onError)
-        {
-            if (onError.HasDelegate)
-            {
-                onError.InvokeAsync(message);
-            }
         }
 
         public int EstimateTokenCount(string userMessage, ITokenizerService tokenizerService)

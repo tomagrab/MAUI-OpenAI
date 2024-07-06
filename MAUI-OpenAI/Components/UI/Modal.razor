@@ -84,13 +84,22 @@
 
     private async Task SaveImage()
     {
-        await ModalService.SaveImageAsync(ImageSrc, ImageSaveService, OnError, platformName);
-        isImageSaved = true;
-        isSaveCancelled = false;
+        var saveResult = await ModalService.SaveImageAsync(ImageSrc, ImageSaveService, platformName);
+
+        if (saveResult == "Cancelled")
+        {
+            isSaveCancelled = true;
+        }
+        else if (saveResult == "Saved")
+        {
+            isImageSaved = true;
+        }
+
         StateHasChanged();
 
         await Task.Delay(2000);
         isImageSaved = false;
+        isSaveCancelled = false;
         StateHasChanged();
     }
 
