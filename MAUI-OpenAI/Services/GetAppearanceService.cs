@@ -18,9 +18,6 @@ namespace MAUI_OpenAI.Services
 
             try
             {
-                _conversationService.ClearConversation(onError);
-                _conversationService.AddUserMessage(inputPrompt, onError);
-
                 await openAIService.GetChatCompletionStreamingAsync(EventCallback.Factory.Create<string>(this, (update) =>
                 {
                     result += update;
