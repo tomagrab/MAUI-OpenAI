@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using MAUI_OpenAI.Models;
 
 namespace MAUI_OpenAI.Services
 {
