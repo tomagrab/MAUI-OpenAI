@@ -18,11 +18,10 @@ namespace MAUI_OpenAI.Services
             _conversationService = conversationService;
         }
 
-        public async Task GetChatCompletionStreamingAsync(EventCallback<string> onUpdate, EventCallback onComplete, EventCallback<string> onError)
+        public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, EventCallback<string> onUpdate, EventCallback onComplete, EventCallback<string> onError)
         {
             try
             {
-                var conversation = await _conversationService.GetTrimmedConversationAsync(onError);
                 var messages = conversation.Select(c => new UserChatMessage(c.Message)).ToArray();
 
                 AsyncResultCollection<StreamingChatCompletionUpdate> updates = _chatClient.CompleteChatStreamingAsync(messages);

@@ -1719,9 +1719,3 @@ p {
 .disabled\:opacity-50:disabled {
   opacity: 0.5;
 }
-
-@media (min-width: 768px) {
-  .md\:max-w-lg {
-    max-width: 32rem;
-  }
-}

@@ -18,7 +18,12 @@ namespace MAUI_OpenAI.Services
 
             try
             {
-                await openAIService.GetChatCompletionStreamingAsync(EventCallback.Factory.Create<string>(this, (update) =>
+                var temporaryConversation = new List<ChatMessageModel>
+                {
+                    new ChatMessageModel(inputPrompt, "user")
+                };
+
+                await openAIService.GetChatCompletionStreamingAsync(temporaryConversation, EventCallback.Factory.Create<string>(this, (update) =>
                 {
                     result += update;
                 }), EventCallback.Factory.Create(this, () =>

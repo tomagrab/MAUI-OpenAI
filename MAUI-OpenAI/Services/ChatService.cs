@@ -29,7 +29,8 @@ namespace MAUI_OpenAI.Services
                 }
                 else
                 {
-                    await GenerateChatResponseAsync(chatMessages, markdownService, onError, onStateChange);
+                    var conversation = await _conversationService.GetTrimmedConversationAsync(onError);
+                    await GenerateChatResponseAsync(conversation, chatMessages, markdownService, onError, onStateChange);
                 }
             }
             catch (Exception ex)
@@ -78,12 +79,12 @@ namespace MAUI_OpenAI.Services
             return loadingMessage;
         }
 
-        public async Task GenerateChatResponseAsync(List<ChatMessageModel> chatMessages, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange)
+        public async Task GenerateChatResponseAsync(List<ChatMessageModel> conversation, List<ChatMessageModel> chatMessages, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange)
         {
             var assistantMessage = new ChatMessageModel("", "assistant");
             bool isFirstUpdateReceived = false;
 
-            await _openAIService.GetChatCompletionStreamingAsync(EventCallback.Factory.Create<string>(this, async (update) =>
+            await _openAIService.GetChatCompletionStreamingAsync(conversation, EventCallback.Factory.Create<string>(this, async (update) =>
             {
                 try
                 {
