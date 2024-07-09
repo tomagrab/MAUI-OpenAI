@@ -7,7 +7,6 @@
         @bind="SearchText"
         @bind:event="oninput"
         @onfocus="ShowDropdown"
-        @onkeydown="HandleKeyDown"
         @onclick="ShowDropdown"
         disabled="@InputDisabled"
         class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full disabled:cursor-not-allowed disabled:opacity-50 pr-10"
@@ -36,7 +35,7 @@
                     <li
                         @onclick="() => SelectItem(item)"
                         tabindex="0"
-                        class="p-2 cursor-pointer hover:bg-gray-700 text-brightWhite @(item == highlightedItem ? "bg-gray-700" : "")"
+                        class="p-2 cursor-pointer hover:bg-gray-700 text-brightWhite"
                     >
                         @((MarkupString)HighlightText(item))
                     </li>
@@ -68,8 +67,6 @@
     private string SearchText { get; set; } = string.Empty;
     private bool DropdownVisible { get; set; } = false;
     private ElementReference comboBoxRef;
-    private string highlightedItem = string.Empty;
-    private int highlightedIndex = -1;
 
     private List<string> FilteredItems => ComboBoxService.FilterItems(SearchText, Items);
 
@@ -94,7 +91,6 @@
     private void ShowDropdown()
     {
         DropdownVisible = true;
-        highlightedIndex = -1;
     }
 
     private void HideDropdown()
@@ -107,29 +103,7 @@
     {
         if (e.Key == "Enter" && FilteredItems.Any())
         {
-            if (highlightedIndex >= 0 && highlightedIndex < FilteredItems.Count)
-            {
-                await SelectItem(FilteredItems[highlightedIndex]);
-            }
-        }
-        else if (e.Key == "ArrowDown")
-        {
-            MoveFocus(1);
-        }
-        else if (e.Key == "ArrowUp")
-        {
-            MoveFocus(-1);
-        }
-    }
-
-    private void MoveFocus(int direction)
-    {
-        if (FilteredItems.Any())
-        {
-            highlightedIndex = (highlightedIndex + direction) % FilteredItems.Count;
-            if (highlightedIndex < 0) highlightedIndex = FilteredItems.Count - 1;
-            highlightedItem = FilteredItems[highlightedIndex];
-            StateHasChanged();
+            await SelectItem(FilteredItems.First());
         }
     }
 
