@@ -8,6 +8,7 @@
         OnItemSelected="HandleRoleChange"
         @ref="comboBoxRef"
         InputDisabled="@inputDisabled"
+        OnClear="HandleClear"
     />
     @if (!string.IsNullOrEmpty(selectedRole))
     {
@@ -51,6 +52,12 @@
     {
         selectedRole = value;
         await RoleSelectorService.HandleRoleChangeAsync(value, OnRoleSelected);
+    }
+
+    private async Task HandleClear()
+    {
+        selectedRole = "";
+        StateHasChanged();
     }
 
     private async Task HandleImageGenerated(byte[] imageBytes)

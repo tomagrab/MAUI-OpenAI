@@ -12,6 +12,8 @@
         disabled="@InputDisabled"
         class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full disabled:cursor-not-allowed disabled:opacity-50 pr-10"
         placeholder="Select Role"
+        aria-autocomplete="list"
+        aria-controls="comboBoxDropdown"
     />
     @if (!string.IsNullOrEmpty(SearchText))
     {
@@ -19,23 +21,34 @@
             type="button"
             class="absolute right-2 top-2 text-brightWhite hover:text-gray-900 focus:outline-none"
             @onclick="ClearInput"
+            aria-label="Clear input"
         >
             <i class="fas fa-times"></i>
         </button>
     }
-    @if (DropdownVisible && FilteredItems.Any())
+    @if (DropdownVisible)
     {
-        <ul class="absolute z-10 mt-1 bg-darkblue border border-gray rounded w-full max-h-80 overflow-y-auto">
-            @foreach (var item in FilteredItems)
-            {
-                <li
-                    class="p-2 cursor-pointer hover:bg-gray-700 text-brightWhite"
-                    @onclick="() => SelectItem(item)"
-                >
-                    @item
-                </li>
-            }
-        </ul>
+        @if (FilteredItems.Any())
+        {
+            <ul id="comboBoxDropdown" class="absolute z-10 mt-1 bg-darkblue border border-gray rounded w-full max-h-80 overflow-y-auto">
+                @foreach (var item in FilteredItems)
+                {
+                    <li
+                        @onclick="() => SelectItem(item)"
+                        tabindex="0"
+                        class="p-2 cursor-pointer hover:bg-gray-700 text-brightWhite @(item == highlightedItem ? "bg-gray-700" : "")"
+                    >
+                        @((MarkupString)HighlightText(item))
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="absolute z-10 mt-1 bg-darkblue border border-gray rounded w-full p-2 text-brightWhite">
+                No results found
+            </div>
+        }
     }
 </div>
 
@@ -49,10 +62,14 @@
     public bool InputDisabled { get; set; } = false;
     [Parameter]
     public EventCallback<string> OnError { get; set; }
+    [Parameter]
+    public EventCallback OnClear { get; set; }
 
     private string SearchText { get; set; } = string.Empty;
     private bool DropdownVisible { get; set; } = false;
     private ElementReference comboBoxRef;
+    private string highlightedItem = string.Empty;
+    private int highlightedIndex = -1;
 
     private List<string> FilteredItems => ComboBoxService.FilterItems(SearchText, Items);
 
@@ -77,6 +94,7 @@
     private void ShowDropdown()
     {
         DropdownVisible = true;
+        highlightedIndex = -1;
     }
 
     private void HideDropdown()
@@ -89,7 +107,29 @@
     {
         if (e.Key == "Enter" && FilteredItems.Any())
         {
-            await SelectItem(FilteredItems.First());
+            if (highlightedIndex >= 0 && highlightedIndex < FilteredItems.Count)
+            {
+                await SelectItem(FilteredItems[highlightedIndex]);
+            }
+        }
+        else if (e.Key == "ArrowDown")
+        {
+            MoveFocus(1);
+        }
+        else if (e.Key == "ArrowUp")
+        {
+            MoveFocus(-1);
+        }
+    }
+
+    private void MoveFocus(int direction)
+    {
+        if (FilteredItems.Any())
+        {
+            highlightedIndex = (highlightedIndex + direction) % FilteredItems.Count;
+            if (highlightedIndex < 0) highlightedIndex = FilteredItems.Count - 1;
+            highlightedItem = FilteredItems[highlightedIndex];
+            StateHasChanged();
         }
     }
 
@@ -100,16 +140,25 @@
         await OnItemSelected.InvokeAsync(item);
     }
 
-    private void ClearInput()
+    private async void ClearInput()
     {
         SearchText = string.Empty;
         DropdownVisible = false;
+        await OnClear.InvokeAsync();
     }
 
     public async Task ClearAsync()
     {
         SearchText = string.Empty;
         DropdownVisible = false;
-        await Task.CompletedTask;
+        await OnClear.InvokeAsync();
+    }
+
+    private string HighlightText(string text)
+    {
+        if (string.IsNullOrEmpty(SearchText)) return text;
+
+        var highlightedText = text.Replace(SearchText, $"<mark>{SearchText}</mark>", StringComparison.OrdinalIgnoreCase);
+        return highlightedText;
     }
 }
