@@ -10,9 +10,19 @@
         @onkeydown="HandleKeyDown"
         @onclick="ShowDropdown"
         disabled="@InputDisabled"
-        class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full disabled:cursor-not-allowed disabled:opacity-50"
+        class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full disabled:cursor-not-allowed disabled:opacity-50 pr-10"
         placeholder="Select Role"
     />
+    @if (!string.IsNullOrEmpty(SearchText))
+    {
+        <button
+            type="button"
+            class="absolute right-2 top-2 text-brightWhite hover:text-gray-900 focus:outline-none"
+            @onclick="ClearInput"
+        >
+            <i class="fas fa-times"></i>
+        </button>
+    }
     @if (DropdownVisible && FilteredItems.Any())
     {
         <ul class="absolute z-10 mt-1 bg-darkblue border border-gray rounded w-full max-h-80 overflow-y-auto">
@@ -88,6 +98,12 @@
         SearchText = item;
         DropdownVisible = false;
         await OnItemSelected.InvokeAsync(item);
+    }
+
+    private void ClearInput()
+    {
+        SearchText = string.Empty;
+        DropdownVisible = false;
     }
 
     public async Task ClearAsync()
