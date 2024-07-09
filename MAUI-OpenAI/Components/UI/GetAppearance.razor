@@ -1,6 +1,7 @@
 @inject IGetAppearanceService GetAppearanceService
 @inject IOpenAIService OpenAIService
 @inject IBaseService BaseService
+@inject IInputStateService InputStateService
 
 @if (!string.IsNullOrEmpty(Role) && !string.IsNullOrEmpty(Description))
 {
@@ -33,7 +34,7 @@
     [Parameter]
     public bool IsAppearanceLoading { get; set; } = false;
 
-    private bool InputDisabled => IsAppearanceGenerating || IsSendingMessage || IsImageLoading;
+    private bool InputDisabled => InputStateService.IsInputDisabled(IsSendingMessage, IsImageLoading, IsAppearanceLoading, 0, 0);
 
     private async Task HandleGetAppearance()
     {

@@ -3,6 +3,7 @@
 @inject IChatInputService ChatInputService
 @inject IBaseService BaseService
 @inject IJSRuntime JS
+@inject IInputStateService InputStateService
 
 <div class="@ChatInputService.GetFormContainerCssClass(isFocused, platform) relative">
     <form @onsubmit="HandleSubmitAsync" class="flex w-full relative">
@@ -97,7 +98,7 @@
 
     private bool showModal = false;
     private string modalContent = string.Empty;
-    private bool IsInputDisabled => IsSendingMessage || IsImageLoading || IsAppearanceLoading || TokenCount > MaxTokens;
+    private bool IsInputDisabled => InputStateService.IsInputDisabled(IsSendingMessage, IsImageLoading, IsAppearanceLoading, TokenCount, MaxTokens);
 
     protected override void OnInitialized()
     {

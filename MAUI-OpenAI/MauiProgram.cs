@@ -36,19 +36,20 @@ namespace MAUI_OpenAI
             builder.Services.AddSingleton(imageClient);
             builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
             builder.Services.AddSingleton<IBaseService, BaseService>();
-            builder.Services.AddSingleton<IConversationService, ConversationService>();
-            builder.Services.AddSingleton<ITokenizerService, TokenizerService>();
-            builder.Services.AddSingleton<IOpenAIService, OpenAIService>();
-            builder.Services.AddSingleton<IPlatformService, PlatformService>();
-            builder.Services.AddSingleton<IMarkdownService, MarkdownService>();
-            builder.Services.AddSingleton<IImageSaveService, ImageSaveService>();
             builder.Services.AddSingleton<IChatService, ChatService>();
             builder.Services.AddSingleton<IChatInputService, ChatInputService>();
             builder.Services.AddSingleton<IChatMessagesService, ChatMessagesService>();
             builder.Services.AddSingleton<IComboBoxService, ComboBoxService>();
+            builder.Services.AddSingleton<IConversationService, ConversationService>();
             builder.Services.AddSingleton<IGetAppearanceService, GetAppearanceService>();
+            builder.Services.AddSingleton<IImageSaveService, ImageSaveService>();
+            builder.Services.AddSingleton<IInputStateService, InputStateService>();
+            builder.Services.AddSingleton<IMarkdownService, MarkdownService>();
             builder.Services.AddSingleton<IModalService, ModalService>();
+            builder.Services.AddSingleton<IOpenAIService, OpenAIService>();
+            builder.Services.AddSingleton<IPlatformService, PlatformService>();
             builder.Services.AddSingleton<IRoleSelectorService, RoleSelectorService>();
+            builder.Services.AddSingleton<ITokenizerService, TokenizerService>();
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
