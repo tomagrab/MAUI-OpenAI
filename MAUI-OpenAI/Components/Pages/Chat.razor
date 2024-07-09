@@ -74,7 +74,7 @@
         isSendingMessage = false;
     }
 
-    private async Task HandleRoleSelected(string newRolePrompt)
+    private void HandleRoleSelected(string newRolePrompt)
     {
         ConversationService.AddForgetPreviousRoleMessage(currentRole, OnError);
         ConversationService.AddRoleMessage(newRolePrompt, OnError);
@@ -83,7 +83,7 @@
         StateHasChanged();
     }
 
-    private async Task HandleImageGenerated(byte[] imageBytes)
+    private void HandleImageGenerated(byte[] imageBytes)
     {
         isImageLoading = false;
         StateHasChanged();
