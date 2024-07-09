@@ -8,6 +8,7 @@
         @bind="SearchText"
         @bind:event="oninput"
         @onfocus="ShowDropdown"
+        @onkeydown="HandleKeyDown"
         @onclick="ShowDropdown"
         disabled="@InputDisabled"
         class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full disabled:cursor-not-allowed disabled:opacity-50 pr-10"
