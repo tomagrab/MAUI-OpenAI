@@ -3,6 +3,8 @@
 @inject IMarkdownService MarkdownService
 @inject IChatService ChatService
 @inject IConversationService ConversationService
+@inject IJSRuntime JS
+@inject ISpeechService SpeechService
 
 <div class="flex flex-col h-full bg-backdrop text-brightWhite relative">
     <RoleSelector
@@ -22,6 +24,8 @@
         IsAppearanceLoading="@isAppearanceLoading"
         OnImageClick="OpenModal"
         OnError="HandleError"
+        IsSpeechEnabled="@SpeechService.IsSpeechEnabled"
+        OnMessageReceived="HandleMessageReceived"
     />
     <ChatInput
         UserMessage="@userMessage"
@@ -169,6 +173,17 @@
         catch (Exception ex)
         {
             HandleError($"Error closing modal: {ex.Message}");
+        }
+    }
+
+    private async Task HandleMessageReceived(string message)
+    {
+        if (SpeechService.IsSpeechEnabled)
+        {
+            await OpenAIService.GenerateSpeechAsync(message, async (speechBytes) =>
+            {
+                await JS.InvokeVoidAsync("playAudio", Convert.ToBase64String(speechBytes));
+            }, OnError);
         }
     }
 }

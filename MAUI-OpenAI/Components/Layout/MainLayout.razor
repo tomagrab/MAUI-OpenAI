@@ -1,12 +1,38 @@
 ﻿@inherits LayoutComponentBase
+@inject ISpeechService SpeechService
 
 <div>
     <Header />
     <div class="h-[calc(100dvh-4rem)] flex p-4 bg-darkblue">
         <div class="flex-1 flex flex-col rounded-md bg-backdrop p-4">
+            <button @onclick="ToggleSpeech" class="btn-toggle-speech">
+                @((SpeechService.IsSpeechEnabled ? "Disable" : "Enable") + " Speech")
+            </button>
             <div class="flex-1 overflow-auto">
                 @Body
             </div>
         </div>
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        SpeechService.OnSpeechStateChanged += HandleSpeechStateChanged;
+    }
+
+    private void ToggleSpeech()
+    {
+        SpeechService.ToggleSpeech();
+    }
+
+    private void HandleSpeechStateChanged(bool isSpeechEnabled)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        SpeechService.OnSpeechStateChanged -= HandleSpeechStateChanged;
+    }
+}

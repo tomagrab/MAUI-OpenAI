@@ -4,6 +4,7 @@ using OpenAI.Images;
 using OpenAI.Embeddings;
 using OpenAI.Audio;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 
 namespace MAUI_OpenAI.Services
 {
@@ -15,6 +16,7 @@ namespace MAUI_OpenAI.Services
         private readonly AudioClient _transcribeClient;
         private readonly AudioClient _textToSpeechClient;
         private readonly IConversationService _conversationService;
+        private readonly ILogger<OpenAIService> _logger;
 
         public OpenAIService(
             ChatClient chatClient,
@@ -22,7 +24,8 @@ namespace MAUI_OpenAI.Services
             EmbeddingClient embeddingClient,
             AudioClient transcribeClient,
             AudioClient textToSpeechClient,
-            IConversationService conversationService)
+            IConversationService conversationService,
+            ILogger<OpenAIService> logger)
         {
             _chatClient = chatClient;
             _imageClient = imageClient;
@@ -30,6 +33,7 @@ namespace MAUI_OpenAI.Services
             _transcribeClient = transcribeClient;
             _textToSpeechClient = textToSpeechClient;
             _conversationService = conversationService;
+            _logger = logger;
         }
 
         public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, EventCallback<string> onUpdate, EventCallback onComplete, EventCallback<string> onError)
@@ -51,14 +55,17 @@ namespace MAUI_OpenAI.Services
             }
             catch (ClientResultException cre)
             {
+                _logger.LogError(cre, "An error occurred while processing the request");
                 await HandleErrorAsync($"An error occurred while processing the request: {cre.Message}", onError);
             }
             catch (TimeoutException te)
             {
+                _logger.LogError(te, "Request timed out");
                 await HandleErrorAsync("Request timed out: " + te.Message, onError);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An unexpected error occurred while processing the request");
                 await HandleErrorAsync($"An unexpected error occurred while processing the request: {ex.Message}", onError);
             }
         }
@@ -80,14 +87,17 @@ namespace MAUI_OpenAI.Services
             }
             catch (ClientResultException cre)
             {
+                _logger.LogError(cre, "An error occurred while generating the image");
                 await HandleErrorAsync($"An error occurred while generating the image: {cre.Message}", onError);
             }
             catch (TimeoutException te)
             {
+                _logger.LogError(te, "Image generation request timed out");
                 await HandleErrorAsync("Image generation request timed out: " + te.Message, onError);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An unexpected error occurred while generating the image");
                 await HandleErrorAsync($"An unexpected error occurred while generating the image: {ex.Message}", onError);
             }
         }
@@ -102,14 +112,17 @@ namespace MAUI_OpenAI.Services
             }
             catch (ClientResultException cre)
             {
+                _logger.LogError(cre, "An error occurred while generating the embeddings");
                 await HandleErrorAsync($"An error occurred while generating the embeddings: {cre.Message}", onError);
             }
             catch (TimeoutException te)
             {
+                _logger.LogError(te, "Embedding generation request timed out");
                 await HandleErrorAsync("Embedding generation request timed out: " + te.Message, onError);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An unexpected error occurred while generating the embeddings");
                 await HandleErrorAsync($"An unexpected error occurred while generating the embeddings: {ex.Message}", onError);
             }
         }
@@ -129,35 +142,41 @@ namespace MAUI_OpenAI.Services
             }
             catch (ClientResultException cre)
             {
+                _logger.LogError(cre, "An error occurred while transcribing the audio");
                 await HandleErrorAsync($"An error occurred while transcribing the audio: {cre.Message}", onError);
             }
             catch (TimeoutException te)
             {
+                _logger.LogError(te, "Audio transcription request timed out");
                 await HandleErrorAsync("Audio transcription request timed out: " + te.Message, onError);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An unexpected error occurred while transcribing the audio");
                 await HandleErrorAsync($"An unexpected error occurred while transcribing the audio: {ex.Message}", onError);
             }
         }
 
-        public async Task GenerateSpeechAsync(string text, EventCallback<byte[]> onSpeechGenerated, EventCallback<string> onError)
+        public async Task GenerateSpeechAsync(string text, Func<byte[], Task> onSpeechGenerated, EventCallback<string> onError)
         {
             try
             {
                 BinaryData speech = await _textToSpeechClient.GenerateSpeechFromTextAsync(text, GeneratedSpeechVoice.Alloy);
-                await onSpeechGenerated.InvokeAsync(speech.ToArray());
+                await onSpeechGenerated.Invoke(speech.ToArray());
             }
             catch (ClientResultException cre)
             {
+                _logger.LogError(cre, "An error occurred while generating the speech");
                 await HandleErrorAsync($"An error occurred while generating the speech: {cre.Message}", onError);
             }
             catch (TimeoutException te)
             {
+                _logger.LogError(te, "Text-to-speech request timed out");
                 await HandleErrorAsync("Text-to-speech request timed out: " + te.Message, onError);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An unexpected error occurred while generating the speech");
                 await HandleErrorAsync($"An unexpected error occurred while generating the speech: {ex.Message}", onError);
             }
         }

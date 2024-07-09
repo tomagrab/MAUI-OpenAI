@@ -69,6 +69,7 @@ namespace MAUI_OpenAI
             builder.Services.AddSingleton<IOpenAIService, OpenAIService>();
             builder.Services.AddSingleton<IPlatformService, PlatformService>();
             builder.Services.AddSingleton<IRoleSelectorService, RoleSelectorService>();
+            builder.Services.AddSingleton<ISpeechService, SpeechService>();
             builder.Services.AddSingleton<ITokenizerService, TokenizerService>();
             builder.Services.AddMauiBlazorWebView();
 
