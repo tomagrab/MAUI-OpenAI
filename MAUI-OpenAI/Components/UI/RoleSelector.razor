@@ -45,7 +45,7 @@
     private bool inputDisabled => isAppearanceGenerating || IsSendingMessage || IsImageLoading;
     private string selectedRole = "";
     private bool isAppearanceGenerating = false;
-    private ComboBox comboBoxRef;
+    private ComboBox? comboBoxRef;
 
     private async Task HandleRoleChange(string value)
     {

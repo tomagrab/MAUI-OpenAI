@@ -58,7 +58,7 @@
     private string selectedImage = "";
     private string errorMessage = "";
     private string currentRole = "";
-    private RoleSelector roleSelectorRef;
+    private RoleSelector? roleSelectorRef;
 
     private const int MaxTokens = 1000;
     private const double CharactersPerToken = 3.5;
@@ -120,7 +120,10 @@
         try
         {
             ClearAllMessages();
-            await roleSelectorRef.ClearRoleAsync();
+            if (roleSelectorRef != null)
+            {
+                await roleSelectorRef.ClearRoleAsync();
+            }
             StateHasChanged();
         }
         catch (Exception ex)

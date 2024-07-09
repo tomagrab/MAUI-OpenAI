@@ -100,33 +100,47 @@
 
     private async Task SaveImage()
     {
-        var saveResult = await ModalService.SaveImageAsync(ImageSrc, ImageSaveService, platformName);
-
-        if (saveResult == "Cancelled")
+        if (ImageSrc is not null)   
         {
-            isSaveCancelled = true;
+            var saveResult = await ModalService.SaveImageAsync(ImageSrc, ImageSaveService, platformName);
+
+            if (saveResult == "Cancelled")
+            {
+                isSaveCancelled = true;
+            }
+            else if (saveResult == "Saved")
+            {
+                isImageSaved = true;
+            }
+
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            isImageSaved = false;
+            isSaveCancelled = false;
+            StateHasChanged();
         }
-        else if (saveResult == "Saved")
+        else
         {
-            isImageSaved = true;
+            HandleError("Image source is null.");
         }
-
-        StateHasChanged();
-
-        await Task.Delay(2000);
-        isImageSaved = false;
-        isSaveCancelled = false;
-        StateHasChanged();
     }
 
     private async Task CopyImage()
     {
-        await ModalService.CopyImageAsync(ImageSrc, JS, EventCallback.Factory.Create<string>(this, HandleError));
-        isImageCopied = true;
-        StateHasChanged();
+        if (ImageSrc is not null)
+        {
+            await ModalService.CopyImageAsync(ImageSrc, JS, EventCallback.Factory.Create<string>(this, HandleError));
+            isImageCopied = true;
+            StateHasChanged();
 
-        await Task.Delay(2000);
-        isImageCopied = false;
-        StateHasChanged();
+            await Task.Delay(2000);
+            isImageCopied = false;
+            StateHasChanged();
+        }
+        else
+        {
+            HandleError("Image source is null.");
+        }
     }
 }
