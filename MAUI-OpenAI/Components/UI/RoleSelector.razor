@@ -4,7 +4,7 @@
 
 <div class="mb-4 flex gap-4">
     <ComboBox
-        Items="RolePrompts.Roles.Keys.ToList()"
+        Items="GetSortedRoles()"
         OnItemSelected="HandleRoleChange"
         @ref="comboBoxRef"
         InputDisabled="@inputDisabled"
@@ -47,6 +47,11 @@
     private string selectedRole = "";
     private bool isAppearanceGenerating = false;
     private ComboBox? comboBoxRef;
+
+    private List<string> GetSortedRoles()
+    {
+        return RolePrompts.Roles.Keys.ToList().OrderBy(role => role).ToList();
+    }
 
     private async Task HandleRoleChange(string value)
     {
