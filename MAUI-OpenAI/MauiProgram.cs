@@ -4,6 +4,8 @@ using MAUI_OpenAI.Services;
 using OpenAI.Images;
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Storage;
+using OpenAI.Embeddings;
+using OpenAI.Audio;
 
 namespace MAUI_OpenAI
 {
@@ -32,8 +34,26 @@ namespace MAUI_OpenAI
                 OPENAI_API_KEY
             );
 
+            EmbeddingClient embeddingClient = new (
+                model: "text-embedding-3-small",
+                OPENAI_API_KEY
+            );
+
+            AudioClient transcribeClient = new (
+                model: "whisper-1",
+                OPENAI_API_KEY
+            );
+
+            AudioClient textToSpeechClient = new (
+                model: "tts-1",
+                OPENAI_API_KEY
+            );
+
             builder.Services.AddSingleton(chatClient);
             builder.Services.AddSingleton(imageClient);
+            builder.Services.AddSingleton(embeddingClient);
+            builder.Services.AddSingleton(transcribeClient);
+            builder.Services.AddSingleton(textToSpeechClient);
             builder.Services.AddSingleton<IFileSaver>(FileSaver.Default);
             builder.Services.AddSingleton<IBaseService, BaseService>();
             builder.Services.AddSingleton<IChatService, ChatService>();
