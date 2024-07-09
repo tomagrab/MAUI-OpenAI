@@ -39,13 +39,13 @@
     {
         if (!string.IsNullOrEmpty(Role) && !string.IsNullOrEmpty(Description))
         {
-            var promptForDalle = $"Given this role and description, respond with ONLY a prompt for DALLE-3 to create an image of the role's appearance. Do not include any additional text or explanation. Role: {Role}. Description: {Description}.";
-
+            var promptForDalle = $"Given this role and description, respond with ONLY a prompt for DALLE-3 to create an image of the role's appearance. Do not name them. Do not include any additional text or explanation. Role: {Role}. Description: {Description}.";
             try
             {
                 await OnLoading.InvokeAsync(true);
 
                 string dallePrompt = await GetAppearanceService.GeneratePromptAsync(promptForDalle, OpenAIService, OnError);
+
                 if (!string.IsNullOrEmpty(dallePrompt))
                 {
                     await OpenAIService.GenerateImageAsync(
