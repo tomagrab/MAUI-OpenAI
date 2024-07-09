@@ -28,7 +28,7 @@ Whether you're sparking imagination, enhancing productivity, or just having fun,
       - 100 tokens ≈ 75 words
     - The custom tokenizer in this project estimates 1 token ≈ 3.5 characters in English.
   - User and assistant messages are appended to a `Conversation` list, which is then tokenized and sent to the OpenAI API.
-    - The `Conversation` object allows for a maximum of 80,000 tokens.
+    - The `Conversation` list allows for a maximum of 80,000 tokens.
       - Once the conversation reaches 80,000 tokens, the oldest messages are removed to make room for new messages.
       - GPT-4o model allows for a maximum of 128,000 tokens in the Context Window.
         - The purpose of such conservative tokenization is to ensure that the conversation remains within the token limit, while the model can still retain context from previous messages.
