@@ -70,8 +70,66 @@ Whether you're sparking imagination, enhancing productivity, or just having fun,
         - Click on `Environment Variables`.
         - Under `System variables`, click on `New`.
         - Add a new variable named `OPENAI_API_KEY` with your OpenAI API key as the value.
-    - ***Other Operating Systems***
-        - This project was developed on Windows 11, so the instructions for other operating systems may vary.
+    - ***Linux***
+        - Open the terminal
+        - Temporarily set the API key using the following command:
+            ```bash
+            export OPENAI_API_KEY="your-api-key"
+            ```
+        - To permanently set the API key, add the following line to your `.bashrc` or `.bash_profile` file:
+            ```bash
+            echo 'export OPENAI_API_KEY=your_openai_api_key_here' >> ~/.bashrc
+            ```
+            or
+            ```bash
+            echo 'export OPENAI_API_KEY=your_openai_api_key_here' >> ~/.bash_profile
+            ```
+        - ZSH users can add the line to the `.zshrc` file.
+          ```bash
+          echo 'export OPENAI_API_KEY=your_openai_api_key_here' >> ~/.zshrc
+          ```
+      - Reload the configuration file:
+          ```bash
+          source ~/.bashrc
+          ```
+          or
+          ```bash
+          source ~/.bash_profile
+          ```
+          or
+          ```bash
+          source ~/.zshrc
+          ```
+    - ***macOS***
+      - Open the terminal
+      - Temporarily set the API key using the following command:
+          ```bash
+          export OPENAI_API_KEY="your-api-key"
+          ```
+      - To permanently set the API key, add the following line to your `.bashrc` or `.bash_profile` or `.zshrc` file:
+          ```bash
+          echo 'export OPENAI_API_KEY=your_openai_api_key_here' >> ~/.bash_profile
+          ```
+          or
+          ```bash
+          echo 'export OPENAI_API_KEY=your_openai_api_key_here' >> ~/.bashrc
+          ```
+          or
+          ```bash
+          echo 'export OPENAI_API_KEY=your_openai_api_key_here' >> ~/.zshrc
+          ```
+      - Reload the configuration file:
+          ```bash
+          source ~/.bash_profile
+          ```
+          or
+          ```bash
+          source ~/.bashrc
+          ```
+          or
+          ```bash
+          source ~/.zshrc
+          ```
 
 ## Run the App 🎉
 
