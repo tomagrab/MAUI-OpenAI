@@ -14,6 +14,8 @@ Whether you're sparking imagination, enhancing productivity, or just having fun,
 - **Dynamic Conversations:** Engage in dynamic, creative conversations with the AI, tailored to the role you've selected.
 - **Immersive Experience:** Immerse yourself in a unique, interactive experience that brings your chats to life.
 - **Personalized Interactions:** Customize your interactions with the AI to suit your preferences and create a more engaging experience.
+- **Speech:** Enable or disable speech to hear AI responses, making the interaction more lively.
+- **Voice Selection:** Choose from various voices like Alloy, Echo, Fable, Onyx, Nova, and Shimmer for the AI to speak with.
 - **Custom Tokenizer:** This project uses a custom tokenizer to process the input text before sending it to the OpenAI API.
 
 ## Custom Tokenizer 🧠
