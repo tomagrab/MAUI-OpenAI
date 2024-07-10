@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Components;
+
 namespace MAUI_OpenAI.Services
 {
-    public class SpeechService : ISpeechService
+    public class SpeechService : BaseService, ISpeechService
     {
         private bool _isSpeechEnabled;
 
@@ -10,22 +12,53 @@ namespace MAUI_OpenAI.Services
 
         public void ToggleSpeech()
         {
-            _isSpeechEnabled = !_isSpeechEnabled;
-            NotifyStateChanged();
+            try
+            {
+                _isSpeechEnabled = !_isSpeechEnabled;
+                NotifyStateChanged();
+            }
+            catch (Exception ex)
+            {
+                HandleError($"Error toggling speech: {ex.Message}", EventCallback.Factory.Create<string>(this, message => { }));
+            }
         }
 
         public void SetSpeechEnabled(bool isEnabled)
         {
-            _isSpeechEnabled = isEnabled;
-            NotifyStateChanged();
+            try
+            {
+                _isSpeechEnabled = isEnabled;
+                NotifyStateChanged();
+            }
+            catch (Exception ex)
+            {
+                HandleError($"Error setting speech enabled: {ex.Message}", EventCallback.Factory.Create<string>(this, message => { }));
+            }
         }
 
         public void SetSpeechDisabled()
         {
-            _isSpeechEnabled = false;
-            NotifyStateChanged();
+            try
+            {
+                _isSpeechEnabled = false;
+                NotifyStateChanged();
+            }
+            catch (Exception ex)
+            {
+                HandleError($"Error setting speech disabled: {ex.Message}", EventCallback.Factory.Create<string>(this, message => { }));
+            }
         }
 
-        private void NotifyStateChanged() => OnSpeechStateChanged?.Invoke(_isSpeechEnabled);
+        private void NotifyStateChanged()
+        {
+            try
+            {
+                OnSpeechStateChanged?.Invoke(_isSpeechEnabled);
+            }
+            catch (Exception ex)
+            {
+                HandleError($"Error notifying state change: {ex.Message}", EventCallback.Factory.Create<string>(this, message => { }));
+            }
+        }
     }
 }

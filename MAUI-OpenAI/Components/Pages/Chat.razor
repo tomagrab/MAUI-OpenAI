@@ -39,9 +39,6 @@
         OnClearMessages="HandleClearMessages"
         OnError="HandleError"
     />
-    <button @onclick="ToggleSpeech" class="btn btn-base btn-primary m-2">
-        @(SpeechService.IsSpeechEnabled ? "Disable Speech" : "Enable Speech")
-    </button>
     @if (showModal)
     {
         <Modal
@@ -89,7 +86,7 @@
             var lastAssistantMessage = ConversationService.GetConversation().LastOrDefault(m => m.Role == "assistant")?.Message;
             if (lastAssistantMessage != null)
             {
-                speechInvoked = true; // Ensure speech is invoked only once
+                speechInvoked = true;
                 await OpenAIService.GenerateSpeechAsync(lastAssistantMessage, async (speechBytes) =>
                 {
                     await JS.InvokeVoidAsync("playAudio", Convert.ToBase64String(speechBytes));
@@ -194,11 +191,5 @@
         {
             HandleError($"Error closing modal: {ex.Message}");
         }
-    }
-
-    private void ToggleSpeech()
-    {
-        SpeechService.ToggleSpeech();
-        StateHasChanged();
     }
 }
