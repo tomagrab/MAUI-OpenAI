@@ -1,14 +1,22 @@
 using Microsoft.AspNetCore.Components;
+using OpenAI.Audio;
 
 namespace MAUI_OpenAI.Services
 {
     public class SpeechService : BaseService, ISpeechService
     {
         private bool _isSpeechEnabled;
+        private GeneratedSpeechVoice _selectedVoice = GeneratedSpeechVoice.Alloy;
 
         public event Action<bool>? OnSpeechStateChanged;
 
         public bool IsSpeechEnabled => _isSpeechEnabled;
+
+        public GeneratedSpeechVoice SelectedVoice
+        {
+            get => _selectedVoice;
+            set => _selectedVoice = value;
+        }
 
         public void ToggleSpeech()
         {

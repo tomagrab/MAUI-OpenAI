@@ -1,7 +1,9 @@
 @using MAUI_OpenAI.Data
 @using MAUI_OpenAI.Models
+@using OpenAI.Audio
 @inject IRoleSelectorService RoleSelectorService
 @inject ISpeechService SpeechService
+
 
 <div class="mb-4 flex gap-4 items-center justify-between">
     <div class="flex gap-4">
@@ -10,6 +12,7 @@
             OnItemSelected="HandleRoleChange"
             @ref="comboBoxRef"
             InputDisabled="@inputDisabled"
+            Placeholder="Select role"
             OnClear="HandleClear"
         />
         @if (!string.IsNullOrEmpty(selectedRole))
@@ -26,13 +29,21 @@
             />
         }
     </div>
-    <button
-        @onclick="ToggleSpeech"
-        type="button"
-        class="text-brightWhite p-2 rounded-full hover:text-brightYellow focus:outline-none"
-    >
-        <i class="fa @(SpeechService.IsSpeechEnabled ? "fa-microphone" : "fa-microphone-slash")"></i>
-    </button>
+    <div class="flex gap-2 items-center">
+        <ComboBox
+            Items="GetVoices()"
+            OnItemSelected="HandleVoiceChange"
+            Placeholder="Select voice"
+            InputDisabled="@inputDisabled"
+        />
+        <button
+            @onclick="ToggleSpeech"
+            type="button"
+            class="text-brightWhite p-2 rounded-full hover:text-brightYellow focus:outline-none"
+        >
+            <i class="fa @(SpeechService.IsSpeechEnabled ? "fa-microphone" : "fa-microphone-slash")"></i>
+        </button>
+    </div>
 </div>
 
 @code {
@@ -63,10 +74,24 @@
         return RolePrompts.Roles.Keys.ToList().OrderBy(role => role).ToList();
     }
 
+    private List<string> GetVoices()
+    {
+        return Enum.GetNames(typeof(GeneratedSpeechVoice)).ToList();
+    }
+
     private async Task HandleRoleChange(string value)
     {
         selectedRole = value;
         await RoleSelectorService.HandleRoleChangeAsync(value, OnRoleSelected);
+    }
+
+    private async Task HandleVoiceChange(string value)
+    {
+        if (Enum.TryParse(value, out GeneratedSpeechVoice voice))
+        {
+            SpeechService.SelectedVoice = voice;
+        }
+        StateHasChanged();
     }
 
     private async Task HandleClear()

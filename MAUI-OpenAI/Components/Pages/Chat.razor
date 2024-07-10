@@ -87,7 +87,7 @@
             if (lastAssistantMessage != null)
             {
                 speechInvoked = true;
-                await OpenAIService.GenerateSpeechAsync(lastAssistantMessage, async (speechBytes) =>
+                await OpenAIService.GenerateSpeechAsync(lastAssistantMessage, SpeechService.SelectedVoice, async (speechBytes) =>
                 {
                     await JS.InvokeVoidAsync("playAudio", Convert.ToBase64String(speechBytes));
                 }, OnError);

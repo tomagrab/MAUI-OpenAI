@@ -142,11 +142,11 @@ namespace MAUI_OpenAI.Services
             }
         }
 
-        public async Task GenerateSpeechAsync(string text, Func<byte[], Task> onSpeechGenerated, EventCallback<string> onError)
+        public async Task GenerateSpeechAsync(string text, GeneratedSpeechVoice voice, Func<byte[], Task> onSpeechGenerated, EventCallback<string> onError)
         {
             try
             {
-                BinaryData speech = await _textToSpeechClient.GenerateSpeechFromTextAsync(text, GeneratedSpeechVoice.Alloy);
+                BinaryData speech = await _textToSpeechClient.GenerateSpeechFromTextAsync(text, voice);
                 await onSpeechGenerated.Invoke(speech.ToArray());
             }
             catch (ClientResultException cre)

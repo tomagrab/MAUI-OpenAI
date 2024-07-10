@@ -12,7 +12,7 @@
         @onclick="ShowDropdown"
         disabled="@InputDisabled"
         class="p-2 rounded border border-gray focus:outline-none bg-input text-brightWhite w-full disabled:cursor-not-allowed disabled:opacity-50 pr-10"
-        placeholder="Select Role"
+        placeholder="@Placeholder"
         aria-autocomplete="list"
         aria-controls="comboBoxDropdown"
     />
@@ -61,6 +61,8 @@
     public EventCallback<string> OnItemSelected { get; set; }
     [Parameter]
     public bool InputDisabled { get; set; } = false;
+    [Parameter]
+    public string Placeholder { get; set; } = "Select item";
     [Parameter]
     public EventCallback<string> OnError { get; set; }
     [Parameter]
