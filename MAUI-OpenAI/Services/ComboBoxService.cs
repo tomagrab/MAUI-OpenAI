@@ -25,7 +25,18 @@ namespace MAUI_OpenAI.Services
         {
             try
             {
+                if (comboBoxRef.Context == null)
+                {
+                    return true;
+                }
+
                 rect = await js.InvokeAsync<BoundingClientRect>("getBoundingClientRect", comboBoxRef);
+
+                if (rect == null)
+                {
+                    return true;
+                }
+
                 return clientX < rect.Left || clientX > rect.Right || clientY < rect.Top || clientY > rect.Bottom;
             }
             catch (Exception ex)

@@ -4,7 +4,6 @@
 @inject IRoleSelectorService RoleSelectorService
 @inject ISpeechService SpeechService
 
-
 <div class="mb-4 flex gap-4 items-center justify-between">
     <div class="flex gap-4">
         <ComboBox
@@ -30,12 +29,15 @@
         }
     </div>
     <div class="flex gap-2 items-center">
-        <ComboBox
-            Items="GetVoices()"
-            OnItemSelected="HandleVoiceChange"
-            Placeholder="Select voice"
-            InputDisabled="@inputDisabled"
-        />
+        @if (SpeechService.IsSpeechEnabled)
+        {
+            <ComboBox
+                Items="GetVoices()"
+                OnItemSelected="HandleVoiceChange"
+                Placeholder="Alloy"
+                InputDisabled="@inputDisabled"
+            />
+        }
         <button
             @onclick="ToggleSpeech"
             type="button"
