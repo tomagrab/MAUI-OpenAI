@@ -4,6 +4,8 @@ Welcome to Airole – your all-in-one AI-powered chat companion! With Airole, yo
 
 - **Select Roles:** Choose unique roles for the AI to take on, from a cheerful elf to a wise philosopher, and experience personalized, immersive conversations.
 - **Generate Appearances:** Bring your chats to life by generating vivid, custom images of the roles you're interacting with, creating a visually rich experience.
+- **Speech:** Enable speech to listen to AI responses using various voices.
+- **Voice Selection:** Select different voices for the AI, enhancing the auditory experience.
 
 Whether you're sparking imagination, enhancing productivity, or just having fun, Airole turns everyday conversations into extraordinary adventures.
 
