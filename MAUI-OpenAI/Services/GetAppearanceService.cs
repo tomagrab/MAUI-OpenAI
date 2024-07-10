@@ -1,3 +1,4 @@
+using System.ClientModel;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Components;
 
@@ -23,17 +24,34 @@ namespace MAUI_OpenAI.Services
                     new ChatMessageModel(inputPrompt, "user")
                 };
 
-                await openAIService.GetChatCompletionStreamingAsync(temporaryConversation, EventCallback.Factory.Create<string>(this, (update) =>
-                {
-                    result += update;
-                }), EventCallback.Factory.Create(this, () =>
-                {
-                    result = ExtractDallePrompt(result);
-                }), onError);
+                await openAIService.GetChatCompletionStreamingAsync(
+                    temporaryConversation,
+                    EventCallback.Factory.Create<string>(this, (update) =>
+                    {
+                        result += update;
+                    }),
+                    EventCallback.Factory.Create(this, () =>
+                    {
+                        result = ExtractDallePrompt(result);
+                        return Task.CompletedTask;
+                    }),
+                    onError,
+                    () => Task.CompletedTask
+                );
+            }
+            catch (ClientResultException cre)
+            {
+                await HandleErrorAsync($"ClientResultException: {cre.Message}", onError);
+                result = cre.Message;
+            }
+            catch (TimeoutException te)
+            {
+                await HandleErrorAsync($"TimeoutException: {te.Message}", onError);
+                result = te.Message;
             }
             catch (Exception ex)
             {
-                await HandleErrorAsync($"Error generating prompt: {ex.Message}", onError);
+                await HandleErrorAsync($"Exception: {ex.Message}", onError);
                 result = ex.Message;
             }
 

@@ -1,7 +1,6 @@
 @inject IJSRuntime JS
 @inject IChatMessagesService ChatMessagesService
 @inject IConversationService ConversationService
-@inject ISpeechService SpeechService
 
 <div id="chatContainer" class="flex-grow p-4 overflow-auto">
     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
@@ -40,10 +39,6 @@
                         @chat.Message
                     </p>
                 }
-                @if (chat.Role == "assistant" && SpeechService.IsSpeechEnabled)
-                {
-                    InvokeMessageReceivedAsync(chat.Message);
-                }
             }
         </div>
     }
@@ -77,10 +72,6 @@
     public bool IsImageLoading { get; set; }
     [Parameter]
     public bool IsAppearanceLoading { get; set; }
-    [Parameter]
-    public bool IsSpeechEnabled { get; set; }
-    [Parameter]
-    public EventCallback<string> OnMessageReceived { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -90,10 +81,5 @@
     private async Task HandleImageClick(string imageSrc)
     {
         await ChatMessagesService.HandleImageClickAsync(imageSrc, OnImageClick, OnError);
-    }
-
-    private async Task InvokeMessageReceivedAsync(string message)
-    {
-        await OnMessageReceived.InvokeAsync(message);
     }
 }

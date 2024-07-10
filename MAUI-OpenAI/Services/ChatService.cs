@@ -13,7 +13,7 @@ namespace MAUI_OpenAI.Services
             _conversationService = conversationService;
         }
 
-        public async Task HandleSendMessageAsync(string message, List<ChatMessageModel> chatMessages, bool isImageGenerationMode, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated)
+        public async Task HandleSendMessageAsync(string message, List<ChatMessageModel> chatMessages, bool isImageGenerationMode, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated, Func<Task> onResponseComplete)
         {
             if (string.IsNullOrWhiteSpace(message)) return;
 
@@ -29,7 +29,7 @@ namespace MAUI_OpenAI.Services
                 else
                 {
                     var conversation = await _conversationService.GetTrimmedConversationAsync(onError);
-                    await GenerateChatResponseAsync(conversation, chatMessages, markdownService, onError, onStateChange);
+                    await GenerateChatResponseAsync(conversation, chatMessages, markdownService, onError, onStateChange, onResponseComplete);
                 }
             }
             catch (Exception ex)
@@ -78,7 +78,7 @@ namespace MAUI_OpenAI.Services
             return loadingMessage;
         }
 
-        public async Task GenerateChatResponseAsync(List<ChatMessageModel> conversation, List<ChatMessageModel> chatMessages, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange)
+        public async Task GenerateChatResponseAsync(List<ChatMessageModel> conversation, List<ChatMessageModel> chatMessages, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange, Func<Task> onResponseComplete)
         {
             var assistantMessage = new ChatMessageModel("", "assistant");
             bool isFirstUpdateReceived = false;
@@ -99,10 +99,11 @@ namespace MAUI_OpenAI.Services
                 {
                     await HandleErrorAsync($"Error updating chat response: {ex.Message}", onError);
                 }
-            }), EventCallback.Factory.Create(this, () =>
+            }), EventCallback.Factory.Create(this, async () =>
             {
-                CompleteResponseAsync(assistantMessage, markdownService, onStateChange, onError);
-            }), onError);
+                await CompleteResponseAsync(assistantMessage, markdownService, onStateChange, onError);
+                await onResponseComplete();
+            }), onError, onResponseComplete);
         }
 
         public void FinishMessageSend(Func<Task> onStateChange)
@@ -110,7 +111,7 @@ namespace MAUI_OpenAI.Services
             onStateChange();
         }
 
-        private async void CompleteResponseAsync(ChatMessageModel chatMessage, IMarkdownService markdownService, Func<Task> onStateChange, EventCallback<string> onError)
+        private async Task CompleteResponseAsync(ChatMessageModel chatMessage, IMarkdownService markdownService, Func<Task> onStateChange, EventCallback<string> onError)
         {
             try
             {

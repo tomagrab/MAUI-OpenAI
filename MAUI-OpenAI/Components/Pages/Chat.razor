@@ -24,8 +24,6 @@
         IsAppearanceLoading="@isAppearanceLoading"
         OnImageClick="OpenModal"
         OnError="HandleError"
-        IsSpeechEnabled="@SpeechService.IsSpeechEnabled"
-        OnMessageReceived="HandleMessageReceived"
     />
     <ChatInput
         UserMessage="@userMessage"
@@ -41,6 +39,9 @@
         OnClearMessages="HandleClearMessages"
         OnError="HandleError"
     />
+    <button @onclick="ToggleSpeech" class="btn btn-base btn-primary m-2">
+        @(SpeechService.IsSpeechEnabled ? "Disable Speech" : "Enable Speech")
+    </button>
     @if (showModal)
     {
         <Modal
@@ -70,12 +71,31 @@
 
     private EventCallback<string> OnError => EventCallback.Factory.Create<string>(this, HandleError);
     private EventCallback<byte[]> OnImageGenerated => EventCallback.Factory.Create<byte[]>(this, HandleImageGenerated);
+    
+    private bool speechInvoked = false;
 
     private async Task HandleSendMessage(string message)
     {
         isSendingMessage = true;
-        await ChatService.HandleSendMessageAsync(message, chatMessages, isImageGenerationMode, MarkdownService, OnError, () => InvokeAsync(StateHasChanged), OnImageGenerated);
+        speechInvoked = false;
+        await ChatService.HandleSendMessageAsync(message, chatMessages, isImageGenerationMode, MarkdownService, OnError, () => InvokeAsync(StateHasChanged), OnImageGenerated, HandleResponseComplete);
         isSendingMessage = false;
+    }
+
+    private async Task HandleResponseComplete()
+    {
+        if (SpeechService.IsSpeechEnabled && !speechInvoked)
+        {
+            var lastAssistantMessage = ConversationService.GetConversation().LastOrDefault(m => m.Role == "assistant")?.Message;
+            if (lastAssistantMessage != null)
+            {
+                speechInvoked = true; // Ensure speech is invoked only once
+                await OpenAIService.GenerateSpeechAsync(lastAssistantMessage, async (speechBytes) =>
+                {
+                    await JS.InvokeVoidAsync("playAudio", Convert.ToBase64String(speechBytes));
+                }, OnError);
+            }
+        }
     }
 
     private void HandleRoleSelected(string newRolePrompt)
@@ -176,14 +196,9 @@
         }
     }
 
-    private async Task HandleMessageReceived(string message)
+    private void ToggleSpeech()
     {
-        if (SpeechService.IsSpeechEnabled)
-        {
-            await OpenAIService.GenerateSpeechAsync(message, async (speechBytes) =>
-            {
-                await JS.InvokeVoidAsync("playAudio", Convert.ToBase64String(speechBytes));
-            }, OnError);
-        }
+        SpeechService.ToggleSpeech();
+        StateHasChanged();
     }
 }
