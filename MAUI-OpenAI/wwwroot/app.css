@@ -943,12 +943,12 @@ video {
   padding-right: 1rem;
 }
 
-.pt-10 {
-  padding-top: 2.5rem;
-}
-
 .pr-10 {
   padding-right: 2.5rem;
+}
+
+.pt-10 {
+  padding-top: 2.5rem;
 }
 
 .text-left {
@@ -1709,6 +1709,11 @@ p {
 .hover\:text-brightRed:hover {
   --tw-text-opacity: 1;
   color: rgb(255 161 152 / var(--tw-text-opacity));
+}
+
+.hover\:text-brightYellow:hover {
+  --tw-text-opacity: 1;
+  color: rgb(227 179 65 / var(--tw-text-opacity));
 }
 
 .focus\:outline-none:focus {
