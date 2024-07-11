@@ -8,3 +8,10 @@ function playAudio(base64Audio) {
     audio = new Audio("data:audio/mp3;base64," + base64Audio);
     audio.play();
 }
+
+function stopAudio() {
+    if (audio) {
+        audio.pause();
+        audio = null;
+    }
+}

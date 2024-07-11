@@ -4,11 +4,11 @@ namespace MAUI_OpenAI.Services
 {
     public interface ISpeechService
     {
-        event Action<bool>? OnSpeechStateChanged;
         bool IsSpeechEnabled { get; }
         GeneratedSpeechVoice SelectedVoice { get; set; }
-        void ToggleSpeech();
-        void SetSpeechEnabled(bool isEnabled);
-        void SetSpeechDisabled();
+        Task SetSpeechDisabled();
+        Task SetSpeechEnabled(bool isEnabled);
+        Task ToggleSpeech();
+        event Func<Task>? OnStopAudioRequested;
     }
 }

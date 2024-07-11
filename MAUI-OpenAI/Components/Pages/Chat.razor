@@ -68,8 +68,14 @@
 
     private EventCallback<string> OnError => EventCallback.Factory.Create<string>(this, HandleError);
     private EventCallback<byte[]> OnImageGenerated => EventCallback.Factory.Create<byte[]>(this, HandleImageGenerated);
-    
+
     private bool speechInvoked = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        SpeechService.OnStopAudioRequested += HandleStopAudioRequested;
+    }
 
     private async Task HandleSendMessage(string message)
     {
@@ -190,6 +196,30 @@
         catch (Exception ex)
         {
             HandleError($"Error closing modal: {ex.Message}");
+        }
+    }
+
+    private async Task HandleStopAudioRequested()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("stopAudio");
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error stopping audio: {ex.Message}");
+        }
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            SpeechService.OnStopAudioRequested -= HandleStopAudioRequested;
+        }
+        catch (Exception ex)
+        {
+            HandleError($"Error disposing: {ex.Message}");
         }
     }
 }

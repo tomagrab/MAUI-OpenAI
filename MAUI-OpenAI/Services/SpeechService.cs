@@ -9,6 +9,7 @@ namespace MAUI_OpenAI.Services
         private GeneratedSpeechVoice _selectedVoice = GeneratedSpeechVoice.Alloy;
 
         public event Action<bool>? OnSpeechStateChanged;
+        public event Func<Task>? OnStopAudioRequested;
 
         public bool IsSpeechEnabled => _isSpeechEnabled;
 
@@ -18,12 +19,17 @@ namespace MAUI_OpenAI.Services
             set => _selectedVoice = value;
         }
 
-        public void ToggleSpeech()
+        public async Task ToggleSpeech()
         {
             try
             {
                 _isSpeechEnabled = !_isSpeechEnabled;
                 NotifyStateChanged();
+
+                if (OnStopAudioRequested != null)
+                {
+                    await OnStopAudioRequested.Invoke();
+                }
             }
             catch (Exception ex)
             {
@@ -31,7 +37,7 @@ namespace MAUI_OpenAI.Services
             }
         }
 
-        public void SetSpeechEnabled(bool isEnabled)
+        public Task SetSpeechEnabled(bool isEnabled)
         {
             try
             {
@@ -42,19 +48,27 @@ namespace MAUI_OpenAI.Services
             {
                 HandleError($"Error setting speech enabled: {ex.Message}", EventCallback.Factory.Create<string>(this, message => { }));
             }
+
+            return Task.CompletedTask;
         }
 
-        public void SetSpeechDisabled()
+        public Task SetSpeechDisabled()
         {
             try
             {
                 _isSpeechEnabled = false;
                 NotifyStateChanged();
+                if (OnStopAudioRequested != null)
+                {
+                    OnStopAudioRequested.Invoke();
+                }
             }
             catch (Exception ex)
             {
                 HandleError($"Error setting speech disabled: {ex.Message}", EventCallback.Factory.Create<string>(this, message => { }));
             }
+
+            return Task.CompletedTask;
         }
 
         private void NotifyStateChanged()
