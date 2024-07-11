@@ -7,7 +7,7 @@
         type="text"
         @bind="SearchText"
         @bind:event="oninput"
-        @onfocus="ShowDropdown"
+        @onfocus="HandleFocus"
         @onkeydown="HandleKeyDown"
         @onclick="ShowDropdown"
         disabled="@InputDisabled"
@@ -67,12 +67,19 @@
     public EventCallback<string> OnError { get; set; }
     [Parameter]
     public EventCallback OnClear { get; set; }
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
 
     private string SearchText { get; set; } = string.Empty;
     private bool DropdownVisible { get; set; } = false;
     private ElementReference comboBoxRef;
 
     private List<string> FilteredItems => ComboBoxService.FilterItems(SearchText, Items);
+
+    protected override void OnInitialized()
+    {
+        SearchText = Value;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -123,6 +130,15 @@
         SearchText = string.Empty;
         DropdownVisible = false;
         await OnClear.InvokeAsync();
+    }
+
+    private void HandleFocus()
+    {
+        if (SearchText == Placeholder)
+        {
+            SearchText = string.Empty;
+        }
+        ShowDropdown();
     }
 
     public async Task ClearAsync()
