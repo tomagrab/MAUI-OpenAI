@@ -3,8 +3,8 @@
 @inject IJSRuntime JS
 @inject IModalService ModalService
 
-<div class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 backdrop-blur-md" @onclick="CloseModal">
-    <div class="relative bg-darkblue bg-opacity-80 backdrop-blur-lg rounded-lg overflow-hidden shadow-lg w-full max-w-2xl" @onclick:stopPropagation="true">
+<div class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 backdrop-blur-md transition-opacity duration-300" @onclick="CloseModal">
+    <div class="relative bg-darkblue bg-opacity-80 backdrop-blur-lg rounded-lg overflow-hidden shadow-lg w-full max-w-2xl transition-transform duration-300 transform @modalClass" @onclick:stopPropagation="true">
         <div class="flex justify-between p-2">
             <div class="flex space-x-2">
                 @if (!string.IsNullOrEmpty(ImageSrc))
@@ -66,6 +66,9 @@
     private string SaveImageText => isImageSaved ? "Image Saved" : isSaveCancelled ? "Save Cancelled" : "Save Image";
     private string CopyImageText => isImageCopied ? "Image Copied" : "Copy Image";
 
+    private bool isClosing = false;
+    private string modalClass = "animate-fadeIn animate-slideIn";
+
     protected override void OnInitialized()
     {
         platformName = PlatformService.GetPlatform(OnError);
@@ -74,6 +77,18 @@
     private string platformName { get; set; } = string.Empty;
 
     private async Task CloseModal()
+    {
+        if (!isClosing)
+        {
+            isClosing = true;
+            modalClass = "animate-fadeOut animate-slideOut";
+            StateHasChanged();
+            await Task.Delay(300);
+            await InvokeCloseEvent();
+        }
+    }
+
+    private async Task InvokeCloseEvent()
     {
         try
         {
@@ -85,6 +100,10 @@
         catch (Exception ex)
         {
             HandleError($"Error closing modal: {ex.Message}");
+        }
+        finally
+        {
+            isClosing = false;
         }
     }
 
