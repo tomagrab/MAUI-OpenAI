@@ -55,12 +55,13 @@
     private bool isImageLoading = false;
     private bool isAppearanceLoading = false;
     private bool isImageGenerationMode = false;
-    private List<ChatMessageModel> chatMessages => ConversationService.GetConversation();
+    private List<ChatMessageModel> chatMessages => _currentConversation.Messages;
     private bool showModal = false;
     private string selectedImage = "";
     private string errorMessage = "";
     private string currentRole = "";
     private RoleSelector? roleSelectorRef;
+    private ConversationModel _currentConversation;
 
     private const int MaxTokens = 1000;
     private const double CharactersPerToken = 3.5;
@@ -74,6 +75,15 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        _currentConversation = ConversationService.GetAllConversations().FirstOrDefault();
+        if (_currentConversation == null)
+        {
+            _currentConversation = ConversationService.AddConversation("Default");
+        }
+        else
+        {
+            ClearAllMessages();
+        }
         SpeechService.OnStopAudioRequested += HandleStopAudioRequested;
     }
 
@@ -81,7 +91,7 @@
     {
         isSendingMessage = true;
         speechInvoked = false;
-        await ChatService.HandleSendMessageAsync(message, chatMessages, isImageGenerationMode, MarkdownService, OnError, () => InvokeAsync(StateHasChanged), OnImageGenerated, HandleResponseComplete);
+        await ChatService.HandleSendMessageAsync(message, isImageGenerationMode, MarkdownService, OnError, () => InvokeAsync(StateHasChanged), OnImageGenerated, HandleResponseComplete);
         isSendingMessage = false;
     }
 
@@ -89,7 +99,7 @@
     {
         if (SpeechService.IsSpeechEnabled && !speechInvoked)
         {
-            var lastAssistantMessage = ConversationService.GetConversation().LastOrDefault(m => m.Role == "assistant")?.Message;
+            var lastAssistantMessage = _currentConversation.Messages.LastOrDefault(m => m.Role == "assistant")?.Message;
             if (lastAssistantMessage != null)
             {
                 speechInvoked = true;
@@ -103,8 +113,8 @@
 
     private void HandleRoleSelected(string newRolePrompt)
     {
-        ConversationService.AddForgetPreviousRoleMessage(currentRole, OnError);
-        ConversationService.AddRoleMessage(newRolePrompt, OnError);
+        ChatService.AddForgetPreviousRoleMessage(currentRole, OnError);
+        ChatService.AddRoleMessage(newRolePrompt, OnError);
 
         currentRole = newRolePrompt;
         StateHasChanged();
@@ -161,8 +171,7 @@
 
     private void ClearAllMessages()
     {
-        chatMessages.Clear();
-        ConversationService.ClearConversation(OnError);
+        _currentConversation.ClearMessages(OnError);
         errorMessage = "";
     }
 

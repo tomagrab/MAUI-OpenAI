@@ -1,6 +1,6 @@
 namespace MAUI_OpenAI.Models
 {
-    public class BoundingClientRect
+    public class BoundingClientRectModel
     {
         public double Left { get; set; }
         public double Right { get; set; }

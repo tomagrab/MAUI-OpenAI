@@ -1,9 +1,10 @@
 using OpenAI.Chat;
-using System.ClientModel;
 using OpenAI.Images;
 using OpenAI.Embeddings;
 using OpenAI.Audio;
 using Microsoft.AspNetCore.Components;
+using MAUI_OpenAI.Models;
+using System.ClientModel;
 
 namespace MAUI_OpenAI.Services
 {
@@ -32,11 +33,11 @@ namespace MAUI_OpenAI.Services
             _conversationService = conversationService;
         }
 
-        public async Task GetChatCompletionStreamingAsync(List<ChatMessageModel> conversation, EventCallback<string> onUpdate, EventCallback onComplete, EventCallback<string> onError, Func<Task> onResponseComplete)
+        public async Task GetChatCompletionStreamingAsync(ConversationModel conversation, EventCallback<string> onUpdate, EventCallback onComplete, EventCallback<string> onError, Func<Task> onResponseComplete)
         {
             try
             {
-                var messages = conversation.Select(c => new UserChatMessage(c.Message)).ToArray();
+                var messages = conversation.GetTextMessages().Select(c => new UserChatMessage(c.Message)).ToArray();
                 AsyncResultCollection<StreamingChatCompletionUpdate> updates = _chatClient.CompleteChatStreamingAsync(messages);
 
                 await foreach (StreamingChatCompletionUpdate update in updates)

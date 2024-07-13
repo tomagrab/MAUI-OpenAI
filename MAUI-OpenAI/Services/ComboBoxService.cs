@@ -21,7 +21,7 @@ namespace MAUI_OpenAI.Services
             }
         }
 
-        public async Task<bool> IsClickOutsideAsync(double clientX, double clientY, BoundingClientRect rect, IJSRuntime js, ElementReference comboBoxRef, EventCallback<string> onError)
+        public async Task<bool> IsClickOutsideAsync(double clientX, double clientY, BoundingClientRectModel rect, IJSRuntime js, ElementReference comboBoxRef, EventCallback<string> onError)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace MAUI_OpenAI.Services
                     return true;
                 }
 
-                rect = await js.InvokeAsync<BoundingClientRect>("getBoundingClientRect", comboBoxRef);
+                rect = await js.InvokeAsync<BoundingClientRectModel>("getBoundingClientRect", comboBoxRef);
 
                 if (rect == null)
                 {

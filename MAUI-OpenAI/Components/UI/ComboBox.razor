@@ -93,7 +93,7 @@
     [JSInvokable]
     public async Task OnOutsideClick(double clientX, double clientY)
     {
-        var rect = new BoundingClientRect();
+        var rect = new BoundingClientRectModel();
         if (await ComboBoxService.IsClickOutsideAsync(clientX, clientY, rect, JS, comboBoxRef, OnError))
         {
             HideDropdown();

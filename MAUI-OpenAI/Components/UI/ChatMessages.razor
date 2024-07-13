@@ -5,13 +5,13 @@
 <div id="chatContainer" class="flex-grow p-4 overflow-auto">
     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
     {
-        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md bg-red text-brightWhite">
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md bg-red text-brightWhite">
             @ErrorMessage
         </div>
     }
-    @foreach (var chat in ConversationService.GetConversation().Where(m => m.DisplayInUI))
+    @foreach (var chat in _currentConversation.Messages.Where(m => m.DisplayInUI))
     {
-        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md @ChatMessagesService.GetMessageCssClass(chat.Role, OnError)">
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md @ChatMessagesService.GetMessageCssClass(chat.Role, OnError)">
             @if (chat.IsImage)
             {
                 @if (chat.IsImageLoading)
@@ -44,7 +44,7 @@
     }
     @if (IsImageLoading)
     {
-        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md bg-green text-brightWhite self-start mr-auto text-left">
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md bg-green text-brightWhite self-start mr-auto text-left">
             <div class="w-40 h-30 bg-gray-300 rounded-lg flex items-center justify-center">
                 <i class="fa fa-spinner custom-spin text-4xl text-gray-600"></i>
             </div>
@@ -52,7 +52,7 @@
     }
     @if (IsAppearanceLoading)
     {
-        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md-max-w-lg sm-max-w-md bg-green text-brightWhite self-start mr-auto text-left">
+        <div class="my-2 p-2 rounded-lg w-fit max-w-xl md:max-w-lg sm:max-w-md bg-green text-brightWhite self-start mr-auto text-left">
             <div class="w-40 h-30 bg-gray-300 rounded-lg flex items-center justify-center">
                 <i class="fa fa-spinner custom-spin text-4xl text-gray-600"></i>
             </div>
@@ -72,6 +72,13 @@
     public bool IsImageLoading { get; set; }
     [Parameter]
     public bool IsAppearanceLoading { get; set; }
+
+    private ConversationModel _currentConversation;
+
+    protected override void OnInitialized()
+    {
+        _currentConversation = ConversationService.GetAllConversations().FirstOrDefault() ?? new ConversationModel("Default");
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

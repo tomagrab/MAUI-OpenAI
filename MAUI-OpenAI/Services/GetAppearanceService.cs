@@ -1,6 +1,7 @@
-using System.ClientModel;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Components;
+using System.Text.RegularExpressions;
+using MAUI_OpenAI.Models;
+using System.ClientModel;
 
 namespace MAUI_OpenAI.Services
 {
@@ -19,10 +20,8 @@ namespace MAUI_OpenAI.Services
 
             try
             {
-                var temporaryConversation = new List<ChatMessageModel>
-                {
-                    new ChatMessageModel(inputPrompt, "user")
-                };
+                var temporaryConversation = new ConversationModel("Temporary");
+                temporaryConversation.AddUserMessage(inputPrompt, onError);
 
                 await openAIService.GetChatCompletionStreamingAsync(
                     temporaryConversation,
