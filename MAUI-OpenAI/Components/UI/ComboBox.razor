@@ -149,6 +149,14 @@
         await OnClear.InvokeAsync();
     }
 
+    public async Task SetValueAsync(string value)
+    {
+        SearchText = value;
+        await OnItemSelected.InvokeAsync(value);
+        DropdownVisible = false;
+        StateHasChanged();
+    }
+
     private string HighlightText(string text)
     {
         if (string.IsNullOrEmpty(SearchText)) return text;

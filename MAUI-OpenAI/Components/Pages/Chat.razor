@@ -160,6 +160,7 @@
             if (roleSelectorRef != null)
             {
                 await roleSelectorRef.ClearRoleAsync();
+                await roleSelectorRef.SetDefaultVoiceAsync("Alloy");
             }
             StateHasChanged();
         }

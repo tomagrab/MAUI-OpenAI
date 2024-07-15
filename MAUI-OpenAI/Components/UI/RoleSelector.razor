@@ -38,6 +38,7 @@
                 Value="Alloy"
                 InputDisabled="@inputDisabled"
                 OnClear="HandleVoiceClear"
+                @ref="voiceComboBoxRef"
             />
         }
         <button
@@ -74,6 +75,7 @@
     private string selectedVoice = "Alloy";
     private bool isAppearanceGenerating = false;
     private ComboBox? comboBoxRef;
+    private ComboBox? voiceComboBoxRef;
 
     protected override async Task OnInitializedAsync()
     {
@@ -120,7 +122,7 @@
 
     private async Task HandleVoiceClear()
     {
-        selectedVoice = "";
+        selectedVoice = "Alloy";
         StateHasChanged();
     }
 
@@ -151,8 +153,18 @@
         selectedRole = RolePromptModel.GetCurrentRole(roles);
         if (comboBoxRef != null)
         {
-            await comboBoxRef.ClearAsync();
+            await comboBoxRef.SetValueAsync("Helpful Assistant");
         }
+        StateHasChanged();
+    }
+
+    public async Task SetDefaultVoiceAsync(string voice)
+    {
+        if (voiceComboBoxRef != null)
+        {
+            await voiceComboBoxRef.SetValueAsync(voice);
+        }
+        selectedVoice = voice;
         StateHasChanged();
     }
 
