@@ -6,13 +6,6 @@ namespace MAUI_OpenAI.Services
     public class ConversationService : BaseService, IConversationService
     {
         private readonly List<ConversationModel> conversations = new List<ConversationModel>();
-        private readonly ITokenizerService _tokenizerService;
-        private const int MaxTokens = 80000;
-
-        public ConversationService(ITokenizerService tokenizerService)
-        {
-            _tokenizerService = tokenizerService;
-        }
 
         public List<ConversationModel> GetAllConversations()
         {
@@ -32,12 +25,10 @@ namespace MAUI_OpenAI.Services
 
                 if (conversation != null)
                 {
-                    var textMessages = conversation.GetTextMessages();
-
-                    return await Task.Run(() => conversation?.GetTrimmedTextMessages(MaxTokens, _tokenizerService, onError) ?? new List<ChatMessageModel>());
+                    return await Task.Run(() => conversation.GetTrimmedTextMessages(onError));
                 }
 
-                return await Task.Run(() => conversation?.GetTrimmedTextMessages(MaxTokens, _tokenizerService, onError) ?? new List<ChatMessageModel>());
+                return new List<ChatMessageModel>();
             }
             catch (Exception ex)
             {

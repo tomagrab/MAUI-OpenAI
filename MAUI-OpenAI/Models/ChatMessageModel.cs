@@ -35,11 +35,18 @@ namespace MAUI_OpenAI.Models
             IsImageLoading = true;
         }
 
-        public async Task ConvertToHtmlAsync(IMarkdownService markdownService, EventCallback<string> onError)
+        public async Task ConvertToHtmlAsync(EventCallback<string> onError)
         {
             try
             {
-                HtmlContent = await markdownService.ConvertToHtmlAsync(Message, onError);
+                var markdownService = Application.Current?.MainPage?.Handler?.MauiContext?.Services?.GetService<IMarkdownService>();
+                if (markdownService != null)
+                {
+                    HtmlContent = await markdownService.ConvertToHtmlAsync(Message, onError);
+                } else
+                {
+                    await onError.InvokeAsync("Markdown service not found.");
+                }
             }
             catch (Exception ex)
             {

@@ -7,15 +7,12 @@ namespace MAUI_OpenAI.Services
     {
         private readonly IOpenAIService _openAIService;
         private readonly IConversationService _conversationService;
-        private readonly ITokenizerService _tokenizerService;
         private ConversationModel _currentConversation;
-        private const int MaxTokensPerRequest = 80000;
 
-        public ChatService(IOpenAIService openAIService, IConversationService conversationService, ITokenizerService tokenizerService)
+        public ChatService(IOpenAIService openAIService, IConversationService conversationService)
         {
             _openAIService = openAIService;
             _conversationService = conversationService;
-            _tokenizerService = tokenizerService;
             _currentConversation = InitializeCurrentConversation() ?? new ConversationModel("Default");
         }
 
@@ -36,7 +33,7 @@ namespace MAUI_OpenAI.Services
             return conversation;
         }
 
-        public async Task HandleSendMessageAsync(string message, bool isImageGenerationMode, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated, Func<Task> onResponseComplete)
+        public async Task HandleSendMessageAsync(string message, bool isImageGenerationMode, EventCallback<string> onError, Func<Task> onStateChange, EventCallback<byte[]> onImageGenerated, Func<Task> onResponseComplete)
         {
             if (string.IsNullOrWhiteSpace(message)) return;
 
@@ -51,9 +48,8 @@ namespace MAUI_OpenAI.Services
                 }
                 else
                 {
-                    var textConversation = _currentConversation.GetTextMessages();
-                    textConversation = _tokenizerService.TrimConversationToTokenLimit(textConversation, MaxTokensPerRequest, onError);
-                    await GenerateChatResponseAsync(textConversation, markdownService, onError, onStateChange, onResponseComplete);
+                    var trimmedMessages = _currentConversation.GetTrimmedTextMessages(onError);
+                    await GenerateChatResponseAsync(trimmedMessages, onError, onStateChange, onResponseComplete);
                 }
             }
             catch (Exception ex)
@@ -102,7 +98,7 @@ namespace MAUI_OpenAI.Services
             return loadingMessage;
         }
 
-        public async Task GenerateChatResponseAsync(List<ChatMessageModel> conversation, IMarkdownService markdownService, EventCallback<string> onError, Func<Task> onStateChange, Func<Task> onResponseComplete)
+        public async Task GenerateChatResponseAsync(List<ChatMessageModel> conversation, EventCallback<string> onError, Func<Task> onStateChange, Func<Task> onResponseComplete)
         {
             var assistantMessage = new ChatMessageModel("", "assistant");
             bool isFirstUpdateReceived = false;
@@ -125,7 +121,7 @@ namespace MAUI_OpenAI.Services
                 }
             }), EventCallback.Factory.Create(this, async () =>
             {
-                await CompleteResponseAsync(assistantMessage, markdownService, onStateChange, onError);
+                await CompleteResponseAsync(assistantMessage, onStateChange, onError);
                 await onResponseComplete();
             }), onError, onResponseComplete);
         }
@@ -135,11 +131,11 @@ namespace MAUI_OpenAI.Services
             onStateChange();
         }
 
-        private async Task CompleteResponseAsync(ChatMessageModel chatMessage, IMarkdownService markdownService, Func<Task> onStateChange, EventCallback<string> onError)
+        private async Task CompleteResponseAsync(ChatMessageModel chatMessage, Func<Task> onStateChange, EventCallback<string> onError)
         {
             try
             {
-                await chatMessage.ConvertToHtmlAsync(markdownService, onError);
+                await chatMessage.ConvertToHtmlAsync(onError);
                 await onStateChange();
             }
             catch (Exception ex)

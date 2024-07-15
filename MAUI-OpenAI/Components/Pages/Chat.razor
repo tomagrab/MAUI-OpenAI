@@ -1,6 +1,5 @@
 ﻿@page "/"
 @inject IOpenAIService OpenAIService
-@inject IMarkdownService MarkdownService
 @inject IChatService ChatService
 @inject IConversationService ConversationService
 @inject IJSRuntime JS
@@ -91,7 +90,7 @@
     {
         isSendingMessage = true;
         speechInvoked = false;
-        await ChatService.HandleSendMessageAsync(message, isImageGenerationMode, MarkdownService, OnError, () => InvokeAsync(StateHasChanged), OnImageGenerated, HandleResponseComplete);
+        await ChatService.HandleSendMessageAsync(message, isImageGenerationMode, OnError, () => InvokeAsync(StateHasChanged), OnImageGenerated, HandleResponseComplete);
         isSendingMessage = false;
     }
 

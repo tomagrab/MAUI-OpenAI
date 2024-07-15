@@ -6,6 +6,7 @@ namespace MAUI_OpenAI.Models
 {
     public class ConversationModel
     {
+        public const int MaxTokens = 80000;
         public Guid Id { get; set; }
         public string Title { get; set; }
         public List<ChatMessageModel> Messages { get; set; } = new List<ChatMessageModel>();
@@ -91,12 +92,21 @@ namespace MAUI_OpenAI.Models
             return Messages.Where(m => !m.IsImage).ToList();
         }
 
-        public List<ChatMessageModel> GetTrimmedTextMessages(int maxTokens, ITokenizerService tokenizerService, EventCallback<string> onError)
+        public List<ChatMessageModel> GetTrimmedTextMessages(EventCallback<string> onError)
         {
             try
             {
+                var tokenizerService = Application.Current?.MainPage?.Handler?.MauiContext?.Services?.GetService<ITokenizerService>();
                 var textMessages = GetTextMessages();
-                return tokenizerService.TrimConversationToTokenLimit(textMessages, maxTokens, onError);
+                if (tokenizerService != null)
+                {
+                    return tokenizerService.TrimConversationToTokenLimit(textMessages, MaxTokens, onError);
+                }
+                else
+                {
+                    onError.InvokeAsync("Tokenizer service is null.");
+                    return new List<ChatMessageModel>();
+                }
             }
             catch (Exception ex)
             {
