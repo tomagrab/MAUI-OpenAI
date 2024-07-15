@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using System.Threading.Tasks;
 
 namespace MAUI_OpenAI.Services
 {
@@ -12,6 +11,5 @@ namespace MAUI_OpenAI.Services
         string GetFormContainerCssClass(bool isFocused, string platform);
         Task FocusTextAreaAsync(ElementReference textAreaRef, IJSRuntime js);
         void HandleError(string message, EventCallback<string> onError);
-        int EstimateTokenCount(string userMessage, ITokenizerService tokenizerService, EventCallback<string> onError);
     }
 }

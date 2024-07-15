@@ -178,7 +178,8 @@
     private void HandleInput(ChangeEventArgs e)
     {
         UserMessage = e.Value?.ToString() ?? string.Empty;
-        TokenCount = ChatInputService.EstimateTokenCount(UserMessage, TokenizerService, OnError);
+        var chatMessage = new ChatMessageModel(UserMessage, "user");
+        TokenCount = chatMessage.EstimateTokenCount(OnError);
     }
 
     private void HandleError(string message)

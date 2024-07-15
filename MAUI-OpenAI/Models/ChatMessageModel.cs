@@ -14,6 +14,8 @@ namespace MAUI_OpenAI.Models
         public bool DisplayInUI { get; set; } = true;
         public Guid ConversationId { get; set; }
 
+        public ITokenizerService TokenizerService { get; set; } = Application.Current!.MainPage!.Handler!.MauiContext!.Services!.GetService<ITokenizerService>()!;
+
         public ChatMessageModel(string message, string role, bool isImage = false, bool isImageLoading = false)
         {
             Id = Guid.NewGuid();
@@ -43,7 +45,8 @@ namespace MAUI_OpenAI.Models
                 if (markdownService != null)
                 {
                     HtmlContent = await markdownService.ConvertToHtmlAsync(Message, onError);
-                } else
+                }
+                else
                 {
                     await onError.InvokeAsync("Markdown service not found.");
                 }
@@ -51,6 +54,27 @@ namespace MAUI_OpenAI.Models
             catch (Exception ex)
             {
                 await onError.InvokeAsync($"Error converting message to HTML: {ex.Message}");
+            }
+        }
+
+        public int EstimateTokenCount(EventCallback<string> onError)
+        {
+            try
+            {
+                if (TokenizerService != null)
+                {
+                    return TokenizerService.EstimateTokenCount(Message, onError);
+                }
+                else
+                {
+                    onError.InvokeAsync("Tokenizer service is null.");
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                onError.InvokeAsync($"Error estimating token count: {ex.Message}");
+                return 0;
             }
         }
     }
