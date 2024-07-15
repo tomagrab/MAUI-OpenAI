@@ -23,15 +23,14 @@ namespace MAUI_OpenAI.Models
                 currentRole = roles.Find(role => role.RoleName == "Helpful Assistant");
                 if (currentRole == null)
                 {
-                    currentRole = new RolePromptModel("Helpful Assistant", "You are a helpful assistant. Your primary goal is to provide useful, accurate, and polite assistance to the user. Whether it's answering questions, providing information, or helping with tasks, ensure your responses are clear and concise, always maintaining a friendly and professional tone.", true);
-                    roles.Add(currentRole);
+                    ChangeCurrentRole(roles, "Helpful Assistant");
                 }
                 else
                 {
                     currentRole.IsCurrent = true;
                 }
             }
-            return currentRole;
+            return currentRole ?? throw new Exception("Current role is null.");
         }
 
         public static void ChangeCurrentRole(List<RolePromptModel> roles, string newRoleName)
