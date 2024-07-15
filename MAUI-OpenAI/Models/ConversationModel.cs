@@ -10,7 +10,7 @@ namespace MAUI_OpenAI.Models
         public Guid Id { get; set; }
         public string Title { get; set; }
         public List<ChatMessageModel> Messages { get; set; } = new List<ChatMessageModel>();
-
+        public ITokenizerService TokenizerService { get; set; } = Application.Current!.MainPage!.Handler!.MauiContext!.Services!.GetService<ITokenizerService>()!;
         public ConversationModel(string title)
         {
             Id = Guid.NewGuid();
@@ -96,11 +96,10 @@ namespace MAUI_OpenAI.Models
         {
             try
             {
-                var tokenizerService = Application.Current?.MainPage?.Handler?.MauiContext?.Services?.GetService<ITokenizerService>();
                 var textMessages = GetTextMessages();
-                if (tokenizerService != null)
+                if (TokenizerService != null)
                 {
-                    return tokenizerService.TrimConversationToTokenLimit(textMessages, MaxTokens, onError);
+                    return TokenizerService.TrimConversationToTokenLimit(textMessages, MaxTokens, onError);
                 }
                 else
                 {
