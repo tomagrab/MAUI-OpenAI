@@ -15,22 +15,19 @@ namespace MAUI_OpenAI.Services
         private readonly EmbeddingClient _embeddingClient;
         private readonly AudioClient _transcribeClient;
         private readonly AudioClient _textToSpeechClient;
-        private readonly IConversationService _conversationService;
 
         public OpenAIService(
             ChatClient chatClient,
             ImageClient imageClient,
             EmbeddingClient embeddingClient,
             AudioClient transcribeClient,
-            AudioClient textToSpeechClient,
-            IConversationService conversationService)
+            AudioClient textToSpeechClient)
         {
             _chatClient = chatClient;
             _imageClient = imageClient;
             _embeddingClient = embeddingClient;
             _transcribeClient = transcribeClient;
             _textToSpeechClient = textToSpeechClient;
-            _conversationService = conversationService;
         }
 
         public async Task GetChatCompletionStreamingAsync(ConversationModel conversation, EventCallback<string> onUpdate, EventCallback onComplete, EventCallback<string> onError, Func<Task> onResponseComplete)

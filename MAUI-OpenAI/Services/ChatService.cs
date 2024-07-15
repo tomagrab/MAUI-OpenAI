@@ -9,7 +9,7 @@ namespace MAUI_OpenAI.Services
         private readonly IConversationService _conversationService;
         private readonly ITokenizerService _tokenizerService;
         private ConversationModel _currentConversation;
-        private const int MaxTokensPerRequest = 600000;
+        private const int MaxTokensPerRequest = 80000;
 
         public ChatService(IOpenAIService openAIService, IConversationService conversationService, ITokenizerService tokenizerService)
         {

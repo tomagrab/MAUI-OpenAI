@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using MAUI_OpenAI.Data;
+using MAUI_OpenAI.Services;
 
 namespace MAUI_OpenAI.Models
 {
@@ -88,6 +89,20 @@ namespace MAUI_OpenAI.Models
         public List<ChatMessageModel> GetTextMessages()
         {
             return Messages.Where(m => !m.IsImage).ToList();
+        }
+
+        public List<ChatMessageModel> GetTrimmedTextMessages(int maxTokens, ITokenizerService tokenizerService, EventCallback<string> onError)
+        {
+            try
+            {
+                var textMessages = GetTextMessages();
+                return tokenizerService.TrimConversationToTokenLimit(textMessages, maxTokens, onError);
+            }
+            catch (Exception ex)
+            {
+                onError.InvokeAsync($"Error trimming conversation: {ex.Message}");
+                return new List<ChatMessageModel>();
+            }
         }
     }
 }

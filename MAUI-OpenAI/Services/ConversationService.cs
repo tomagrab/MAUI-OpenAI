@@ -34,10 +34,10 @@ namespace MAUI_OpenAI.Services
                 {
                     var textMessages = conversation.GetTextMessages();
 
-                    return _tokenizerService.TrimConversationToTokenLimit(textMessages, MaxTokens, onError);
+                    return await Task.Run(() => conversation?.GetTrimmedTextMessages(MaxTokens, _tokenizerService, onError) ?? new List<ChatMessageModel>());
                 }
 
-                return new List<ChatMessageModel>();
+                return await Task.Run(() => conversation?.GetTrimmedTextMessages(MaxTokens, _tokenizerService, onError) ?? new List<ChatMessageModel>());
             }
             catch (Exception ex)
             {
