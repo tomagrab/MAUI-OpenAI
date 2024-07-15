@@ -17,26 +17,6 @@ namespace MAUI_OpenAI.Services
             return conversations.FirstOrDefault(c => c.Id == id);
         }
 
-        public async Task<List<ChatMessageModel>> GetTrimmedConversationAsync(Guid conversationId, EventCallback<string> onError)
-        {
-            try
-            {
-                var conversation = GetConversationById(conversationId);
-
-                if (conversation != null)
-                {
-                    return await Task.Run(() => conversation.GetTrimmedTextMessages(onError));
-                }
-
-                return new List<ChatMessageModel>();
-            }
-            catch (Exception ex)
-            {
-                await HandleErrorAsync($"An error occurred while trimming the conversation: {ex.Message}", onError);
-                return new List<ChatMessageModel>();
-            }
-        }
-
         public ConversationModel AddConversation(string title)
         {
             var conversation = new ConversationModel(title);

@@ -7,7 +7,6 @@ namespace MAUI_OpenAI.Services
     {
         List<ConversationModel> GetAllConversations();
         ConversationModel? GetConversationById(Guid id);
-        Task<List<ChatMessageModel>> GetTrimmedConversationAsync(Guid conversationId, EventCallback<string> onError);
         ConversationModel AddConversation(string title);
         void RemoveConversation(Guid conversationId, EventCallback<string> onError);
     }
