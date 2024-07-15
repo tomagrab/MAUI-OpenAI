@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace MAUI_OpenAI.Models
 {
-    public class ChatMessageModel : BaseService
+    public class ChatMessageModel
     {
         public Guid Id { get; set; }
         public string Message { get; set; }
@@ -43,7 +43,7 @@ namespace MAUI_OpenAI.Models
             }
             catch (Exception ex)
             {
-                await HandleErrorAsync($"Error converting message to HTML: {ex.Message}", onError);
+                await onError.InvokeAsync($"Error converting message to HTML: {ex.Message}");
             }
         }
     }

@@ -28,12 +28,10 @@ namespace MAUI_OpenAI.Services
             }
             else
             {
-                conversation.ClearMessages(
-                    EventCallback.Factory.Create<string>(this, async (error) =>
-                    {
-                        await HandleErrorAsync(error, EventCallback<string>.Empty);
-                    })
-                );
+                conversation.ClearMessages(EventCallback.Factory.Create<string>(this, async (error) =>
+                {
+                    await HandleErrorAsync(error, EventCallback<string>.Empty);
+                }));
             }
             return conversation;
         }
