@@ -58,7 +58,7 @@
     private bool showModal = false;
     private string selectedImage = "";
     private string errorMessage = "";
-    private string currentRole = "";
+    private RolePromptModel currentRole = RolePromptModel.GetCurrentRole(RolePromptModel.RolePrompts());
     private RoleSelector? roleSelectorRef;
     private ConversationModel _currentConversation;
 
@@ -112,10 +112,11 @@
 
     private void HandleRoleSelected(string newRolePrompt)
     {
-        ChatService.AddForgetPreviousRoleMessage(currentRole, OnError);
+        ChatService.AddForgetPreviousRoleMessage(currentRole.RoleName, OnError);
         ChatService.AddRoleMessage(newRolePrompt, OnError);
 
-        currentRole = newRolePrompt;
+        RolePromptModel.ChangeCurrentRole(RolePromptModel.RolePrompts(), newRolePrompt);
+        currentRole = RolePromptModel.GetCurrentRole(RolePromptModel.RolePrompts());
         StateHasChanged();
     }
 

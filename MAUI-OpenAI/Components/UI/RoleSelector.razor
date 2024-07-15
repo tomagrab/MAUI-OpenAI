@@ -1,4 +1,3 @@
-@using MAUI_OpenAI.Data
 @using MAUI_OpenAI.Models
 @using OpenAI.Audio
 @inject IRoleSelectorService RoleSelectorService
@@ -12,14 +11,14 @@
             @ref="comboBoxRef"
             InputDisabled="@inputDisabled"
             Placeholder="Select Role"
-            Value="Helpful Assistant"
+            Value="@selectedRole?.RoleName"
             OnClear="HandleClear"
         />
-        @if (!string.IsNullOrEmpty(selectedRole))
+        @if (!string.IsNullOrEmpty(selectedRole?.RoleName))
         {
             <GetAppearance
-                Role="@selectedRole"
-                Description="@RolePrompts.Roles[selectedRole]"
+                Role="@selectedRole.RoleName"
+                Description="@selectedRole.Description"
                 OnImageGenerated="HandleImageGenerated"
                 OnError="HandleError"
                 OnLoading="HandleLoading"
@@ -70,20 +69,23 @@
     public List<ChatMessageModel> ChatMessageList { get; set; } = new List<ChatMessageModel>();
 
     private bool inputDisabled => isAppearanceGenerating || IsSendingMessage || IsImageLoading;
-    private string selectedRole = "Helpful Assistant";
+    private List<RolePromptModel> roles = new List<RolePromptModel>();
+    private RolePromptModel? selectedRole;
     private string selectedVoice = "Alloy";
     private bool isAppearanceGenerating = false;
     private ComboBox? comboBoxRef;
 
     protected override async Task OnInitializedAsync()
     {
-        await HandleRoleChange(selectedRole);
+        roles = RolePromptModel.RolePrompts();
+        selectedRole = RolePromptModel.GetCurrentRole(roles);
+        await HandleRoleChange(selectedRole.RoleName);
         await HandleVoiceChange(selectedVoice);
     }
 
     private List<string> GetSortedRoles()
     {
-        return RolePrompts.Roles.Keys.ToList().OrderBy(role => role).ToList();
+        return roles.Select(role => role.RoleName).OrderBy(role => role).ToList();
     }
 
     private List<string> GetVoices()
@@ -93,8 +95,10 @@
 
     private async Task HandleRoleChange(string value)
     {
-        selectedRole = value;
-        await RoleSelectorService.HandleRoleChangeAsync(value, OnRoleSelected);
+        RolePromptModel.ChangeCurrentRole(roles, value);
+        selectedRole = RolePromptModel.GetCurrentRole(roles);
+        await RoleSelectorService.HandleRoleChangeAsync(selectedRole.RoleName, OnRoleSelected);
+        StateHasChanged();
     }
 
     private async Task HandleVoiceChange(string value)
@@ -109,7 +113,8 @@
 
     private async Task HandleClear()
     {
-        selectedRole = "";
+        RolePromptModel.ChangeCurrentRole(roles, "Helpful Assistant");
+        selectedRole = RolePromptModel.GetCurrentRole(roles);
         StateHasChanged();
     }
 
@@ -142,7 +147,8 @@
 
     public async Task ClearRoleAsync()
     {
-        selectedRole = "";
+        RolePromptModel.ChangeCurrentRole(roles, "Helpful Assistant");
+        selectedRole = RolePromptModel.GetCurrentRole(roles);
         if (comboBoxRef != null)
         {
             await comboBoxRef.ClearAsync();

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Components;
 using MAUI_OpenAI.Services;
-using MAUI_OpenAI.Data;
 
 namespace MAUI_OpenAI.Models
 {
@@ -63,9 +62,10 @@ namespace MAUI_OpenAI.Models
         {
             try
             {
-                if (RolePrompts.Roles.TryGetValue(roleName, out var roleDescription))
+                var role = RolePromptModel.RolePrompts().Find(r => r.RoleName == roleName);
+                if (role != null)
                 {
-                    var roleMessage = new ChatMessageModel(roleDescription, "system") { DisplayInUI = false };
+                    var roleMessage = new ChatMessageModel(role.Description, "system") { DisplayInUI = false };
                     AddMessage(roleMessage, onError);
                 }
             }
